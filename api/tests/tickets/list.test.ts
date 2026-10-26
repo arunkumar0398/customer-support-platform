@@ -50,7 +50,7 @@ const rows = [
   { index: 3, org: 'alpha', requester: 'other', assignee: null, title: 'Printer setup', description: 'New device onboarding', status: 'OPEN', priority: 'MEDIUM' },
   { index: 4, org: 'alpha', requester: 'customer', assignee: 'admin', title: 'Alpha archival needle', description: 'Alpha record must stay scoped', status: 'CLOSED', priority: 'HIGH' },
   { index: 5, org: 'beta', requester: 'foreign', assignee: null, title: 'Beta only secret needle', description: 'Separate tenant record', status: 'OPEN', priority: 'URGENT' },
-  { index: 6, org: 'beta', requester: 'foreign', assignee: 'foreign', title: 'Beta lockout', description: 'Login supportAcrew trouble', status: 'IN_PROGRESS', priority: 'MEDIUM' },
+  { index: 6, org: 'beta', requester: 'foreign', assignee: 'foreign', title: 'Beta lockout', description: 'Login supportAcrew path\\root trouble', status: 'IN_PROGRESS', priority: 'MEDIUM' },
   { index: 7, org: 'alpha', requester: 'customer', assignee: 'agent', title: 'Reset credentials', description: "Can't sign in; contact support_crew at 100% uptime", status: 'IN_PROGRESS', priority: 'URGENT' },
 ] as const;
 
@@ -153,6 +153,12 @@ describe('tenant-scoped ticket list, filters and search', () => {
     const response = await list('foreign', betaId).query({ search: '_crew' });
     expect(response.status).toBe(200);
     expect(response.body.items.map((item: { id: string }) => ticketIds.indexOf(item.id))).toEqual([]);
+  });
+
+  it('searches a backslash literally rather than treating it as the pattern escape', async () => {
+    const response = await list('foreign', betaId).query({ search: 'path\\root' });
+    expect(response.status).toBe(200);
+    expect(response.body.items.map((item: { id: string }) => ticketIds.indexOf(item.id))).toEqual([6]);
   });
 
   it('returns empty result and zero scoped total when filters do not match', async () => {
