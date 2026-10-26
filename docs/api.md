@@ -34,6 +34,12 @@ Body/query role or organization fields never grant membership or replace the sel
 
 `createActiveMembership` is a server middleware foundation, verified with real PostgreSQL and test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; future tenant-owned routers must chain authentication, active membership, and object/role policy before their handler. Ticket/customer isolation acceptance remains pending until those routes and policies exist.
 
+## Central authorization policies
+
+`api/src/lib/policy.ts` consumes the server-derived membership context. Membership administration requires ADMIN; dashboard and staff ticket management require ADMIN or AGENT. Ticket visibility always requires the active organization, and CUSTOMER additionally requires its own requester ID. Inaccessible/missing tickets return the same 404 before action-specific restrictions disclose state. Customers may edit their own title/description only while OPEN; staff may edit visible ticket content. New comments require a visible non-closed ticket, with 409 `TICKET_CLOSED` on an otherwise visible closed ticket. A closed ticket's conversation/history remains readable within the same visibility policy, as clarified in ADR 0003.
+
+`ticketScope` combines mandatory organization/customer ownership constraints with additional criteria using AND, so criteria cannot overwrite the boundary. It rejects incomplete contexts and unknown roles. Future services must use scoped queries or a locked transactional authorization path; checking a fetched object and then issuing an unconditional write is insufficient. These policy functions currently have unit/Prisma-query-contract coverage; real product-route and transactional authorization integration tests remain future tasks. The functions do not implement status transitions, assignee eligibility, last-admin protection, or product endpoints by themselves.
+
 ## Requests and errors
 
 Every request receives a new server-generated UUID in the `X-Request-ID` response header. Incoming request IDs are ignored. Errors repeat that same ID in their JSON envelope so a caller can report a failure without disclosing request data:

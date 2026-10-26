@@ -1,6 +1,6 @@
 # Multi-Tenant Customer Support Platform — Design
 
-**Status:** Approved by project owner on 2026-10-26
+**Status:** Baseline approved by project owner on 2026-10-26; subsequent implementation clarifications are identified by ADR and checkpoint review.
 **Source contract:** `reference/assessment.pdf`
 **Baseline:** secure Docker-local MVP first; hosted deployment is a later optional stage.
 
@@ -35,11 +35,14 @@ Roles belong to an organization membership, not to a global user record. A user 
 | Edit ticket title/description | Yes | Yes | Own ticket while OPEN (design assumption) |
 | Change status/priority/assignee | Yes | Yes | No |
 | Assign ticket | Yes | Yes, to an eligible member of same organization | No |
-| Comment/read history | Visible non-closed tickets | Visible non-closed tickets | Own non-closed tickets |
+| Add comment | Visible non-closed tickets | Visible non-closed tickets | Own non-closed tickets |
+| Read conversation/activity history | All visible tickets, including closed | All visible tickets, including closed | Own tickets, including closed |
 | View dashboard | Yes | Yes | No |
 | Manage memberships and roles through the API and UI | Yes, own organization only | No | No |
 
 The last active organization admin cannot be removed or demoted. Return a non-disclosing not-found response for records outside the caller's visibility. Every organization-owned read, write, aggregate, search, comment, history, and assignment query is scoped by the validated organization and then by role/ownership. Enforce same-organization relationships in both service logic and database constraints where practical. Seed two organizations and include foreign-organization and same-organization/different-customer fixtures.
+
+ADR 0003 clarifies the original combined comment/history row: the closed-ticket restriction applies to adding comments; authorized historical reads remain available after closure. It does not expand tenant or customer visibility.
 
 ## Authentication and request protection
 
