@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Initial harness-only state was extended with the TK-01 API/web bootstrap and smoke tests; Docker, database, full assessment requirements, and deployment remain unverified. All acceptance IDs remain `NOT_RUN`.  
-**Planning baseline SHA:** `d5bdceb` (approved design, implementation plan, and initial acceptance ledger)  
+**Baseline:** The workspace includes the TK-01 API/web bootstrap and a TK-02 local PostgreSQL service with separate development/test identities. The Compose database service and identity checks have executed, but the assessment acceptance checks, full application-in-Compose path, migrations, seed, browser journeys, and deployment remain unverified. All acceptance IDs remain `NOT_RUN`.
+**Current evidence baseline SHA:** `a46a4df` (TK-02 implementation and checkpoint evidence committed)
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |

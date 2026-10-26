@@ -31,7 +31,7 @@ Roles belong to an organization membership, not to a global user record. A user 
 | Capability | Admin | Agent | Customer |
 |---|---|---|---|
 | View tickets in active organization | All | All permitted organization tickets | Own tickets only |
-| Create ticket | Yes | Yes | Yes; requester is the signed-in customer |
+| Create ticket | Yes; may select an eligible same-org customer requester | Yes; may select an eligible same-org customer requester | Yes; requester is the signed-in customer |
 | Edit ticket title/description | Yes | Yes | Own ticket while OPEN (design assumption) |
 | Change status/priority/assignee | Yes | Yes | No |
 | Assign ticket | Yes | Yes, to an eligible member of same organization | No |
@@ -68,6 +68,8 @@ Provide sign-in, ticket list/search/filter, create ticket, ticket detail/edit/co
 ## API and errors
 
 Expose documented JSON endpoints for login/logout/current user, memberships, tickets, assignments, comments, activity history, dashboard, and health/readiness. Use strict request allowlists and reject unauthorized fields such as `organizationId`, role, password hash, and client-supplied internal version. Use consistent error envelopes with request IDs and appropriate 400/401/403/404/409/422/429/500 status codes. Unexpected errors do not expose stack traces or secrets. Structured logs must redact credentials and customer-sensitive values.
+
+For ticket creation, customers cannot choose a requester: the server derives it from the authenticated customer membership and rejects a supplied requester field. Admins and agents may set an explicit `requesterUserId` only on create; the service verifies that the selected user has an active `CUSTOMER` membership in the active organization. On every other role/operation, requester changes are rejected. This is a narrowly allowlisted staff workflow, not general client authority to impersonate users.
 
 ## Required evidence and release gates
 
