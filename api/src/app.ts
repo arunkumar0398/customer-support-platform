@@ -3,6 +3,7 @@ import { errorHandler, notFoundHandler } from './middleware/errors.js';
 import { requestIdMiddleware } from './middleware/request-id.js';
 import { createAuthRouter } from './modules/auth/routes.js';
 import type { AuthOptions } from './modules/auth/session.js';
+import { createMembershipRouter } from './modules/memberships/routes.js';
 
 export function createApp(options: AuthOptions = {}) {
   const application = express();
@@ -13,6 +14,7 @@ export function createApp(options: AuthOptions = {}) {
     response.status(200).json({ status: 'ok' });
   });
   application.use('/api/auth', createAuthRouter(options));
+  application.use('/api/memberships', createMembershipRouter(options));
   application.use(notFoundHandler);
   application.use(errorHandler);
   return application;

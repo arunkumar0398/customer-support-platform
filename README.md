@@ -1,14 +1,14 @@
 # Multi-Tenant Customer Support Platform
 
-**Status (2026-10-26):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, Prisma domain schema, a synthetic two-organization seed, safe API errors, and password/session authentication endpoints. Ticket APIs and user-facing workflows are still pending. No hosted deployment is configured or claimed.
+**Status (2026-10-26):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, and tenant-scoped membership administration. Ticket APIs and user-facing workflows are still pending. No hosted deployment is configured or claimed.
 
 The employer assessment PDF is the product contract in [`reference/assessment.pdf`](reference/assessment.pdf). The approved design, task plan, acceptance matrix, security contract, and assumptions are under `docs/` and `harness/`.
 
 ## Current checkpoint
 
 - C0 workspace and local database foundation are in place.
-- TK-03–TK-07 design/schema/seed/HTTP foundation tasks are closed. TK-08 adds PostgreSQL-backed login/session/logout with origin/CSRF defense and local login limits; G2 remains partial until membership and authorization work is complete.
-- `api/src/app.ts` exposes health and authentication endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is a shell. There is no login screen or local app launch command yet.
+- TK-03–TK-10 design/schema/seed/auth/tenant/policy foundations are closed. TK-11 adds real roster/create/update APIs with current admin checks and transactional last-admin protection; G2 remains incomplete until product ticket isolation is verified.
+- `api/src/app.ts` exposes health, authentication, and membership endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is a shell. There is no login screen or local app launch command yet.
 - Acceptance IDs A01–A40 remain `NOT_RUN`. `npm run check` verifies the current scaffold, unit/database checks, builds, and Playwright test discovery; it does not complete all assessment acceptance journeys or execute the listed browser test.
 
 ## Local database setup
