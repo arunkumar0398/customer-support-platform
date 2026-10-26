@@ -1,14 +1,14 @@
 # Multi-Tenant Customer Support Platform — Design
 
-**Status:** Proposed for review
+**Status:** Approved by project owner on 2026-10-26
 **Source contract:** `reference/assessment.pdf`
 **Baseline:** secure Docker-local MVP first; hosted deployment is a later optional stage.
 
 ## Goals and scope
 
-Deliver the assessment's required working vertical slice: sign-in, organization-aware authorization, ticket creation/listing/filtering/detail/update, persistent storage, a minimal dashboard, basic automated tests, and a local Docker setup. Include comments, assignment, and meaningful activity history because they are explicit functional requirements. Provide the required setup, architecture, data/index, API, seed, test, and limitations documentation. State assumptions and gaps openly.
+Deliver the assessment's required working vertical slice: sign-in, organization-aware authorization, ticket creation/listing/filtering/detail/update, persistent storage, a minimal dashboard, basic automated tests, and a local Docker setup. Include comments, assignment, and meaningful activity history because they are explicit functional requirements. Provide the required setup, architecture, distinct data-model/indexes, API, seed, test, and limitations documentation. State assumptions and gaps openly.
 
-Do not treat Vercel/Neon hosting, CI, notifications, attachments, richer analytics, or an observability dashboard as prerequisites for the local MVP. The planned hosted target is two Vercel projects with Neon, only after local release gates pass and deployment is separately authorized.
+Do not treat Vercel/Neon hosting, CI, notifications, attachments, richer analytics, or an observability dashboard as prerequisites for the local MVP. The planned hosted target is two Vercel projects with Neon, only after local release gates pass and deployment is separately authorized. Notifications remain a designed future integration, not an MVP sender.
 
 ## Delivery approach
 
@@ -44,6 +44,8 @@ The last active organization admin cannot be removed or demoted. Return a non-di
 ## Authentication and request protection
 
 Use password hashes and persistent opaque server-side sessions; store only a hash of the session token. Cookies are `HttpOnly`, `SameSite=Lax`, and `Secure` in production. Unsafe requests require same-origin validation plus a CSRF defense suitable for cookie authentication. Re-check the current session and membership on protected requests so expiry, revocation, or role changes take effect. Rate-limit login. Never log passwords, session values, or database connection strings. No public self-signup is in scope; seeded demo accounts provide repeatable access.
+
+No outbound integration is required for the local MVP. Document the future notification delivery contract: persist an outbox event with the ticket transaction, deliver asynchronously with bounded retries and idempotency, surface terminal failure for operator recovery, and do not roll back a valid ticket mutation because an external provider is unavailable. Record timeout, retry, duplicate, and recovery behavior as design-only until a provider exists.
 
 ## Data model and query behavior
 
