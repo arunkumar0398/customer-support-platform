@@ -320,6 +320,8 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 **RED:** Adversarial matrix must reproduce each unauthorized access attempt against a named route before protection is asserted.  
 **GREEN:** Cross-org and same-org ownership negatives, role/property checks, CSRF/origin, expired session, login throttle, response/log redaction all fail closed.
 
+**Security follow-up for TK-30:** `SEC-FOUNDATION-01` in `evidence/reviews/security-foundation-2026-10-26-2f95a1a.md` requires a disposable limiter-key exhaustion/recovery probe and an explicit availability disposition. Shared/provider limiter overload behavior must be verified before public/serverless exposure; current process-local protection is not a hosted-release claim.
+
 ### TK-31 — Reliability and query plan evidence
 
 **Depends on:** TK-13–TK-30. **Gate:** G5. **Acceptance:** A19, A21, A29–A30, A38.

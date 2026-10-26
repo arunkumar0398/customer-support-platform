@@ -38,7 +38,7 @@
 | A30 | NOT_RUN | |
 | A31 | NOT_RUN | [TK-07](TK-07.md), [TK-09](TK-09.md): allowlist/context foundations; product-route attack suite pending. |
 | A32 | NOT_RUN | [TK-08](TK-08.md): cookie flags and HTTP origin/CSRF tests; browser/proxy proof pending. |
-| A33 | NOT_RUN | [TK-07](TK-07.md), [TK-08](TK-08.md): errors/request IDs/logs/local throttling; complete product/release attack suite pending. |
+| A33 | NOT_RUN | [TK-07](TK-07.md), [TK-08](TK-08.md): errors/request IDs/logs/local throttling; [OPEN P2 capacity concern](../reviews/security-foundation-2026-10-26-2f95a1a.md), full attack suite pending. |
 | A34 | NOT_RUN | [TK-01](TK-01.md), [TK-08](TK-08.md): local checks only; actual browser and CI gate pending. |
 | A35 | NOT_RUN | |
 | A36 | NOT_RUN | |
