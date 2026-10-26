@@ -13,8 +13,8 @@ Last source SHA: `3a94144e93875d75b24a2f9a286e6444e836c1ba`; the checkpoint/hand
 - TK-09 implements database-derived current membership using `X-Organization-ID`; source checks pass and independent read-only review at `abf8ab1eb6ae51f304fd0bd6dd2824e5a6574953` closed it with no P0–P2 findings. The middleware is exercised through test-only context routes; product routes are not implemented yet.
 - TK-10 central admin/staff/ownership/action/query policies are implemented with 35 unit tests; checkpoint/spec review closed it at `3ca8bb30cb209fa177d6fa3c35f4a1a436902fd3`. Separate security/code review permits advancement with one non-blocking P2 limiter availability concern. ADR 0003 splits comments from history access: authorized closed history readable, new comments denied. No product route or executed SQL policy proof is implied.
 - Exact TK-10 source check: `npm run check` exit 0, API 132/132, web 1/1, lint/type/build pass. Playwright listed one shell test, did not execute it. Last migration/identity proof is TK-08 with no schema change in TK-09/TK-10.
-- TK-11 membership administration source is committed: ADMIN-only roster/add/role/activation, strict input, current actor recheck after tenant row lock, transactional last-active-admin protection. Exact source `npm run check` exit 0: API 177/177, web 1/1, lint/type/build pass; browser test listed only. Targeted 45/45 real PostgreSQL cases include parallel writes and actual blocked-request actor demotion. Independent review pending. See TK-11.md.
-- All A01–A40 remain `NOT_RUN` in the release ledger; partial HTTP/DB evidence does not complete acceptance journeys.
+- TK-11 is closed: ADMIN-only roster/add/role/activation, strict input, actor recheck after tenant row lock and transactional last-admin protection. Source check exit 0: API177/177, web1/1, lint/type/build pass; browser listed only. Independent reviewer replay45/45 and separate static security review closed it. One reporting P2 corrected A03 to PASS for its API-only acceptance scope. Five Python validator regressions pass; --initial preserves the original all-NOT_RUN baseline check.
+- A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
 ## Gate status
@@ -38,6 +38,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-Review TK-11 against exact source/evidence HEAD using the sibling kit. `/root/assessment_design_review` may independently replay the targeted membership suite once, serialized while the builder runs no DB tests; `/root/design_check` performs a separate static security/code pass. Persist findings/dispositions before advancing. Next task is TK-12 ticket creation with transactional creation event; inspect its plan/spec/ADR before RED tests.
+Begin TK-12 ticket creation with transactional creation event, strict role-specific payload and same-org active CUSTOMER requester selection per ADR0002. TK-11 review closed with A03 reporting correction; see evidence/reviews/tk11-2026-10-26-3a94144.md. Reuse both reviewer agents after exact-source verification; serialize DB replay. No TK-12 code exists yet.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.

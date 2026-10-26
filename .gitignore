@@ -16,6 +16,7 @@ playwright-report/
 test-results/
 .next/
 *.tsbuildinfo
+__pycache__/
 # Local databases / temporary
 *.sqlite
 *.sqlite-journal

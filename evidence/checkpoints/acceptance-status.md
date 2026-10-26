@@ -1,6 +1,6 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, and membership administration have supporting local tests. Ticket product routes, browser journeys, complete Docker application startup, CI, and deployment are pending. Every row below remains `NOT_RUN` for its complete acceptance scope; partial supporting evidence is linked without promoting it to a full acceptance pass.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, and membership administration have supporting local tests. A03 has passed its API-only scope; other complete checks remain NOT_RUN. Ticket routes, browser journeys, complete Docker application startup, CI, and deployment are pending.
 **Latest implementation source SHA:** `3a94144e93875d75b24a2f9a286e6444e836c1ba` (TK-11). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | A01 | NOT_RUN | [TK-08](TK-08.md): real-DB credential/session API checks; browser login pending. |
 | A02 | NOT_RUN | [TK-08](TK-08.md): expiry/revocation/replay denied on auth endpoints; protected product endpoints pending. |
-| A03 | NOT_RUN | [TK-11](TK-11.md): real membership API role/tenant/last-admin checks; browser checks pending. |
+| A03 | PASS | Source `3a94144e93875d75b24a2f9a286e6444e836c1ba`; `npm run test:api -- tests/memberships/memberships.test.ts` exit 0, 45/45 real PostgreSQL/HTTP cases; independently replayed. [TK-11](TK-11.md), [review](../reviews/tk11-2026-10-26-3a94144.md). |
 | A04 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/visibility foundations; ticket GET pending. |
 | A05 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/action policies; actual tenant mutation routes pending. |
 | A06 | NOT_RUN | [TK-10](TK-10.md): ownership policy unit cases; customer product-route/browser negatives pending. |

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check required planning docs and the initial acceptance ledger contract."""
+"""Check planning docs and acceptance status shape; --initial enforces NOT_RUN."""
 
 from __future__ import annotations
 
@@ -88,12 +88,23 @@ def main() -> int:
             errors.append(f"Acceptance ledger has unexpected IDs: {', '.join(sorted(set(unexpected)))}")
         if len(ids) != 40:
             errors.append(f"Acceptance ledger must contain exactly 40 ID rows; found {len(ids)}.")
+        allowed = {"NOT_RUN", "PASS", "FAIL", "BLOCKED", "N/A"}
+        invalid = [acceptance_id for acceptance_id, result in rows if result.strip() not in allowed]
+        if invalid:
+            errors.append("Invalid acceptance status for: " + ", ".join(invalid))
         non_not_run = [acceptance_id for acceptance_id, result in rows if result.strip() != "NOT_RUN"]
-        if non_not_run:
+        if "--initial" in sys.argv and non_not_run:
             errors.append(
                 "Initial acceptance ledger must keep every result NOT_RUN; found other results for: "
                 + ", ".join(non_not_run)
             )
+        # This checks evidence presence, not its truth. Exact SHA/command/result
+        # and acceptance scope still require engineering review.
+        for acceptance_id, result in rows:
+            if result.strip() != "NOT_RUN":
+                evidence_row = re.search(rf"^\|\s*{acceptance_id}\s*\|[^|]+\|\s*([^|]*)\|", ledger, re.MULTILINE)
+                if not evidence_row or not evidence_row.group(1).strip():
+                    errors.append(f"{acceptance_id}: a recorded result requires evidence or rationale.")
 
     if errors:
         print("Documentation contract failed:")
@@ -101,7 +112,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print("Documentation contract passed: required sections are present and A01-A40 are uniquely NOT_RUN.")
+    print("Documentation contract passed: required sections and unique A01-A40 statuses/evidence are present.")
     return 0
 
 
