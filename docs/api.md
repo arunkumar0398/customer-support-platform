@@ -82,8 +82,10 @@ The response contains only id, organizationId, ticketNumber, requesterUserId, as
 | `assigneeId` | Canonical UUID or `unassigned` | Matches one assignee or null assignment. |
 | `customerId` | Canonical UUID | Filters requester ID. Customer's own requester constraint still applies. |
 | `search` | Trimmed non-empty text, max 100 chars | Case-insensitive contains match in title or description. The result DTO does not return description. |
+| `page` | Integer 1–1000, default 1 | One-based page number. |
+| `pageSize` | Integer 1–100, default 25 | Maximum results on this page. |
 
-Unknown/repeated/nested parameters, invalid enums/IDs, blank or oversized search, and body-controlled organization/requester fields are not accepted; invalid query fields return 422. Query matching and the result count use one repeatable-read snapshot. Results are currently capped at the first 100 tickets, ordered `createdAt DESC, id DESC`; page/offset controls are the next TK-14 task. Result items omit descriptions and credentials; `{ items, total }` counts only rows visible through the same SQL scope. Search is a case-insensitive literal substring (including literal `%` and `_` characters), not full text/ranking.
+Unknown/repeated/nested parameters, non-integer/out-of-range page values, invalid enums/IDs, blank or oversized search, and body-controlled organization/requester fields are not accepted; invalid query fields return 422. Query matching and the result count use one repeatable-read snapshot. Results use deterministic `createdAt DESC, id DESC` ordering before applying the bounded page offset. Result items omit descriptions and credentials; `{ items, total, page, pageSize }` counts only rows visible through the same SQL scope. Search is a case-insensitive literal substring (including literal `%` and `_` characters), not full text/ranking.
 
 `npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation. Detail/update/comment routes are not implemented yet.
 

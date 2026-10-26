@@ -26,15 +26,25 @@ export type TicketListQuery = {
   assigneeId?: string;
   customerId?: string;
   search?: string;
+  page: number;
+  pageSize: number;
 };
 
 const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i).transform((id) => id.toLowerCase());
+const pageNumber = (maximum: number, fallback: number) => z.string()
+  .regex(/^\d+$/)
+  .transform(Number)
+  .pipe(z.number().int().min(1).max(maximum))
+  .optional()
+  .transform((value) => value ?? fallback);
 const ticketListQuery = z.object({
   status: z.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
   assigneeId: z.union([uuid, z.literal('unassigned')]).optional(),
   customerId: uuid.optional(),
   search: z.string().trim().min(1).max(100).optional(),
+  page: pageNumber(1000, 1),
+  pageSize: pageNumber(100, 25),
 }).strict();
 
 export function parseTicketListQuery(input: unknown): TicketListQuery {

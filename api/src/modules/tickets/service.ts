@@ -67,18 +67,20 @@ export async function listTickets(client: PrismaClient, actor: ActiveMembershipC
   // ticketScope is always an independent AND child: caller filters never replace
   // tenant scope or the authenticated customer's requester restriction.
   const where = { AND: [ticketScope(actor), ...filters] };
+  const { page, pageSize } = query;
   return client.$transaction(async (transaction) => {
     const total = await transaction.ticket.count({ where });
     const items = await transaction.ticket.findMany({
       where,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-      take: 100,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
       select: {
         id: true, organizationId: true, ticketNumber: true, requesterUserId: true,
         assigneeUserId: true, title: true, status: true, priority: true, dueAt: true,
         version: true, createdAt: true, updatedAt: true,
       },
     });
-    return { items, total };
+    return { items, total, page, pageSize };
   }, { isolationLevel: 'RepeatableRead', maxWait: 5000, timeout: 10000 });
 }
