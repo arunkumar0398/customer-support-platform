@@ -20,7 +20,7 @@ erDiagram
   ORGANIZATION { uuid id PK }
   USER { uuid id PK string email UK string passwordHash }
   MEMBERSHIP { uuid organizationId PK uuid userId PK enum role boolean active }
-  TICKET { uuid organizationId PK uuid id PK string ticketNumber enum status enum priority int version }
+  TICKET { uuid id PK uuid organizationId string ticketNumber enum status enum priority int version }
   COMMENT { uuid organizationId uuid ticketId uuid id PK }
   ACTIVITY_EVENT { uuid organizationId uuid ticketId uuid id PK }
   SESSION { uuid id PK uuid userId string tokenHash UK timestamptz expiresAt }
@@ -31,10 +31,10 @@ erDiagram
 | `Organization` | Stable UUID, unique slug, display name, created/updated timestamps. Parent tenant for memberships and tickets. |
 | `User` | Stable UUID, normalized unique email, adaptive `passwordHash`, timestamps. A user may join multiple organizations; global identity does not imply a tenant role. |
 | `Membership` | `(organizationId, userId)` key, role enum (`ADMIN`, `AGENT`, `CUSTOMER`), active state, timestamps. Each user/org pair has at most one current membership row. Enforce last-active-admin protection in the transaction service. |
-| `Ticket` | Tenant ID plus stable UUID, organization-unique ticket number, requester user, nullable assignee user, title/description, status, priority, `dueAt`, version, timestamps. Requester and assignee must have memberships in that same organization. A customer-created ticket uses the authenticated customer as requester; on ticket creation only, an admin or agent may choose a same-org user with an active `CUSTOMER` membership as requester. |
+| `Ticket` | Stable UUID, tenant ID, organization-unique positive `ticketNumber`, requester membership, nullable assignee membership, title/description, status, priority, `dueAt`, positive version, timestamps. Requester and assignee must have memberships in that same organization. The optional Prisma composite assignee relation stores a nullable organization scalar alongside the nullable user scalar; the migration checks that the two scalars are both null or that the assignee organization equals the ticket organization. A customer-created ticket uses the authenticated customer as requester; on ticket creation only, an admin or agent may choose a same-org user with an active `CUSTOMER` membership as requester. |
 | `Comment` | Tenant ID, ticket ID, author ID, body, created timestamp. Append-only in the MVP; ticket and author must be in the same tenant; no new comments after closure. |
 | `ActivityEvent` | Tenant ID, ticket ID, actor ID, event type, sanitized before/after metadata, optional reason, created timestamp. Append-only; tenant-linked to ticket and actor. Insert in the same transaction as the associated mutation. |
-| `Session` | User ID, unique token hash, expiry, revocation/last-seen timestamps. Store no raw bearer token; authentication revalidates current membership per request. |
+| `Session` | User ID, unique token hash, expiry, optional revocation and last-seen timestamps, and created timestamp. Store no raw bearer token; authentication revalidates current membership per request. |
 
 ## Tenant integrity
 
@@ -46,7 +46,7 @@ All tenant-owned SQL is parameterized and includes the validated `organizationId
 
 Expected constraints to realize in Prisma/SQL and verify against PostgreSQL:
 
-- Unique normalized `User.email`, `Organization.slug`, `(Membership.organizationId, Membership.userId)`, and `(Ticket.organizationId, Ticket.ticketNumber)`.
+- Unique normalized `User.email`, `Organization.slug`, `(Membership.organizationId, Membership.userId)`, and `(Ticket.organizationId, Ticket.ticketNumber)`; ticket numbers and versions must be positive.
 - Composite tenant foreign keys for ticket requester/assignee, comment ticket/author, and event ticket/actor.
 - Check or enum constraints for allowed role/status/priority values; positive ticket version; non-empty required names/title/body where suitable.
 - Unique session token hash and foreign key to its user; session token hash is never returned to the browser.
@@ -57,8 +57,8 @@ Initial indexes should follow the tenant-leading predicates:
 | Table | Index |
 |---|---|
 | `Membership` | Primary/unique `(organizationId, userId)`; reverse lookup `(userId, active, organizationId)` |
-| `Ticket` | Unique `(organizationId, ticketNumber)`; listing `(organizationId, createdAt DESC, id DESC)`; status/priority `(organizationId, status, priority, createdAt DESC, id DESC)` |
-| `Ticket` | Assignee workload `(organizationId, assigneeId, status, createdAt DESC, id DESC)`; requester ownership `(organizationId, requesterId, createdAt DESC, id DESC)`; overdue `(organizationId, dueAt, status)` where a useful partial predicate is supported |
+| `Ticket` | Unique `(organizationId, ticketNumber)`; listing `(organizationId, createdAt DESC, id DESC)`; status `(organizationId, status, createdAt DESC, id DESC)`; priority `(organizationId, priority, createdAt DESC, id DESC)` |
+| `Ticket` | Assignee workload `(organizationId, assigneeUserId, status, createdAt DESC, id DESC)`; requester ownership `(organizationId, requesterUserId, status, createdAt DESC, id DESC)`; overdue `(organizationId, dueAt, status)` |
 | `Comment` | `(organizationId, ticketId, createdAt, id)` |
 | `ActivityEvent` | `(organizationId, ticketId, createdAt, id)` |
 | `Session` | Unique `(tokenHash)`; lookup/cleanup `(userId, expiresAt)` and expiry index if cleanup query needs it |

@@ -13,6 +13,30 @@ enum MembershipRole {
   CUSTOMER
 }
 
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ActivityEventType {
+  TICKET_CREATED
+  TITLE_CHANGED
+  DESCRIPTION_CHANGED
+  STATUS_CHANGED
+  PRIORITY_CHANGED
+  ASSIGNMENT_CHANGED
+  COMMENT_ADDED
+}
+
 model Organization {
   id          String       @id @default(uuid()) @db.Uuid
   slug        String       @unique @db.VarChar(80)
@@ -20,6 +44,7 @@ model Organization {
   createdAt   DateTime     @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
   memberships Membership[]
+  tickets     Ticket[]
 
   @@map("Organization")
 }
@@ -31,21 +56,107 @@ model User {
   createdAt    DateTime     @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
   memberships  Membership[]
+  sessions     Session[]
 
   @@map("User")
 }
 
 model Membership {
-  organizationId String         @db.Uuid
-  userId         String         @db.Uuid
-  role           MembershipRole
-  isActive       Boolean        @default(true)
-  createdAt      DateTime       @default(now()) @db.Timestamptz(6)
-  updatedAt      DateTime       @default(now()) @updatedAt @db.Timestamptz(6)
-  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId   String          @db.Uuid
+  userId           String          @db.Uuid
+  role             MembershipRole
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  requestedTickets Ticket[]        @relation("TicketRequester")
+  assignedTickets  Ticket[]        @relation("TicketAssignee")
+  comments         Comment[]
+  activityEvents   ActivityEvent[]
 
   @@id([organizationId, userId], map: "Membership_pkey")
   @@index([userId, isActive, organizationId], map: "Membership_userId_isActive_organizationId_idx")
   @@map("Membership")
+}
+
+model Ticket {
+  id                     String          @id @default(uuid()) @db.Uuid
+  organizationId         String          @db.Uuid
+  ticketNumber           Int
+  requesterUserId        String          @db.Uuid
+  /// Nullable composite relation scalar; a migration CHECK keeps it equal to organizationId when assigned.
+  assigneeOrganizationId String?         @db.Uuid
+  assigneeUserId         String?         @db.Uuid
+  title                  String          @db.VarChar(200)
+  description            String          @db.Text
+  status                 TicketStatus    @default(OPEN)
+  priority               TicketPriority  @default(MEDIUM)
+  dueAt                  DateTime?       @db.Timestamptz(6)
+  version                Int             @default(1)
+  createdAt              DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime        @default(now()) @updatedAt @db.Timestamptz(6)
+  organization           Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  requesterMembership    Membership      @relation("TicketRequester", fields: [organizationId, requesterUserId], references: [organizationId, userId], onDelete: Restrict, onUpdate: Cascade)
+  assigneeMembership     Membership?     @relation("TicketAssignee", fields: [assigneeOrganizationId, assigneeUserId], references: [organizationId, userId], onDelete: Restrict, onUpdate: Cascade)
+  comments               Comment[]
+  activityEvents         ActivityEvent[]
+
+  @@unique([organizationId, id], map: "Ticket_organizationId_id_key")
+  @@unique([organizationId, ticketNumber], map: "Ticket_organizationId_ticketNumber_key")
+  @@index([organizationId, createdAt(sort: Desc), id(sort: Desc)], map: "Ticket_org_created_id_idx")
+  @@index([organizationId, status, createdAt(sort: Desc), id(sort: Desc)], map: "Ticket_org_status_created_id_idx")
+  @@index([organizationId, priority, createdAt(sort: Desc), id(sort: Desc)], map: "Ticket_org_priority_created_id_idx")
+  @@index([organizationId, requesterUserId, status, createdAt(sort: Desc), id(sort: Desc)], map: "Ticket_org_requester_status_created_id_idx")
+  @@index([organizationId, assigneeUserId, status, createdAt(sort: Desc), id(sort: Desc)], map: "Ticket_org_assignee_status_created_id_idx")
+  @@index([organizationId, dueAt, status], map: "Ticket_org_due_status_idx")
+  @@map("Ticket")
+}
+
+model Comment {
+  id               String     @id @default(uuid()) @db.Uuid
+  organizationId   String     @db.Uuid
+  ticketId         String     @db.Uuid
+  authorUserId     String     @db.Uuid
+  body             String     @db.Text
+  createdAt        DateTime   @default(now()) @db.Timestamptz(6)
+  ticket           Ticket     @relation(fields: [organizationId, ticketId], references: [organizationId, id], onDelete: Restrict, onUpdate: Cascade)
+  authorMembership Membership @relation(fields: [organizationId, authorUserId], references: [organizationId, userId], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([organizationId, id], map: "Comment_organizationId_id_key")
+  @@index([organizationId, ticketId, createdAt(sort: Desc), id(sort: Desc)], map: "Comment_org_ticket_created_id_idx")
+  @@map("Comment")
+}
+
+/// Activity rows are immutable by application contract: expose read-only routes and create events only with their ticket transaction.
+model ActivityEvent {
+  id              String            @id @default(uuid()) @db.Uuid
+  organizationId  String            @db.Uuid
+  ticketId        String            @db.Uuid
+  actorUserId     String            @db.Uuid
+  type            ActivityEventType
+  previousValue   Json?
+  newValue        Json?
+  reason          String?           @db.VarChar(500)
+  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
+  ticket          Ticket            @relation(fields: [organizationId, ticketId], references: [organizationId, id], onDelete: Restrict, onUpdate: Cascade)
+  actorMembership Membership        @relation(fields: [organizationId, actorUserId], references: [organizationId, userId], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([organizationId, id], map: "ActivityEvent_organizationId_id_key")
+  @@index([organizationId, ticketId, createdAt(sort: Desc), id(sort: Desc)], map: "ActivityEvent_org_ticket_created_id_idx")
+  @@map("ActivityEvent")
+}
+
+model Session {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique(map: "Session_tokenHash_key") @db.Char(64)
+  expiresAt  DateTime  @db.Timestamptz(6)
+  revokedAt  DateTime? @db.Timestamptz(6)
+  lastSeenAt DateTime? @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, expiresAt], map: "Session_userId_expiresAt_idx")
+  @@map("Session")
 }
