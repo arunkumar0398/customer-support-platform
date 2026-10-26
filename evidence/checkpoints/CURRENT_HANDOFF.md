@@ -4,7 +4,7 @@ Date: 2026-10-26; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `2f95a1ad85d5b599ce1cd378d60dfe946a3dd3e0`; the checkpoint/handoff commit contains evidence only.
+Last source SHA: `3a94144e93875d75b24a2f9a286e6444e836c1ba`; the checkpoint/handoff commit contains evidence only.
 
 ## Current task state
 
@@ -13,6 +13,7 @@ Last source SHA: `2f95a1ad85d5b599ce1cd378d60dfe946a3dd3e0`; the checkpoint/hand
 - TK-09 implements database-derived current membership using `X-Organization-ID`; source checks pass and independent read-only review at `abf8ab1eb6ae51f304fd0bd6dd2824e5a6574953` closed it with no P0–P2 findings. The middleware is exercised through test-only context routes; product routes are not implemented yet.
 - TK-10 central admin/staff/ownership/action/query policies are implemented with 35 unit tests; checkpoint/spec review closed it at `3ca8bb30cb209fa177d6fa3c35f4a1a436902fd3`. Separate security/code review permits advancement with one non-blocking P2 limiter availability concern. ADR 0003 splits comments from history access: authorized closed history readable, new comments denied. No product route or executed SQL policy proof is implied.
 - Exact TK-10 source check: `npm run check` exit 0, API 132/132, web 1/1, lint/type/build pass. Playwright listed one shell test, did not execute it. Last migration/identity proof is TK-08 with no schema change in TK-09/TK-10.
+- TK-11 membership administration source is committed: ADMIN-only roster/add/role/activation, strict input, current actor recheck after tenant row lock, transactional last-active-admin protection. Exact source `npm run check` exit 0: API 177/177, web 1/1, lint/type/build pass; browser test listed only. Targeted 45/45 real PostgreSQL cases include parallel writes and actual blocked-request actor demotion. Independent review pending. See TK-11.md.
 - All A01–A40 remain `NOT_RUN` in the release ledger; partial HTTP/DB evidence does not complete acceptance journeys.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
@@ -37,6 +38,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-Begin TK-11 in `docs/superpowers/plans/2026-10-26-assessment-implementation.md`. TK-11 creates membership routes/service/schema and real HTTP/PostgreSQL tests for non-admin/foreign-org/duplicate/last-admin denials. Re-read task card and define a strict membership input contract before code. Keep last-admin checks and mutation atomic/serialized; use current server-derived membership and re-check actor authority within the write transaction where necessary. Existing independent agents: `/root/assessment_design_review` for checkpoint/spec review and `/root/design_check` for a separate security/code pass.
+Review TK-11 against exact source/evidence HEAD using the sibling kit. `/root/assessment_design_review` may independently replay the targeted membership suite once, serialized while the builder runs no DB tests; `/root/design_check` performs a separate static security/code pass. Persist findings/dispositions before advancing. Next task is TK-12 ticket creation with transactional creation event; inspect its plan/spec/ADR before RED tests.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
