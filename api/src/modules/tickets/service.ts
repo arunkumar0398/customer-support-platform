@@ -51,14 +51,17 @@ export async function createTicket(client: PrismaClient, actor: ActiveMembership
 }
 
 export async function listTickets(client: PrismaClient, actor: ActiveMembershipContext, query: TicketListQuery) {
+  // Prisma maps contains to SQL LIKE/ILIKE; escape pattern metacharacters so
+  // the public contract remains a literal substring search.
+  const search = query.search?.replace(/[\\%_]/g, '\\$&');
   const filters = [
     ...(query.status ? [{ status: query.status }] : []),
     ...(query.priority ? [{ priority: query.priority }] : []),
     ...(query.assigneeId ? [{ assigneeUserId: query.assigneeId === 'unassigned' ? null : query.assigneeId }] : []),
     ...(query.customerId ? [{ requesterUserId: query.customerId }] : []),
-    ...(query.search ? [{ OR: [
-      { title: { contains: query.search, mode: 'insensitive' as const } },
-      { description: { contains: query.search, mode: 'insensitive' as const } },
+    ...(search ? [{ OR: [
+      { title: { contains: search, mode: 'insensitive' as const } },
+      { description: { contains: search, mode: 'insensitive' as const } },
     ] }] : []),
   ];
   // ticketScope is always an independent AND child: caller filters never replace

@@ -50,8 +50,8 @@ const rows = [
   { index: 3, org: 'alpha', requester: 'other', assignee: null, title: 'Printer setup', description: 'New device onboarding', status: 'OPEN', priority: 'MEDIUM' },
   { index: 4, org: 'alpha', requester: 'customer', assignee: 'admin', title: 'Alpha archival needle', description: 'Alpha record must stay scoped', status: 'CLOSED', priority: 'HIGH' },
   { index: 5, org: 'beta', requester: 'foreign', assignee: null, title: 'Beta only secret needle', description: 'Separate tenant record', status: 'OPEN', priority: 'URGENT' },
-  { index: 6, org: 'beta', requester: 'foreign', assignee: 'foreign', title: 'Beta lockout', description: 'Login trouble', status: 'IN_PROGRESS', priority: 'MEDIUM' },
-  { index: 7, org: 'alpha', requester: 'customer', assignee: 'agent', title: 'Reset credentials', description: "Can't sign in", status: 'IN_PROGRESS', priority: 'URGENT' },
+  { index: 6, org: 'beta', requester: 'foreign', assignee: 'foreign', title: 'Beta lockout', description: 'Login supportAcrew trouble', status: 'IN_PROGRESS', priority: 'MEDIUM' },
+  { index: 7, org: 'alpha', requester: 'customer', assignee: 'agent', title: 'Reset credentials', description: "Can't sign in; contact support_crew at 100% uptime", status: 'IN_PROGRESS', priority: 'URGENT' },
 ] as const;
 
 describe('tenant-scoped ticket list, filters and search', () => {
@@ -141,6 +141,18 @@ describe('tenant-scoped ticket list, filters and search', () => {
     expect(response.status).toBe(200);
     expect(response.body.items).toHaveLength(1);
     expect(response.body.items[0]).toMatchObject({ organizationId: betaId, title: 'Beta only secret needle' });
+  });
+
+  it('searches percent as a literal character rather than a SQL LIKE wildcard', async () => {
+    const response = await list().query({ search: '100%' });
+    expect(response.status).toBe(200);
+    expect(response.body.items.map((item: { id: string }) => ticketIds.indexOf(item.id))).toEqual([7]);
+  });
+
+  it('searches underscore as a literal character rather than a SQL LIKE wildcard', async () => {
+    const response = await list('foreign', betaId).query({ search: '_crew' });
+    expect(response.status).toBe(200);
+    expect(response.body.items.map((item: { id: string }) => ticketIds.indexOf(item.id))).toEqual([]);
   });
 
   it('returns empty result and zero scoped total when filters do not match', async () => {
