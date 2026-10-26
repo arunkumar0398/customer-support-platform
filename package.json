@@ -21,6 +21,8 @@
     "build": "npm run build --workspace api && npm run build --workspace web",
     "db:migrate": "npm run db:migrate --workspace api",
     "db:seed": "npm run db:seed --workspace api",
+    "db:wait": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-health.ps1",
+    "db:verify-test": "node scripts/verify-test-database.mjs",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:e2e -- --list && npm run build"
   },
   "devDependencies": {

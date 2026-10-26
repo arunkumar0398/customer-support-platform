@@ -48,7 +48,7 @@
 
 Each TK task has one owner and one gate. For a new behavior, add the named failing assertion first, run it to observe RED, implement the smallest change, then run the targeted test and relevant quality checks. Configuration bootstrap uses a failing preflight command as its RED proof. Commit only a verified task with exact evidence; do not commit fabricated test results.
 
-**Command contract:** TK-01 defines `test:api` and `test:web` as Vitest pass-through scripts, so run API tests with `npm run test:api -- api/tests/<path>.test.ts` and web unit tests with `npm run test:web -- web/tests/<path>.test.tsx`. Run a Playwright file with `npm run test:e2e -- web/tests/e2e/<path>.spec.ts`. Global gates use `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, or `npm run check`. Run `npm run db:migrate` and `npm run db:seed` only after the DB verifier passes; tests must target the disposable test database.
+**Command contract:** TK-01 defines `test:api` and `test:web` as Vitest pass-through scripts that execute from each workspace, so run API tests with `npm run test:api -- tests/<path>.test.ts` and web unit tests with `npm run test:web -- tests/<path>.test.tsx`. Run a Playwright file from the repository root with `npm run test:e2e -- web/tests/e2e/<path>.spec.ts`. Global gates use `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, or `npm run check`. Run `npm run db:migrate` and `npm run db:seed` only after the DB verifier passes; tests must target the disposable test database.
 
 ### TK-01 — Workspace and runtime bootstrap
 
@@ -61,7 +61,7 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 
 ### TK-02 — Local PostgreSQL and safe database identities
 
-**Depends on:** TK-01. **Gate:** G1. **Acceptance:** A24, A25.
+**Depends on:** TK-01. **Gate:** G1. **Supporting acceptance coverage:** A24 (Compose database foundation), A25 (separate test identity only). This task does not satisfy either acceptance check; full Docker app verification and two-organization seed evidence are later tasks.
 
 **Files:** Create `docker-compose.yml`, `docker/postgres/init-databases.sh`, `scripts/db-health.ps1`, `scripts/verify-test-database.mjs`, `api/tests/db/database-identity.test.ts`; update `.env.example` and root scripts.
 
