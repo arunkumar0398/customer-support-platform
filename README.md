@@ -1,15 +1,15 @@
 # Multi-Tenant Customer Support Platform
 
-**Status (2026-10-26):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, and tenant-scoped membership administration. Ticket APIs and user-facing workflows are still pending. No hosted deployment is configured or claimed.
+**Status (2026-10-26):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, tenant-scoped membership administration, and role-scoped ticket creation with transactional creation history. Ticket listing/editing and user-facing workflows are still pending. No hosted deployment is configured or claimed.
 
 The employer assessment PDF is the product contract in [`reference/assessment.pdf`](reference/assessment.pdf). The approved design, task plan, acceptance matrix, security contract, and assumptions are under `docs/` and `harness/`.
 
 ## Current checkpoint
 
 - C0 workspace and local database foundation are in place.
-- TK-03–TK-10 design/schema/seed/auth/tenant/policy foundations are closed. TK-11 adds real roster/create/update APIs with current admin checks and transactional last-admin protection; G2 remains incomplete until product ticket isolation is verified.
-- `api/src/app.ts` exposes health, authentication, and membership endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is a shell. There is no login screen or local app launch command yet.
-- Acceptance IDs A01–A40 remain `NOT_RUN`. `npm run check` verifies the current scaffold, unit/database checks, builds, and Playwright test discovery; it does not complete all assessment acceptance journeys or execute the listed browser test.
+- TK-03–TK-11 design/schema/seed/auth/tenant/policy and membership API foundations are closed. TK-12 adds real role-scoped ticket creation, tenant-local numbering, and transactional creation history; G2/G3 remain incomplete until ticket access and mutation routes are verified.
+- `api/src/app.ts` exposes health, authentication, membership, and ticket-creation endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is still a shell. There is no login screen or local app launch command yet.
+- A03 has passed its API role-check scope. Other complete acceptance IDs remain `NOT_RUN`; `npm run check` verifies the current unit/database tests, build, and Playwright discovery but does not execute browser journeys or complete release acceptance.
 
 ## Local database setup
 

@@ -1,6 +1,6 @@
-# API contract — implemented foundation
+# API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, and membership administration. Ticket/dashboard endpoints, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health, authentication, membership administration, and ticket creation. Ticket listing/detail/update, comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
 
 ## Health
 
@@ -56,6 +56,21 @@ Body-provided organization/user IDs, email changes on PATCH, passwords/hashes, u
 
 Run `npm run test:api -- tests/memberships/memberships.test.ts` for real HTTP/PostgreSQL checks, including concurrent duplicates/removals, stale actor authority, and an observed database lock-wait probe. Browser membership controls remain TK-28 work.
 
+## Ticket creation
+
+`POST /api/tickets` requires an authenticated session, exact approved origin, session-bound CSRF token, and current active organization selected by `X-Organization-ID`. It is available to ADMIN, AGENT, and CUSTOMER memberships. Organization, requester for customers, ticket number, status, assignee, version, dates, and activity events are not client-controlled.
+
+| Active role | Strict JSON body | Requester/defaults |
+|---|---|---|
+| CUSTOMER | `{ "title": "Printer outage", "description": "Cannot print the synthetic invoice." }` | Requester is the signed-in active customer; status OPEN, priority MEDIUM, unassigned, dueAt null, version 1. |
+| ADMIN/AGENT | Same title/description plus required `requesterUserId` and optional priority (`LOW`, `MEDIUM`, `HIGH`, `URGENT`) | Requester must have an active CUSTOMER membership in the selected organization. Priority defaults MEDIUM. |
+
+Title is trimmed and must contain 1–200 characters. Description is trimmed and must contain 1–10,000 characters. Empty content, customer-supplied priority/requester, staff without requester, inactive/non-customer/foreign requester, and extra properties return the sanitized 422 or 404 error without writes. Ticket numbers are allocated from the current organization maximum while holding its organization-row lock; concurrent API creates serialize and the database unique constraint remains a final guard. At the signed PostgreSQL integer ceiling return 409 `TICKET_NUMBER_LIMIT`.
+
+The ticket row and one `TICKET_CREATED` event are nested in the same Prisma transaction. Event data captures title, OPEN status, priority, and requester ID; it does not store credentials. An event insert failure rolls back the ticket and does not consume its number. Repeating the same POST creates another ticket; there is no idempotency key and no duplicate-request suppression in this checkpoint.
+
+The response contains only id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. `npm run test:api -- tests/tickets/create.test.ts` runs the real HTTP/PostgreSQL creation contract, including role-specific fields, cross-org negatives, concurrent numbering, and forced event rollback. Listing, details, editing, assignment, and history reads remain unimplemented.
+
 ## Central authorization policies
 
 `api/src/lib/policy.ts` consumes the server-derived membership context. Membership administration requires ADMIN; dashboard and staff ticket management require ADMIN or AGENT. Ticket visibility always requires the active organization, and CUSTOMER additionally requires its own requester ID. Inaccessible/missing tickets return the same 404 before action-specific restrictions disclose state. Customers may edit their own title/description only while OPEN; staff may edit visible ticket content. New comments require a visible non-closed ticket, with 409 `TICKET_CLOSED` on an otherwise visible closed ticket. A closed ticket's conversation/history remains readable within the same visibility policy, as clarified in ADR 0003.
@@ -80,6 +95,7 @@ Every request receives a new server-generated UUID in the `X-Request-ID` respons
 |---|---|---|
 | 400 | `MALFORMED_JSON` | JSON could not be parsed. |
 | 404 | `NOT_FOUND` | Unknown route or unavailable resource; the response does not repeat the path or record identifier. |
+| 409 | `TICKET_NUMBER_LIMIT` | The organization's positive ticket number reached the PostgreSQL integer ceiling. |
 | 413 | `PAYLOAD_TOO_LARGE` | JSON exceeds the 32 KiB request body limit. |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | Unsupported JSON charset or compressed body encoding. Send uncompressed JSON. |
 | 422 | `VALIDATION_ERROR` | Body, query, or path input fails its schema or allowlist. |
