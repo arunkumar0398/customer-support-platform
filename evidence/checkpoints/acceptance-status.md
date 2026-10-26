@@ -1,25 +1,25 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, HTTP error/validation middleware, persisted authentication, and current organization membership have supporting local tests. Product routes, role/ownership enforcement, browser journeys, complete Docker application startup, CI, and deployment are pending. Every row below remains `NOT_RUN` for its complete acceptance scope; partial supporting evidence is linked without promoting it to a full acceptance pass.
-**Latest implementation source SHA:** `f3cfbbfa9ec6804d10b9ab736066cae2c14936dc` (TK-09). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, HTTP middleware, persisted authentication, current organization membership, and central role/ownership policies have supporting local tests. Product routes and their permission enforcement, browser journeys, complete Docker application startup, CI, and deployment are pending. Every row below remains `NOT_RUN` for its complete acceptance scope; partial supporting evidence is linked without promoting it to a full acceptance pass.
+**Latest implementation source SHA:** `2f95a1ad85d5b599ce1cd378d60dfe946a3dd3e0` (TK-10). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
 |---|---|---|
 | A01 | NOT_RUN | [TK-08](TK-08.md): real-DB credential/session API checks; browser login pending. |
 | A02 | NOT_RUN | [TK-08](TK-08.md): expiry/revocation/replay denied on auth endpoints; protected product endpoints pending. |
-| A03 | NOT_RUN | |
-| A04 | NOT_RUN | [TK-09](TK-09.md): foreign organization selector denied; ticket GET still pending. |
-| A05 | NOT_RUN | [TK-09](TK-09.md): current membership context only; tenant-scoped mutation routes pending. |
-| A06 | NOT_RUN | |
+| A03 | NOT_RUN | [TK-10](TK-10.md): admin policy unit cases; membership API/browser checks pending. |
+| A04 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/visibility foundations; ticket GET pending. |
+| A05 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/action policies; actual tenant mutation routes pending. |
+| A06 | NOT_RUN | [TK-10](TK-10.md): ownership policy unit cases; customer product-route/browser negatives pending. |
 | A07 | NOT_RUN | [TK-09](TK-09.md): membership foundation; actual list/dashboard counts pending. |
 | A08 | NOT_RUN | |
 | A09 | NOT_RUN | [TK-05](TK-05.md): real cross-org FK negatives; assignment API and role eligibility pending. |
-| A10 | NOT_RUN | |
+| A10 | NOT_RUN | [TK-10](TK-10.md): visibility foundation; actual create/list/detail/API/browser journey pending. |
 | A11 | NOT_RUN | [TK-07](TK-07.md): strict validation middleware; ticket schemas and browser forms pending. |
-| A12 | NOT_RUN | |
+| A12 | NOT_RUN | [TK-10](TK-10.md): staff policy unit cases; actual update/assignment journey pending. |
 | A13 | NOT_RUN | |
-| A14 | NOT_RUN | |
+| A14 | NOT_RUN | [TK-10](TK-10.md): comment permission foundation; persistence/order/API/browser checks pending. |
 | A15 | NOT_RUN | [TK-05](TK-05.md): activity relation foundation; transactional immutable event behavior pending. |
 | A16 | NOT_RUN | [TK-05](TK-05.md): tenant relations; ticket/event fault rollback pending. |
 | A17 | NOT_RUN | |
