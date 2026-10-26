@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Starter-kit planning only. No application code, app tests, Docker run, or deployment has been verified.  
-**Design baseline SHA:** `1fa9d2b` (design spec committed; implementation plan is under review)  
+**Baseline:** Initial harness-only state was extended with the TK-01 API/web bootstrap and smoke tests; Docker, database, full assessment requirements, and deployment remain unverified. All acceptance IDs remain `NOT_RUN`.  
+**Planning baseline SHA:** `d5bdceb` (approved design, implementation plan, and initial acceptance ledger)  
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |

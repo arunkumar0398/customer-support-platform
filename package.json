@@ -1,0 +1,35 @@
+{
+  "name": "customer-support-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspace api && npm run lint --workspace web",
+    "typecheck": "npm run typecheck --workspace api && npm run typecheck --workspace web",
+    "test:api": "npm run test --workspace api --",
+    "test:web": "npm run test --workspace web --",
+    "test:e2e": "playwright test",
+    "test": "npm run test:api && npm run test:web",
+    "build": "npm run build --workspace api && npm run build --workspace web",
+    "db:migrate": "npm run db:migrate --workspace api",
+    "db:seed": "npm run db:seed --workspace api",
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:e2e -- --list && npm run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "eslint": "10.13.0",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "5.0.5"
+  }
+}

@@ -54,10 +54,10 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 
 **Depends on:** Approved design; npm available. **Gate:** G0. **Acceptance:** A26, A34.
 
-**Files:** Create root `package.json`, `package-lock.json`, `.nvmrc`, `.npmrc`, `api/package.json`, `web/package.json`, `api/tsconfig.json`, `web/tsconfig.json`, API/web skeletons, `api/tests/bootstrap.test.ts`, and `web/tests/bootstrap.test.tsx`.
+**Files:** Create root `package.json`, `package-lock.json`, `.nvmrc`, `.npmrc`, `eslint.config.js`, `playwright.config.ts`, `api/package.json`, `web/package.json`, `api/tsconfig.json`, `web/tsconfig.json`, `api/index.ts`, API/web skeletons, `api/tests/bootstrap.test.ts`, and `web/tests/bootstrap.test.tsx`.
 
 **RED:** Before files exist, record `npm run check` failing because the root manifest is absent.  
-**GREEN:** `npm ci`, `npm run lint`, `npm run typecheck`, `npm run test:api`, `npm run test:web`, `npm run test:e2e -- --list`, `npm run build`, and `npm run check` each execute real commands and return zero. Define root pass-through scripts for `test:api`, `test:web`, `test:e2e`, `db:migrate`, `db:seed`, and `check`; `api`/`web` tests must not be no-op scripts. Add API app-health and web app-render smoke tests; assert an intentionally invalid TS fixture fails typecheck, then remove it. Keep toolchain versions exact in the lockfile and runtime declaration.
+**GREEN:** `npm ci`, real ESLint, `npm run typecheck`, `npm run test:api`, `npm run test:web`, `npm run test:e2e -- --list`, `npm run build`, and `npm run check` each execute real commands and return zero. Define root pass-through scripts for `test:api`, `test:web`, `test:e2e`, `db:migrate`, `db:seed`, and `check`; `api`/`web` tests must not be no-op scripts. Add an API serverless-entrypoint and health smoke test plus a web app-render smoke test; assert an intentionally invalid TS fixture fails typecheck, then remove it. Keep toolchain versions exact in the lockfile and runtime declaration.
 
 ### TK-02 — Local PostgreSQL and safe database identities
 
@@ -108,7 +108,7 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 
 **Depends on:** TK-01, TK-05. **Gate:** G2. **Acceptance:** A11, A26, A33.
 
-**Files:** Create `api/src/http/app.ts`, `api/index.ts`, `api/src/middleware/{errors,request-id,validate}.ts`, `api/tests/http/errors.test.ts`.
+**Files:** Update `api/src/app.ts`; create `api/src/middleware/{errors,request-id,validate}.ts` and `api/tests/http/errors.test.ts`.
 
 **RED:** Supertest asserts malformed JSON, invalid schema, and thrown error responses; expected envelope/status tests fail.  
 **GREEN:** App returns documented sanitized envelopes with request ID; Zod rejects unknown/forbidden fields; logs redact request body secrets.
@@ -351,7 +351,7 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 
 **Depends on:** TK-33 and explicit human approval to enter C6. **Gate:** G6 preparation only. **Acceptance:** A27, A35–A36.
 
-**Files:** Create `api/index.ts` only if not already completed in TK-07, `web/vercel.json`, `docs/deployment.md`; update operations docs.
+**Files:** Create `web/vercel.json` and `docs/deployment.md`; update operations docs. Use and verify the `api/index.ts` serverless entrypoint established in TK-01.
 
 **RED:** Local Vercel preview/build check fails for API entrypoint, rewrite, cookie, SPA fallback, or pooled/direct DB mapping.  
 **GREEN:** Validate current official platform behavior and local preview configuration without creating provider resources; write migration sequencing, region, secrets, backups, monitoring, CI, cost, rollback, and failure behavior.
@@ -405,7 +405,7 @@ For every TK task, append `evidence/checkpoints/TK-XX.md` with branch, pre-task 
 ## Self-Review
 
 - **Spec coverage:** Product, permissions, tenant boundaries, session/CSRF, schema, constraints, search/pagination, lifecycle, audit/concurrency, dashboard formulas, UI states, API errors, local Docker, optional cloud topology, evidence, AI disclosure, and final demo all have owning tasks.
-- **Step and interface consistency:** API modules use routes/services/schemas under `api/src/modules`; `api/index.ts` exports the app, and local startup stays separate. Tests use API and web workspace scripts established in TK-01. TK-34 does not duplicate API entrypoint ownership from TK-07.
+- **Step and interface consistency:** API modules use routes/services/schemas under `api/src/modules`; `api/index.ts` exports the app, and local startup stays separate. Tests use API and web workspace scripts established in TK-01. TK-01 owns the serverless entrypoint; later deployment tasks verify and use it.
 - **Review focus:** The five uncovered risk classes each name the test-owning TK tasks above.
 - **Proportion:** This plan refines 37 user-specified task cards; it intentionally retains the requested checkpoints and keeps production approval distinct from code implementation.
 - **Environment gap:** npm is now installed/active as Node 24.22.1's bundled npm 11.19.1 and the doctor detects it. Docker is installed; Compose-backed app behavior is still unverified.
