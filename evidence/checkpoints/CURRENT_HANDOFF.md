@@ -4,7 +4,7 @@ Date: 2026-10-26; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `b3ea2596e9e92eaa542c6776585dda53405a1fe4`; the checkpoint/handoff commit contains evidence only.
+Last source SHA: `15a4095df9902397c51795685b54bdbfac9d5671`; the checkpoint/handoff commit contains evidence only.
 
 ## Current task state
 
@@ -15,6 +15,8 @@ Last source SHA: `b3ea2596e9e92eaa542c6776585dda53405a1fe4`; the checkpoint/hand
 - Exact TK-10 source check: `npm run check` exit 0, API 132/132, web 1/1, lint/type/build pass. Playwright listed one shell test, did not execute it. Last migration/identity proof is TK-08 with no schema change in TK-09/TK-10.
 - TK-11 is closed: ADMIN-only roster/add/role/activation, strict input, actor recheck after tenant row lock and transactional last-admin protection. Source check exit 0: API177/177, web1/1, lint/type/build pass; browser listed only. Independent reviewer replay45/45 and separate static security review closed it. One reporting P2 corrected A03 to PASS for its API-only acceptance scope. Five Python validator regressions pass; --initial preserves the original all-NOT_RUN baseline check.
 - TK-12 source adds `POST /api/tickets`, strict role-specific schemas, active same-org CUSTOMER requester validation, org-locked current membership recheck, local max+1 ticket numbering and nested atomic `TICKET_CREATED` event. Exact source `npm run check` exit0: API228/228, web1/1, lint/type/build pass; Playwright listed only. A 51-case real PostgreSQL targeted suite includes actual trigger failure rollback/recovery and a blocked transaction with actor role change. Reviewer pending. See TK-12.md.
+- TK-12 was independently statically reviewed with no code finding. Its reviewer test run had 50/51 pass and one beforeEach timeout; root replayed named case and complete targeted suite, both passed, no source changes. Cause remains unexplained and is disclosed in the persisted review report. TK-13 removed its own repeated five-account login setup after encountering slow fixture setup during RED. Do not conflate the two test setup observations.
+- TK-13 source adds tenant/customer-scoped `GET /api/tickets` with status, priority, assignee/unassigned, customer and case-insensitive text filters plus scoped count in RepeatableRead. Exact `npm run check` exit0: API261/261, web1/1, lint/type/build pass; Playwright listed only. Independent review pending. A07/A17/A18 remain NOT_RUN pending review and whole-scope evidence. See TK-13.md.
 - A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
@@ -39,6 +41,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-Review TK-12 against source `b3ea2596e9e92eaa542c6776585dda53405a1fe4` using the parent kit. `/root/assessment_design_review` may replay `npm run test:api -- tests/tickets/create.test.ts` once, serialized while the builder runs no DB tests; `/root/design_check` is static only. Persist review, then begin TK-13. A03 is PASS, all other complete acceptance scopes remain NOT_RUN; G3 and release gates not complete.
+Review TK-13 against source `15a4095df9902397c51795685b54bdbfac9d5671` using the parent kit. `/root/assessment_design_review` may replay `npm run test:api -- tests/tickets/list.test.ts` once, serialized while the builder runs no DB tests; `/root/design_check` is static only. Ask whether A18's API-only scope is fully satisfied; A07 also needs a dashboard, A17 browser work. Persist review, then begin TK-14. A03 is PASS; other complete acceptance scopes remain NOT_RUN; G3 and release gates not complete.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.

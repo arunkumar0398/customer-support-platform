@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, and membership administration have supporting local tests. A03 has passed its API-only scope; other complete checks remain NOT_RUN. Ticket routes, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `b3ea2596e9e92eaa542c6776585dda53405a1fe4` (TK-12). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `15a4095df9902397c51795685b54bdbfac9d5671` (TK-13). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -12,7 +12,7 @@
 | A04 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/visibility foundations; ticket GET pending. |
 | A05 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/action policies; actual tenant mutation routes pending. |
 | A06 | NOT_RUN | [TK-10](TK-10.md): ownership policy unit cases; customer product-route/browser negatives pending. |
-| A07 | NOT_RUN | [TK-09](TK-09.md): membership foundation; actual list/dashboard counts pending. |
+| A07 | NOT_RUN | [TK-13](TK-13.md): list counts are tenant-scoped; dashboard counts remain pending. |
 | A08 | NOT_RUN | [TK-11](TK-11.md): scoped roster/add/role/deactivate/reactivate API with concurrent last-admin protection; browser administration pending. |
 | A09 | NOT_RUN | [TK-05](TK-05.md): real cross-org FK negatives; assignment API and role eligibility pending. |
 | A10 | NOT_RUN | [TK-12](TK-12.md): role-scoped create API; actual list/detail/visibility and browser journey pending. |
@@ -22,8 +22,8 @@
 | A14 | NOT_RUN | [TK-10](TK-10.md): comment permission foundation; persistence/order/API/browser checks pending. |
 | A15 | NOT_RUN | [TK-12](TK-12.md): atomic creation event tested; events for update/comment/assignment still pending. |
 | A16 | NOT_RUN | [TK-12](TK-12.md): create/event DB fault rollback tested; remaining ticket mutation paths pending. |
-| A17 | NOT_RUN | |
-| A18 | NOT_RUN | |
+| A17 | NOT_RUN | [TK-13](TK-13.md): API filter coverage; browser filtering journey pending. |
+| A18 | NOT_RUN | [TK-13](TK-13.md): scoped case-insensitive API search tests; pending independent checkpoint review. |
 | A19 | NOT_RUN | |
 | A20 | NOT_RUN | |
 | A21 | NOT_RUN | |
