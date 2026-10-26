@@ -23,7 +23,7 @@
 | A15 | NOT_RUN | [TK-12](TK-12.md): atomic creation event tested; events for update/comment/assignment still pending. |
 | A16 | NOT_RUN | [TK-12](TK-12.md): create/event DB fault rollback tested; remaining ticket mutation paths pending. |
 | A17 | NOT_RUN | [TK-13](TK-13.md): API filter coverage; browser filtering journey pending. |
-| A18 | NOT_RUN | [TK-13](TK-13.md): scoped case-insensitive API search tests; pending independent checkpoint review. |
+| A18 | PASS | Source `15a4095df9902397c51795685b54bdbfac9d5671`; `npm run test:api -- tests/tickets/list.test.ts` exit 0, 33/33 real PostgreSQL/API cases; independent replay and query-scope review. [TK-13](TK-13.md), [review](../reviews/tk13-2026-10-26-15a4095.md). |
 | A19 | NOT_RUN | |
 | A20 | NOT_RUN | |
 | A21 | NOT_RUN | |

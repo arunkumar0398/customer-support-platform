@@ -32,7 +32,7 @@ Tenant-owned product routes will require `X-Organization-ID` after session authe
 
 Body/query role or organization fields never grant membership or replace the selector. Endpoint-specific body schemas must still reject forbidden properties. Users with memberships in multiple organizations can choose each valid selector with that organization's own current role. Removing membership or changing role takes effect on the next request with the same session.
 
-`createActiveMembership` is used by the membership product router and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers must chain authentication, active membership, and object/role policy before their handler. Ticket/customer isolation acceptance remains pending until the ticket routes exist.
+`createActiveMembership` is used by the membership and ticket product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Ticket detail/mutation and dashboard routes, and full ticket/customer isolation acceptance, remain pending.
 
 ## Membership administration
 
