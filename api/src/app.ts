@@ -1,16 +1,22 @@
 import express from 'express';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
 import { requestIdMiddleware } from './middleware/request-id.js';
+import { createAuthRouter } from './modules/auth/routes.js';
+import type { AuthOptions } from './modules/auth/session.js';
 
-export const app = express();
+export function createApp(options: AuthOptions = {}) {
+  const application = express();
+  application.disable('x-powered-by');
+  application.use(requestIdMiddleware);
+  application.use(express.json({ limit: '32kb', inflate: false }));
+  application.get('/api/health', (_request, response) => {
+    response.status(200).json({ status: 'ok' });
+  });
+  application.use('/api/auth', createAuthRouter(options));
+  application.use(notFoundHandler);
+  application.use(errorHandler);
+  return application;
+}
 
-app.disable('x-powered-by');
-app.use(requestIdMiddleware);
-app.use(express.json({ limit: '32kb', inflate: false }));
-app.get('/api/health', (_request, response) => {
-  response.status(200).json({ status: 'ok' });
-});
-app.use(notFoundHandler);
-app.use(errorHandler);
-
+export const app = createApp();
 export default app;

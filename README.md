@@ -1,14 +1,14 @@
 # Multi-Tenant Customer Support Platform
 
-**Status (2026-10-26):** implementation is in progress. The repository now has the TypeScript workspaces, local PostgreSQL setup, Prisma organization/ticket/session schema, and synthetic two-organization seed. Authentication, ticket APIs, and user-facing workflows are not implemented yet. No hosted deployment is configured or claimed.
+**Status (2026-10-26):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, Prisma domain schema, a synthetic two-organization seed, safe API errors, and password/session authentication endpoints. Ticket APIs and user-facing workflows are still pending. No hosted deployment is configured or claimed.
 
 The employer assessment PDF is the product contract in [`reference/assessment.pdf`](reference/assessment.pdf). The approved design, task plan, acceptance matrix, security contract, and assumptions are under `docs/` and `harness/`.
 
 ## Current checkpoint
 
 - C0 workspace and local database foundation are in place.
-- TK-03 design/requirements artifacts and TK-04–TK-06 schema/seed work are progressing through G1.
-- `api/src/app.ts` currently exposes only `/api/health`; `web/src/App.tsx` is only a shell. There is no login screen or local app launch command yet.
+- TK-03–TK-07 design/schema/seed/HTTP foundation tasks are closed. TK-08 adds PostgreSQL-backed login/session/logout with origin/CSRF defense and local login limits; G2 remains partial until membership and authorization work is complete.
+- `api/src/app.ts` exposes health and authentication endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is a shell. There is no login screen or local app launch command yet.
 - Acceptance IDs A01–A40 remain `NOT_RUN`. `npm run check` verifies the current scaffold, unit/database checks, builds, and Playwright test discovery; it does not complete all assessment acceptance journeys or execute the listed browser test.
 
 ## Local database setup
@@ -28,7 +28,7 @@ The seed command verifies a loopback `support_dev` connection before writing. It
 
 ## Demo accounts
 
-The eight Alpha/Beta synthetic accounts cover admin, agent, and customer roles. Their shared demo password, seed details, and intended ticket fixtures are documented in [`docs/demo-accounts.md`](docs/demo-accounts.md). They cannot sign in yet because authentication is scheduled for TK-08 and the UI flow comes later. A25 remains `NOT_RUN` until the actual sign-in path is implemented and verified.
+The eight Alpha/Beta synthetic accounts cover admin, agent, and customer roles. Their shared demo password and fixtures are documented in [`docs/demo-accounts.md`](docs/demo-accounts.md). The authentication HTTP tests use isolated fixtures in the verified disposable database. The seeded accounts' hashes are verified separately; browser sign-in and the complete local launch path come later. A25 remains `NOT_RUN` until that setup/sign-in journey is implemented and verified.
 
 ## Checks
 
