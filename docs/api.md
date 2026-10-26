@@ -16,7 +16,7 @@ Configure an exact `APP_ORIGIN` without a trailing slash, a securely generated `
 | `GET /api/auth/me` | Session cookie | 200 with the current user, active memberships, and session-bound `csrfToken`; absent, unknown, expired, or revoked sessions return 401. |
 | `POST /api/auth/logout` | Session cookie, exact approved `Origin`, `X-CSRF-Token` from login/me | 204 after persisted revocation and browser cookie expiry; replay is rejected. |
 
-Successful login/me JSON has only `user: { id, email }`, `memberships: [{ organizationId, role, organization: { name, slug } }]`, and `csrfToken`. A user with no active memberships has an empty list and gains no organization authority. Active organization selection and per-object permission enforcement are TK-09/TK-10 work, not implied by this response. All auth responses use `Cache-Control: no-store`.
+Successful login/me JSON has only `user: { id, email }`, `memberships: [{ organizationId, role, organization: { name, slug } }]`, and `csrfToken`. A user with no active memberships has an empty list and gains no organization authority. Membership context is resolved separately; object permission enforcement remains TK-10 and later product-route work. All auth responses use `Cache-Control: no-store`.
 
 Email is trimmed/lowercased and limited to 320 characters; password must be a string of 1–256 characters. Unknown login properties are rejected. Password verification uses the fixed salted scrypt format of the seed (`N=32768`, `r=8`, `p=1`) and performs a dummy derivation for unknown accounts. The password is never returned or logged.
 
@@ -25,6 +25,14 @@ Each successful login generates 32 random bytes, stores only its SHA-256 token h
 Login requires both the exact origin and a custom non-simple header, mitigating login CSRF without an anonymous session. Other authenticated unsafe methods require the exact origin plus a per-session HMAC token in `X-CSRF-Token`, compared in constant time. Login/me expose that token to the app, while the HttpOnly session cookie value is never returned in JSON. No cross-origin CORS access is configured. Future protected routes must use `createAuthenticate`, which applies these checks to unsafe methods. These decisions follow [OWASP's CSRF prevention guidance](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) and [session guidance](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html); actual browser/proxy behavior remains a later gate.
 
 The local login limiter allows five attempts per normalized account and twenty per socket IP per fifteen-minute window, counting successful and failed attempts. It returns 429 plus `Retry-After`, ignores untrusted forwarding headers, and bounds its in-memory key table. This process-local state resets on restart and is not shared across replicas; it must be replaced or supplemented before a distributed/serverless release. Trusted-proxy configuration is not enabled; proxy clients may share one IP budget. These limits and the two-hour expiry are project design defaults, not employer requirements.
+
+## Active organization context
+
+Tenant-owned product routes will require `X-Organization-ID` after session authentication. The middleware accepts a single canonical UUID (case-insensitive), then queries PostgreSQL for that user's current active membership. It derives the organization, user ID, and role from the stored membership on each request. Missing selector returns `400 ORGANIZATION_REQUIRED`; malformed/ambiguous selector returns `400 INVALID_ORGANIZATION`; inactive, removed, foreign, and nonexistent memberships all return the same `404 NOT_FOUND` envelope.
+
+Body/query role or organization fields never grant membership or replace the selector. Endpoint-specific body schemas must still reject forbidden properties. Users with memberships in multiple organizations can choose each valid selector with that organization's own current role. Removing membership or changing role takes effect on the next request with the same session.
+
+`createActiveMembership` is a server middleware foundation, verified with real PostgreSQL and test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; future tenant-owned routers must chain authentication, active membership, and object/role policy before their handler. Ticket/customer isolation acceptance remains pending until those routes and policies exist.
 
 ## Requests and errors
 
