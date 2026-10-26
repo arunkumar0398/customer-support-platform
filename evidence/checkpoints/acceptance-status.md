@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, and membership administration have supporting local tests. A03 has passed its API-only scope; other complete checks remain NOT_RUN. Ticket routes, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `15a4095df9902397c51795685b54bdbfac9d5671` (TK-13). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `00120c7fa2ad2ffff7dd7af687b6cfb145098899` (TK-13 corrected search). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -23,7 +23,7 @@
 | A15 | NOT_RUN | [TK-12](TK-12.md): atomic creation event tested; events for update/comment/assignment still pending. |
 | A16 | NOT_RUN | [TK-12](TK-12.md): create/event DB fault rollback tested; remaining ticket mutation paths pending. |
 | A17 | NOT_RUN | [TK-13](TK-13.md): API filter coverage; browser filtering journey pending. |
-| A18 | PASS | Source `15a4095df9902397c51795685b54bdbfac9d5671`; `npm run test:api -- tests/tickets/list.test.ts` exit 0, 33/33 real PostgreSQL/API cases; independent replay and query-scope review. [TK-13](TK-13.md), [review](../reviews/tk13-2026-10-26-15a4095.md). |
+| A18 | PASS | Source `00120c7fa2ad2ffff7dd7af687b6cfb145098899`; `npm run test:api -- tests/tickets/list.test.ts` exit0, 36/36 real PostgreSQL/API cases; independently replayed after literal wildcard correction. [TK-13](TK-13.md), [review](../reviews/tk13-2026-10-26-15a4095.md). |
 | A19 | NOT_RUN | |
 | A20 | NOT_RUN | |
 | A21 | NOT_RUN | |
