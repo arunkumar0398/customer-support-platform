@@ -119,6 +119,21 @@ describe('tenant-scoped ticket, comment, event, and session relations', () => {
     });
   });
 
+  it('rejects an assignee user when the assignee organization scope is null', async () => {
+    await withRollback(async () => {
+      const requester = await createActor('CUSTOMER', 'null-assignee-scope-requester');
+      const foreignAgent = await createActor('AGENT', 'null-assignee-scope-agent');
+
+      await expect(client.query(
+        `INSERT INTO "Ticket"
+           ("id", "organizationId", "ticketNumber", "requesterUserId", "assigneeOrganizationId", "assigneeUserId", "title", "description")
+         VALUES ($1, $2, $3, $4, NULL, $5, $6, $7)`,
+        [randomUUID(), requester.organizationId, 1, requester.userId, foreignAgent.userId,
+          'Unscoped assignee', 'The assignee scope must not be nullable.'],
+      )).rejects.toMatchObject({ code: '23514' });
+    });
+  });
+
   it('rejects a comment author who has membership only in another organization', async () => {
     await withRollback(async () => {
       const ticketOwner = await createActor('CUSTOMER', 'ticket-owner');
