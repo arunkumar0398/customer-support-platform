@@ -10,7 +10,7 @@
     "test": "vitest run",
     "build": "tsc -p tsconfig.build.json",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts --run"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
