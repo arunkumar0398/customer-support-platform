@@ -20,6 +20,29 @@ export type CreateTicketInput = {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 };
 
+export type TicketListQuery = {
+  status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  assigneeId?: string;
+  customerId?: string;
+  search?: string;
+};
+
+const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i).transform((id) => id.toLowerCase());
+const ticketListQuery = z.object({
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
+  assigneeId: z.union([uuid, z.literal('unassigned')]).optional(),
+  customerId: uuid.optional(),
+  search: z.string().trim().min(1).max(100).optional(),
+}).strict();
+
+export function parseTicketListQuery(input: unknown): TicketListQuery {
+  const result = ticketListQuery.safeParse(input);
+  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'Request query is invalid.');
+  return result.data;
+}
+
 export function parseCreateTicket(input: unknown, role: MembershipRole): CreateTicketInput {
   if (!['ADMIN', 'AGENT', 'CUSTOMER'].includes(role)) {
     throw new ApiError(403, 'FORBIDDEN', 'This action is not permitted.');

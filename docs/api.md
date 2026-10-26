@@ -1,6 +1,6 @@
 # API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, membership administration, and ticket creation. Ticket listing/detail/update, comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health, authentication, membership administration, ticket creation, and ticket listing with filters/search. Ticket detail/update, comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
 
 ## Health
 
@@ -69,7 +69,23 @@ Title is trimmed and must contain 1–200 characters. Description is trimmed and
 
 The ticket row and one `TICKET_CREATED` event are nested in the same Prisma transaction. Event data captures title, OPEN status, priority, and requester ID; it does not store credentials. An event insert failure rolls back the ticket and does not consume its number. Repeating the same POST creates another ticket; there is no idempotency key and no duplicate-request suppression in this checkpoint.
 
-The response contains only id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. `npm run test:api -- tests/tickets/create.test.ts` runs the real HTTP/PostgreSQL creation contract, including role-specific fields, cross-org negatives, concurrent numbering, and forced event rollback. Listing, details, editing, assignment, and history reads remain unimplemented.
+The response contains only id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. `npm run test:api -- tests/tickets/create.test.ts` runs the real HTTP/PostgreSQL creation contract, including role-specific fields, cross-org negatives, concurrent numbering, and forced event rollback.
+
+## Ticket list, filters, and search
+
+`GET /api/tickets` requires a session and valid active `X-Organization-ID`. ADMIN/AGENT see the selected organization's tickets. CUSTOMER queries are always restricted to the authenticated user's own requester ID, even when a `customerId` filter is supplied. The organization and customer predicates are combined with every optional filter in SQL using AND, so caller filters cannot replace the server scope.
+
+| Query | Accepted value | Behavior |
+|---|---|---|
+| `status` | `OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED` | Exact status filter. |
+| `priority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` | Exact priority filter. |
+| `assigneeId` | Canonical UUID or `unassigned` | Matches one assignee or null assignment. |
+| `customerId` | Canonical UUID | Filters requester ID. Customer's own requester constraint still applies. |
+| `search` | Trimmed non-empty text, max 100 chars | Case-insensitive contains match in title or description. The result DTO does not return description. |
+
+Unknown/repeated/nested parameters, invalid enums/IDs, blank or oversized search, and body-controlled organization/requester fields are not accepted; invalid query fields return 422. Query matching and the result count use one repeatable-read snapshot. Results are currently capped at the first 100 tickets, ordered `createdAt DESC, id DESC`; page/offset controls are the next TK-14 task. Result items omit descriptions and credentials; `{ items, total }` counts only rows visible through the same SQL scope. Search is literal substring matching with PostgreSQL's case-insensitive mode, not full text/ranking.
+
+`npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation. Detail/update/comment routes are not implemented yet.
 
 ## Central authorization policies
 

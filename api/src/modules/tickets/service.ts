@@ -3,6 +3,7 @@ import { ticketScope } from '../../lib/policy.js';
 import type { ActiveMembershipContext } from '../../middleware/active-membership.js';
 import { ApiError } from '../../middleware/errors.js';
 import { parseCreateTicket } from './schemas.js';
+import type { TicketListQuery } from './schemas.js';
 
 export async function createTicket(client: PrismaClient, actor: ActiveMembershipContext, payload: unknown) {
   ticketScope(actor); // Fail closed on incomplete/unrecognized service context.
@@ -47,4 +48,34 @@ export async function createTicket(client: PrismaClient, actor: ActiveMembership
       },
     });
   }, { maxWait: 5000, timeout: 10000 });
+}
+
+export async function listTickets(client: PrismaClient, actor: ActiveMembershipContext, query: TicketListQuery) {
+  const filters = [
+    ...(query.status ? [{ status: query.status }] : []),
+    ...(query.priority ? [{ priority: query.priority }] : []),
+    ...(query.assigneeId ? [{ assigneeUserId: query.assigneeId === 'unassigned' ? null : query.assigneeId }] : []),
+    ...(query.customerId ? [{ requesterUserId: query.customerId }] : []),
+    ...(query.search ? [{ OR: [
+      { title: { contains: query.search, mode: 'insensitive' as const } },
+      { description: { contains: query.search, mode: 'insensitive' as const } },
+    ] }] : []),
+  ];
+  // ticketScope is always an independent AND child: caller filters never replace
+  // tenant scope or the authenticated customer's requester restriction.
+  const where = { AND: [ticketScope(actor), ...filters] };
+  return client.$transaction(async (transaction) => {
+    const total = await transaction.ticket.count({ where });
+    const items = await transaction.ticket.findMany({
+      where,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 100,
+      select: {
+        id: true, organizationId: true, ticketNumber: true, requesterUserId: true,
+        assigneeUserId: true, title: true, status: true, priority: true, dueAt: true,
+        version: true, createdAt: true, updatedAt: true,
+      },
+    });
+    return { items, total };
+  }, { isolationLevel: 'RepeatableRead', maxWait: 5000, timeout: 10000 });
 }
