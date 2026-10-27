@@ -1,6 +1,6 @@
 # API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, membership administration, ticket create/detail/list/update/assignment, with list filters/search/pagination. Comments/history, dashboard, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health, authentication, membership administration, ticket create/detail/list/update/assignment, comments, and activity history, with bounded list filters/search/pagination. Dashboard, the local listener/launch command, and browser journeys remain later tasks.
 
 ## Health
 
@@ -16,7 +16,7 @@ Configure an exact `APP_ORIGIN` without a trailing slash, a securely generated `
 | `GET /api/auth/me` | Session cookie | 200 with the current user, active memberships, and session-bound `csrfToken`; absent, unknown, expired, or revoked sessions return 401. |
 | `POST /api/auth/logout` | Session cookie, exact approved `Origin`, `X-CSRF-Token` from login/me | 204 after persisted revocation and browser cookie expiry; replay is rejected. |
 
-Successful login/me JSON has only `user: { id, email }`, `memberships: [{ organizationId, role, organization: { name, slug } }]`, and `csrfToken`. A user with no active memberships has an empty list and gains no organization authority. Membership context is resolved separately; ticket object enforcement still needs its product routes. All auth responses use `Cache-Control: no-store`.
+Successful login/me JSON has only `user: { id, email }`, `memberships: [{ organizationId, role, organization: { name, slug } }]`, and `csrfToken`. A user with no active memberships has an empty list and gains no organization authority. Membership context is resolved separately; ticket routes enforce object visibility through tenant-scoped queries. All auth responses use `Cache-Control: no-store`.
 
 Email is trimmed/lowercased and limited to 320 characters; password must be a string of 1–256 characters. Unknown login properties are rejected. Password verification uses the fixed salted scrypt format of the seed (`N=32768`, `r=8`, `p=1`) and performs a dummy derivation for unknown accounts. The password is never returned or logged.
 
@@ -28,11 +28,11 @@ The local login limiter allows five attempts per normalized account and twenty p
 
 ## Active organization context
 
-Tenant-owned product routes will require `X-Organization-ID` after session authentication. The middleware accepts a single canonical UUID (case-insensitive), then queries PostgreSQL for that user's current active membership. It derives the organization, user ID, and role from the stored membership on each request. Missing selector returns `400 ORGANIZATION_REQUIRED`; malformed/ambiguous selector returns `400 INVALID_ORGANIZATION`; inactive, removed, foreign, and nonexistent memberships all return the same `404 NOT_FOUND` envelope.
+Tenant-owned product routes require `X-Organization-ID` after session authentication. The middleware accepts a single canonical UUID (case-insensitive), then queries PostgreSQL for that user's current active membership. It derives the organization, user ID, and role from the stored membership on each request. Missing selector returns `400 ORGANIZATION_REQUIRED`; malformed/ambiguous selector returns `400 INVALID_ORGANIZATION`; inactive, removed, foreign, and nonexistent memberships all return the same `404 NOT_FOUND` envelope.
 
 Body/query role or organization fields never grant membership or replace the selector. Endpoint-specific body schemas must still reject forbidden properties. Users with memberships in multiple organizations can choose each valid selector with that organization's own current role. Removing membership or changing role takes effect on the next request with the same session.
 
-`createActiveMembership` is used by the membership and ticket product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Ticket mutation and dashboard routes, and full ticket/customer isolation acceptance, remain pending.
+`createActiveMembership` is used by the membership and ticket product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Dashboard routes and complete ticket/customer isolation acceptance remain pending.
 
 ## Membership administration
 
@@ -86,7 +86,15 @@ The response contains the ticket's id, organizationId, ticketNumber, requesterUs
 | `page` | Integer 1–1000, default 1 | One-based page number. |
 | `pageSize` | Integer 1–100, default 25 | Maximum results on this page. |
 
-Unknown, repeated, or out-of-range query parameters return 422. The response is `{ items, total, page, pageSize }`; items are ordered by `createdAt ASC, id ASC` and contain only `id`, `organizationId`, `ticketId`, `actorUserId`, `type`, `previousValue`, `newValue`, `reason`, and `createdAt`. Ticket visibility, event count, and event page are read in one repeatable-read transaction; event queries include both the authorized organization and ticket IDs. The bounded offset API reaches at most 100,000 events for a ticket. `npm run test:api -- tests/activity/atomicity.test.ts` covers chronology, tenant and customer ownership, query validation, absence of mutation routes, and a PostgreSQL fault-injection rollback for ticket update plus event insert. Comments remain a separate endpoint planned in TK-19.
+Unknown, repeated, or out-of-range query parameters return 422. The response is `{ items, total, page, pageSize }`; items are ordered by `createdAt ASC, id ASC` and contain only `id`, `organizationId`, `ticketId`, `actorUserId`, `type`, `previousValue`, `newValue`, `reason`, and `createdAt`. Ticket visibility, event count, and event page are read in one repeatable-read transaction; event queries include both the authorized organization and ticket IDs. The bounded offset API reaches at most 100,000 events for a ticket. `npm run test:api -- tests/activity/atomicity.test.ts` covers chronology, tenant and customer ownership, query validation, absence of mutation routes, and a PostgreSQL fault-injection rollback for ticket update plus event insert.
+
+## Ticket comments and conversation
+
+`GET /api/tickets/{ticketId}/comments` and `POST /api/tickets/{ticketId}/comments` require an authenticated session and valid active `X-Organization-ID`. ADMIN/AGENT can read and comment on tickets in the selected organization. CUSTOMER can read and comment only on their own tickets. Inaccessible or absent tickets return the same generic 404. Conversation history remains readable for CLOSED tickets; attempting to add a comment to a visible CLOSED ticket returns 409 `TICKET_CLOSED`.
+
+The GET endpoint accepts only `page` (1–1000, default 1) and `pageSize` (1–100, default 25); unknown, repeated, or out-of-range query fields return 422. It returns `{ items, total, page, pageSize }`, with comments ordered by `createdAt ASC, id ASC`. Each item contains only `id`, `organizationId`, `ticketId`, `authorUserId`, `body`, and `createdAt`.
+
+POST accepts only `{ "body": "..." }`; the body is trimmed and must contain 1–10,000 characters. Unknown properties and empty/oversized text return 422. The response is 201 with the created comment DTO. The service reloads current membership after taking the organization lock, checks ticket visibility and lifecycle, then inserts the comment and a `COMMENT_ADDED` event in one PostgreSQL transaction. The event stores the new comment ID, not a duplicate copy of the comment body. `npm run test:api -- tests/tickets/comments.test.ts` exercises role access, ownership, foreign-tenant denial, closed-ticket behavior, ordering, validation, and rollback on a PostgreSQL event-insert failure.
 
 ## Ticket updates
 
@@ -114,13 +122,13 @@ Allowed status transitions are `OPEN → IN_PROGRESS`, `OPEN → RESOLVED`, `IN_
 
 Unknown/repeated/nested parameters, non-integer/out-of-range page values, invalid enums/IDs, blank or oversized search, and body-controlled organization/requester fields are not accepted; invalid query fields return 422. Query matching and the result count use one repeatable-read snapshot. Results use deterministic `createdAt DESC, id DESC` ordering before applying the bounded page offset. Result items omit descriptions and credentials; `{ items, total, page, pageSize }` counts only rows visible through the same SQL scope. Because `page` is capped at 1,000 and `pageSize` at 100, this offset API can retrieve at most the first 100,000 matching rows; `total` can exceed that limit. Cursor pagination is the scale path if an organization grows beyond that range. Search is a case-insensitive literal substring (including literal `%` and `_` characters), not full text/ranking.
 
-`npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation. Update and comment routes are not implemented yet.
+`npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation.
 
 ## Central authorization policies
 
 `api/src/lib/policy.ts` consumes the server-derived membership context. Membership administration requires ADMIN; dashboard and staff ticket management require ADMIN or AGENT. Ticket visibility always requires the active organization, and CUSTOMER additionally requires its own requester ID. Inaccessible/missing tickets return the same 404 before action-specific restrictions disclose state. Customers may edit their own title/description only while OPEN; staff may edit visible ticket content. New comments require a visible non-closed ticket, with 409 `TICKET_CLOSED` on an otherwise visible closed ticket. A closed ticket's conversation/history remains readable within the same visibility policy, as clarified in ADR 0003.
 
-`ticketScope` combines mandatory organization/customer ownership constraints with additional criteria using AND, so criteria cannot overwrite the boundary. It rejects incomplete contexts and unknown roles. Future services must use scoped queries or a locked transactional authorization path; checking a fetched object and then issuing an unconditional write is insufficient. These policy functions currently have unit/Prisma-query-contract coverage; real product-route and transactional authorization integration tests remain future tasks. The functions do not implement status transitions, assignee eligibility, last-admin protection, or product endpoints by themselves.
+`ticketScope` combines mandatory organization/customer ownership constraints with additional criteria using AND, so criteria cannot overwrite the boundary. It rejects incomplete contexts and unknown roles. Services must use scoped queries or a locked transactional authorization path; checking a fetched object and then issuing an unconditional write is insufficient. Ticket, comment, membership, and activity product-route behavior has scoped PostgreSQL/HTTP integration coverage, but the full tenant-escape acceptance suite and browser journeys remain pending. These policy functions do not implement status transitions, assignee eligibility, last-admin protection, or product endpoints by themselves.
 
 ## Requests and errors
 
@@ -141,6 +149,7 @@ Every request receives a new server-generated UUID in the `X-Request-ID` respons
 | 400 | `MALFORMED_JSON` | JSON could not be parsed. |
 | 404 | `NOT_FOUND` | Unknown route or unavailable resource; the response does not repeat the path or record identifier. |
 | 409 | `TICKET_NUMBER_LIMIT` | The organization's positive ticket number reached the PostgreSQL integer ceiling. |
+| 409 | `TICKET_CLOSED` | A visible closed ticket does not accept new comments. |
 | 409 | `INVALID_STATUS_TRANSITION` | The current ticket status cannot transition to the requested status. |
 | 409 | `TICKET_VERSION_LIMIT` | The ticket's version reached the PostgreSQL integer ceiling. |
 | 413 | `PAYLOAD_TOO_LARGE` | JSON exceeds the 32 KiB request body limit. |
