@@ -28,6 +28,8 @@ export type UpdateTicketInput = {
   reopenReason?: string;
 };
 
+export type AssignmentInput = { assigneeUserId: string | null };
+
 export type TicketListQuery = {
   status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
@@ -66,6 +68,7 @@ const staffTicketUpdate = z.object({
   reopenReason: z.string().trim().min(1).max(500).optional(),
 }).strict().refine((value) => Object.values(value).some((field) => field !== undefined))
   .refine((value) => value.reopenReason === undefined || value.status === 'IN_PROGRESS');
+const assignmentSchema = z.object({ assigneeUserId: z.union([uuid, z.null()]) }).strict();
 
 export function parseTicketListQuery(input: unknown): TicketListQuery {
   const result = ticketListQuery.safeParse(input);
@@ -82,6 +85,12 @@ export function parseTicketId(input: unknown): string {
 export function parseUpdateTicket(input: unknown, role: MembershipRole): UpdateTicketInput {
   const schema = role === 'CUSTOMER' ? customerTicketUpdate : staffTicketUpdate;
   const result = schema.safeParse(input);
+  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'Request body is invalid.');
+  return result.data;
+}
+
+export function parseAssignment(input: unknown): AssignmentInput {
+  const result = assignmentSchema.safeParse(input);
   if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'Request body is invalid.');
   return result.data;
 }

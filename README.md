@@ -7,7 +7,7 @@ The employer assessment PDF is the product contract in [`reference/assessment.pd
 ## Current checkpoint
 
 - C0 workspace and local database foundation are in place.
-- TK-03–TK-12 design/schema/seed/auth/tenant/policy, membership APIs, and ticket creation are closed. TK-13–TK-15 add tenant-scoped ticket listing/search/filtering/pagination and detail authorization; G3 remains incomplete until update, comments, audit, dashboard, and the complete API journey are verified.
+- TK-03–TK-12 design/schema/seed/auth/tenant/policy, membership APIs, and ticket creation are closed. TK-13–TK-17 add tenant-scoped ticket list/detail/update/assignment APIs; G3 remains incomplete until comments/history, dashboard, and the complete API journey are verified.
 - `api/src/app.ts` exposes health, authentication, membership, ticket creation, and ticket list endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is still a shell. There is no login screen or local app launch command yet.
 - A03 has passed its API role-check scope. Other complete acceptance IDs remain `NOT_RUN`; `npm run check` verifies the current unit/database tests, build, and Playwright discovery but does not execute browser journeys or complete release acceptance.
 

@@ -1,10 +1,10 @@
 import type { PrismaClient } from '../../generated/prisma/client.js';
-import { assertCanEditTicketContent, ticketScope } from '../../lib/policy.js';
+import { assertCanEditTicketContent, requireStaff, ticketScope } from '../../lib/policy.js';
 import type { ActiveMembershipContext } from '../../middleware/active-membership.js';
 import { ApiError } from '../../middleware/errors.js';
 import { parseCreateTicket } from './schemas.js';
 import type { TicketListQuery } from './schemas.js';
-import { parseUpdateTicket } from './schemas.js';
+import { parseAssignment, parseUpdateTicket } from './schemas.js';
 
 export async function createTicket(client: PrismaClient, actor: ActiveMembershipContext, payload: unknown) {
   ticketScope(actor); // Fail closed on incomplete/unrecognized service context.
@@ -149,6 +149,63 @@ export async function updateTicket(client: PrismaClient, actor: ActiveMembership
       },
     });
     await transaction.activityEvent.createMany({ data: events });
+    return updated;
+  }, { maxWait: 5000, timeout: 10000 });
+}
+
+export async function assignTicket(client: PrismaClient, actor: ActiveMembershipContext, id: string, payload: unknown) {
+  return client.$transaction(async (transaction) => {
+    const organizations = await transaction.$queryRaw<{ id: string }[]>`
+      SELECT "id" FROM "Organization" WHERE "id" = ${actor.organizationId}::uuid FOR UPDATE
+    `;
+    if (organizations.length !== 1) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
+    const membership = await transaction.membership.findFirst({
+      where: { organizationId: actor.organizationId, userId: actor.userId, isActive: true },
+      select: { organizationId: true, userId: true, role: true },
+    });
+    if (!membership) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
+    const currentActor = { ...actor, organizationId: membership.organizationId, userId: membership.userId, role: membership.role };
+    requireStaff(currentActor);
+    const input = parseAssignment(payload);
+    const ticket = await transaction.ticket.findFirst({
+      where: ticketScope(currentActor, { id }),
+      select: {
+        id: true, organizationId: true, ticketNumber: true, requesterUserId: true,
+        assigneeUserId: true, title: true, description: true, status: true, priority: true,
+        dueAt: true, version: true, createdAt: true, updatedAt: true,
+      },
+    });
+    if (!ticket) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
+    if (input.assigneeUserId !== null) {
+      const eligible = await transaction.membership.findFirst({
+        where: { organizationId: membership.organizationId, userId: input.assigneeUserId, isActive: true, role: 'AGENT' },
+        select: { userId: true },
+      });
+      if (!eligible) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
+    }
+    if (input.assigneeUserId === ticket.assigneeUserId) return ticket;
+    if (ticket.version >= 2147483647) throw new ApiError(409, 'TICKET_VERSION_LIMIT', 'Ticket version limit reached.');
+    const updated = await transaction.ticket.update({
+      where: { organizationId_id: { organizationId: ticket.organizationId, id: ticket.id } },
+      data: {
+        assigneeOrganizationId: input.assigneeUserId === null ? null : membership.organizationId,
+        assigneeUserId: input.assigneeUserId,
+        version: { increment: 1 },
+      },
+      select: {
+        id: true, organizationId: true, ticketNumber: true, requesterUserId: true,
+        assigneeUserId: true, title: true, description: true, status: true, priority: true,
+        dueAt: true, version: true, createdAt: true, updatedAt: true,
+      },
+    });
+    await transaction.activityEvent.create({
+      data: {
+        organizationId: ticket.organizationId, ticketId: ticket.id, actorUserId: currentActor.userId,
+        type: 'ASSIGNMENT_CHANGED',
+        ...(ticket.assigneeUserId === null ? {} : { previousValue: ticket.assigneeUserId }),
+        ...(input.assigneeUserId === null ? {} : { newValue: input.assigneeUserId }),
+      },
+    });
     return updated;
   }, { maxWait: 5000, timeout: 10000 });
 }

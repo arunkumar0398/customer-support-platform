@@ -1,6 +1,6 @@
 # API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, membership administration, ticket create/detail/list/update, with list filters/search/pagination. Comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health, authentication, membership administration, ticket create/detail/list/update/assignment, with list filters/search/pagination. Comments/history, dashboard, the local listener/launch command, and browser journeys remain later tasks.
 
 ## Health
 
@@ -82,6 +82,10 @@ The response contains the ticket's id, organizationId, ticketNumber, requesterUs
 `PATCH /api/tickets/{ticketId}` requires an authenticated session, exact approved `Origin`, session-bound `X-CSRF-Token`, and current active organization. ADMIN/AGENT may submit a strict object with one or more of `title`, `description`, `status`, and `priority`. CUSTOMER may submit only `title` and/or `description`, and only for their own OPEN ticket. Body fields including organization, requester, assignee, due date, version, and ticket number are server-controlled and rejected. Empty/no-op updates do not create events or increment the ticket version.
 
 Allowed status transitions are `OPEN → IN_PROGRESS`, `OPEN → RESOLVED`, `IN_PROGRESS → RESOLVED`, `RESOLVED → IN_PROGRESS`, and `RESOLVED → CLOSED`; CLOSED is final. `RESOLVED → IN_PROGRESS` requires a trimmed `reopenReason` (1–500 characters), recorded on its status event. Invalid transitions return 409 `INVALID_STATUS_TRANSITION`; missing/invalid reasons return 422 `VALIDATION_ERROR`. Each changed field creates an activity event in the same PostgreSQL transaction as the ticket update; the version increments once per meaningful PATCH. Optimistic expected-version conflicts are TK-20 work. `npm run test:api -- tests/tickets/update.test.ts` covers roles, field allowlists, transition rules, reopen reason, events, versioning, and scoped negative requests.
+
+## Ticket assignment
+
+`PATCH /api/tickets/{ticketId}/assignment` requires an authenticated ADMIN/AGENT membership, exact approved `Origin`, session-bound `X-CSRF-Token`, and current active organization. Its strict JSON body is `{ "assigneeUserId": "<uuid>" }` for assignment or `{ "assigneeUserId": null }` to unassign. The target must be an active AGENT in that same organization. Customer actors, customer/inactive/cross-org targets, and inaccessible tickets are rejected; unavailable targets and tickets use the generic 404 response. The service stores both same-organization assignee keys, increments ticket version on a change, and records `ASSIGNMENT_CHANGED` in the same transaction. Repeating the current assignment is a no-op without event/version change. `npm run test:api -- tests/tickets/assignment.test.ts` covers both staff roles, valid assignment/unassignment, customer denial, target eligibility, and cross-organization IDs.
 
 ## Ticket list, filters, and search
 
