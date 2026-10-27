@@ -19,6 +19,12 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function clearUserTicketQueries(queryClient: ReturnType<typeof useQueryClient>, userId: string) {
+  for (const family of ['tickets', 'ticket-detail', 'ticket-comments', 'ticket-activity']) {
+    queryClient.removeQueries({ queryKey: [family, userId] });
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading', identity: null, error: null });
   const queryClient = useQueryClient();
@@ -59,14 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .sort()
         .join('|');
       if (previous.user.id !== identity.user.id || accessScope(previous) !== accessScope(identity)) {
-        queryClient.removeQueries({ queryKey: ['tickets', previous.user.id] });
+        clearUserTicketQueries(queryClient, previous.user.id);
         setState({ status: 'authenticated', identity, error: null });
       } else if (previous.csrfToken !== identity.csrfToken) {
         setState({ status: 'authenticated', identity, error: null });
       }
     } catch (error) {
       if (generation !== authGeneration.current) return;
-      queryClient.removeQueries({ queryKey: ['tickets', state.identity.user.id] });
+      clearUserTicketQueries(queryClient, state.identity.user.id);
       if (error instanceof ApiError && error.status === 401) {
         setState({ status: 'anonymous', identity: null, error: null });
       } else {
@@ -106,8 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (state.status !== 'authenticated') return;
     const generation = ++authGeneration.current;
     await signOut(state.identity.csrfToken);
-    if (generation === authGeneration.current) setState({ status: 'anonymous', identity: null, error: null });
-  }, [state]);
+    if (generation === authGeneration.current) {
+      clearUserTicketQueries(queryClient, state.identity.user.id);
+      setState({ status: 'anonymous', identity: null, error: null });
+    }
+  }, [queryClient, state]);
 
   const value = useMemo(() => ({ state, login, logout, refresh }), [state, login, logout, refresh]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

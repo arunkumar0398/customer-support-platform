@@ -45,6 +45,10 @@ export function TicketDetailPage({
   const queryClient = useQueryClient();
   const membership = identity.memberships[0];
   const isStaff = membership?.role === 'ADMIN' || membership?.role === 'AGENT';
+  const membershipScope = identity.memberships
+    .map((item) => `${item.organizationId}:${item.role}`)
+    .sort()
+    .join('|');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TicketListItem['status']>('OPEN');
@@ -58,19 +62,19 @@ export function TicketDetailPage({
   const [sendingComment, setSendingComment] = useState(false);
 
   const ticketQuery = useQuery({
-    queryKey: ['ticket-detail', identity.user.id, organizationId, ticketId],
+    queryKey: ['ticket-detail', identity.user.id, membershipScope, organizationId, ticketId],
     queryFn: () => getTicketDetail(organizationId!, ticketId),
     enabled: Boolean(organizationId),
     retry: false,
   });
   const commentsQuery = useQuery({
-    queryKey: ['ticket-comments', identity.user.id, organizationId, ticketId],
+    queryKey: ['ticket-comments', identity.user.id, membershipScope, organizationId, ticketId],
     queryFn: () => getTicketComments(organizationId!, ticketId),
     enabled: Boolean(organizationId && ticketQuery.data),
     retry: false,
   });
   const activityQuery = useQuery({
-    queryKey: ['ticket-activity', identity.user.id, organizationId, ticketId],
+    queryKey: ['ticket-activity', identity.user.id, membershipScope, organizationId, ticketId],
     queryFn: () => getTicketActivity(organizationId!, ticketId),
     enabled: Boolean(organizationId && ticketQuery.data),
     retry: false,
@@ -87,9 +91,9 @@ export function TicketDetailPage({
 
   async function refreshAfterMutation() {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['ticket-detail', identity.user.id, organizationId, ticketId] }),
-      queryClient.invalidateQueries({ queryKey: ['ticket-comments', identity.user.id, organizationId, ticketId] }),
-      queryClient.invalidateQueries({ queryKey: ['ticket-activity', identity.user.id, organizationId, ticketId] }),
+      queryClient.invalidateQueries({ queryKey: ['ticket-detail', identity.user.id, membershipScope, organizationId, ticketId] }),
+      queryClient.invalidateQueries({ queryKey: ['ticket-comments', identity.user.id, membershipScope, organizationId, ticketId] }),
+      queryClient.invalidateQueries({ queryKey: ['ticket-activity', identity.user.id, membershipScope, organizationId, ticketId] }),
       queryClient.invalidateQueries({ queryKey: ['tickets', identity.user.id, organizationId] }),
     ]);
   }

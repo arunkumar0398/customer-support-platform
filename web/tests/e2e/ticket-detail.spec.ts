@@ -62,6 +62,18 @@ test.beforeAll(async () => {
       type: 'TICKET_CREATED', newValue: { title: 'Detail fixture 1', status: 'OPEN' },
     },
   });
+  await db.comment.create({
+    data: {
+      organizationId, ticketId: ticketIds[2], authorUserId: customerIds[1],
+      body: 'Private comment on a different customer ticket.',
+    },
+  });
+  await db.activityEvent.createMany({
+    data: [
+      { organizationId, ticketId: ticketIds[2], actorUserId: customerIds[1], type: 'TICKET_CREATED', newValue: { title: 'Detail fixture 3', status: 'OPEN' } },
+      { organizationId, ticketId: ticketIds[2], actorUserId: customerIds[1], type: 'COMMENT_ADDED', newValue: { body: 'private history marker' } },
+    ],
+  });
 });
 
 test.afterAll(async () => {
@@ -104,6 +116,27 @@ test('customer opens an owned ticket, reads history, and adds a chronological co
   await expect(page.getByText('I can reproduce this on my account.')).toBeVisible();
   await expect(page.getByText('Comment added')).toBeVisible();
   await expect.poll(() => db.comment.count({ where: { organizationId, ticketId: ticketIds[0] } })).toBe(1);
+
+  const result = await page.evaluate(async ({ organizationId, ticketId, assigneeUserId }) => {
+    const identityResponse = await fetch('/api/auth/me');
+    const identity = await identityResponse.json() as { csrfToken: string };
+    const response = await fetch(`/api/tickets/${ticketId}/assignment`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': identity.csrfToken,
+        'X-Organization-ID': organizationId,
+        'If-Match': '"1"',
+      },
+      body: JSON.stringify({ assigneeUserId }),
+    });
+    return { status: response.status, body: await response.json() };
+  }, { organizationId, ticketId: ticketIds[1], assigneeUserId: agentIds[1] });
+
+  expect(result.status).toBe(403);
+  expect(result.body.error.code).toBe('FORBIDDEN');
+  expect(await db.ticket.findUnique({ where: { id: ticketIds[1] }, select: { assigneeUserId: true, version: true } }))
+    .toMatchObject({ assigneeUserId: null, version: 1 });
 });
 
 test('staff can edit, transition, assign, and inspect ticket history', async ({ page }) => {
@@ -128,30 +161,6 @@ test('staff can edit, transition, assign, and inspect ticket history', async ({ 
   expect(ticket).toMatchObject({ title: 'Updated detail fixture', status: 'IN_PROGRESS', priority: 'HIGH', assigneeUserId: agentIds[1] });
 });
 
-test('customer assignment request is denied by the API from the authenticated browser session', async ({ page }) => {
-  await signIn(page, customerIds[0]);
-  const result = await page.evaluate(async ({ organizationId, ticketId, assigneeUserId }) => {
-    const identityResponse = await fetch('/api/auth/me');
-    const identity = await identityResponse.json() as { csrfToken: string };
-    const response = await fetch(`/api/tickets/${ticketId}/assignment`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': identity.csrfToken,
-        'X-Organization-ID': organizationId,
-        'If-Match': '"1"',
-      },
-      body: JSON.stringify({ assigneeUserId }),
-    });
-    return { status: response.status, body: await response.json() };
-  }, { organizationId, ticketId: ticketIds[1], assigneeUserId: agentIds[1] });
-
-  expect(result.status).toBe(403);
-  expect(result.body.error.code).toBe('FORBIDDEN');
-  expect(await db.ticket.findUnique({ where: { id: ticketIds[1] }, select: { assigneeUserId: true, version: true } }))
-    .toMatchObject({ assigneeUserId: null, version: 1 });
-});
-
 test('invalid staff transition is shown as a server denial without hiding the current state', async ({ page }) => {
   await signIn(page, agentIds[0]);
   await page.goto(`/tickets/${ticketIds[1]}`);
@@ -168,6 +177,26 @@ test('invalid staff transition is shown as a server denial without hiding the cu
   await expect(page.getByLabel('Ticket status')).toHaveValue('OPEN');
   await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[1] }, select: { status: true, version: true } }))
     .toMatchObject({ status: 'OPEN', version: 1 });
+});
+
+test('role downgrade clears cached ticket detail, comments, and activity', async ({ page }) => {
+  await signIn(page, agentIds[1]);
+  await page.goto(`/tickets/${ticketIds[2]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 3' })).toBeVisible();
+  await expect(page.getByText('Private comment on a different customer ticket.')).toBeVisible();
+  await expect(page.getByText('Ticket created')).toBeVisible();
+
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: agentIds[1] } },
+    data: { role: 'CUSTOMER' },
+  });
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+  await expect(page.getByRole('heading', { name: 'Ticket unavailable' })).toBeVisible();
+  await expect(page.getByText('Private comment on a different customer ticket.')).toHaveCount(0);
+  await expect(page.getByText('Synthetic detail description 3')).toHaveCount(0);
+  await expect(page.getByText('Ticket created')).toHaveCount(0);
+  await expect(page.getByText(`${emailByUserId.get(agentIds[1])} · customer`)).toBeVisible();
 });
 
 test('stale edit shows a refresh path and allows retry with the current version', async ({ page }) => {
