@@ -74,6 +74,7 @@
 
 - [x] Map existing state evidence before adding cases; current Playwright coverage already includes queue/dashboard loading and failure, queue/dashboard empty, create validation, forbidden access, and stale conflict. No duplicate state test was added.
 - [x] Exercise the mobile workspace navigation by moving between Dashboard and Ticket queue at 375×812.
-- [ ] Run `npm run check`, the guarded full browser suite, `py -3 scripts/check-doc-contract.py`, and `git diff --check`.
-- [ ] Commit the verified source changes, obtain independent exact-SHA browser and static review via the parent-folder reviewer kit, then record evidence and the next checkpoint.
-- [ ] Keep A22/A23/A37/G4 as NOT_RUN unless the entire acceptance contract is met; record scoped contributions otherwise.
+- [x] Initial parent-kit browser review found the mobile roster's horizontal scrolling was undiscoverable. Added a failing visibility assertion, then a mobile-only instruction outside the scroller; the focused membership test passed and the refreshed screenshot shows the cue without page overflow.
+- [x] Run `npm run check` (API369/369, web3/3, lint/typecheck/build and discovery), the guarded full browser suite (23/23), `py -3 scripts/check-doc-contract.py`, and `git diff --check`.
+- [x] Commit source as `f834843094d8b23887e567e8314032e1deea0436`; obtain exact-SHA browser (23/23) and static reviews through the parent-folder kit; record reports and checkpoint evidence.
+- [x] Keep A22/A23/A37/G4 as NOT_RUN because route-by-route responsive/state coverage and the broader accessibility pass are incomplete; record scoped contributions in the acceptance ledger.

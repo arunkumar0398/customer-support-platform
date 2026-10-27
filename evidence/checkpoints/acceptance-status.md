@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, and health/readiness have supporting local tests. A03–A04, A09–A10, A12–A15, A17–A21 and A29 have passed their documented scoped criteria; other complete checks remain NOT_RUN. Browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `6260fd55853917eb966f2468dfb28b2de3480df2` (TK-28 admin membership controls and role-draft refresh correction; independently replayed by parent-folder reviewer kit). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, health/readiness, and scoped frontend journeys have supporting local evidence. A03–A04, A08–A10, A12–A15, A17–A21 and A29 have passed their documented scoped criteria; other complete checks remain NOT_RUN. Full acceptance of responsive/state/accessibility behavior, Docker application startup, CI, and deployment remains pending.
+**Latest implementation source SHA:** `f834843094d8b23887e567e8314032e1deea0436` (TK-29 responsive/state evidence and mobile membership roster scroll cue; independently replayed by parent-folder browser and static reviewers). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -27,8 +27,8 @@
 | A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage; 100,000-row offset limit documented. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |
 | A20 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Exact organization status and priority totals match seeded rows. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
 | A21 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Tests match overdue boundary/exclusions and assigned OPEN/IN_PROGRESS workload formulas for active agents, including zero-workload agent. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
-| A22 | NOT_RUN | [TK-23](TK-23.md)–[TK-28](TK-28.md): auth, queue, create, detail, dashboard, and membership journeys have scoped coverage; membership viewport and complete narrow/desktop product flows remain pending. |
-| A23 | NOT_RUN | [TK-23](TK-23.md)–[TK-28](TK-28.md): sign-in/queue states, create validation, detail denial/conflict, dashboard loading/empty/forbidden/failure-retry, and membership denial/last-admin states are covered; full product state coverage remains pending. |
+| A22 | NOT_RUN | [TK-29](TK-29.md): 12 narrow/desktop screenshots and 375px layout checks cover the main views; exact-SHA reviewers note interactive narrow coverage is concentrated in sign-in, queue, and memberships, so complete route-by-route narrow/desktop usability remains unverified. |
+| A23 | NOT_RUN | [TK-29](TK-29.md): loading, empty, validation, denial, conflict, and failure examples pass across several flows; not every state is verified on every route. |
 | A24 | NOT_RUN | [TK-02](TK-02.md): Compose database only; full fresh Docker app startup pending. |
 | A25 | NOT_RUN | [TK-06](TK-06.md): deterministic seed and hashes verified; complete setup/sign-in journey pending. |
 | A26 | NOT_RUN | [TK-03](TK-03.md), [TK-07](TK-07.md), [TK-08](TK-08.md): partial documentation/API contracts; full submission audit pending. |
@@ -42,7 +42,7 @@
 | A34 | NOT_RUN | [TK-01](TK-01.md), [TK-08](TK-08.md): local checks only; actual browser and CI gate pending. |
 | A35 | NOT_RUN | |
 | A36 | NOT_RUN | |
-| A37 | NOT_RUN | |
+| A37 | NOT_RUN | [TK-29](TK-29.md): native labels, accessible names, and a keyboard Tab/focus-treatment path have scoped evidence; a dedicated broader keyboard/focus accessibility pass remains pending. |
 | A38 | NOT_RUN | [TK-04](TK-04.md), [TK-05](TK-05.md): schema/index foundation; representative EXPLAIN pending. |
 | A39 | NOT_RUN | [TK-06](TK-06.md): notifications scoped as future work; final limitation/demo review pending. |
 | A40 | NOT_RUN | [TK-06](TK-06.md): optional feature scope recorded; final backlog/limitations audit pending. |

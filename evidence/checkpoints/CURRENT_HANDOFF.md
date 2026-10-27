@@ -82,8 +82,14 @@ TK-28 admin membership controls and the follow-up role-draft correction are comm
 
 A08 is PASS for the documented API + browser membership administration criterion, using TK-11 real PostgreSQL/API evidence and TK-28 browser flows plus exact-SHA independent replay. A03 retains its scoped API PASS. A22/A23 and G4 remain NOT_RUN overall; full viewport and product-state coverage is incomplete.
 
+## TK-29 completion and current state
+
+TK-29 responsive, keyboard, and state coverage is recorded at source `f834843094d8b23887e567e8314032e1deea0436`. The parent-folder browser reviewer replayed the full E2E suite at that exact SHA (23/23), inspected all 12 screenshots, and closed the mobile membership scroll-discoverability P2 after the visible mobile cue was added. The static reviewer found no P0–P3 issues. Root `npm run check` passed (API369/369, web3/3, lint/typecheck/discovery/build); root guarded full E2E passed 23/23. See [TK-29.md](TK-29.md) and [review](../reviews/tk29-2026-10-27-f834843.md).
+
+A22, A23, A37, and G4 remain `NOT_RUN`: this checkpoint adds screenshot, responsive, state, keyboard focus, and accessible-name evidence, but does not establish every route/viewport/state combination or a dedicated accessibility audit. The reviewer replay regenerated 10 tracked screenshot artifacts, now retained with the checkpoint evidence.
+
 ## Next action
 
-Proceed with TK-29: responsive, keyboard, and user-state coverage across the delivered frontend. Inspect the exact TK-29 requirements in the task ledger, acceptance matrix, and assessment PDF; map existing tests and evidence-backed gaps before adding focused regressions. Cover narrow/desktop journeys and loading, empty, validation, forbidden, conflict, and failure states where the relevant screens still lack evidence. Use the sibling `100xdevs_assessment_review_agent_skill` for independent exact-SHA review. Keep A22/A23 and G4 NOT_RUN until their complete criteria pass.
+Proceed with TK-30: security attack suite. Read its task ledger, acceptance, security contract, and current route/auth defenses; map existing real PostgreSQL/API attack coverage before adding test-first adversarial cases for role boundaries, mass assignment, CSRF/origin, and rate limiting. Record scoped outcomes and use the sibling `100xdevs_assessment_review_agent_skill` for fresh exact-SHA review. Keep A31–A33 and G5 `NOT_RUN` until their complete criteria pass.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
