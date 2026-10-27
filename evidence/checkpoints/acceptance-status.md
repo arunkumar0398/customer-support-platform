@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle and dashboard metrics have supporting local tests. A03, A04, A09, A13, A18, A19, A20, A21 and A29 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `93485ad0c10d4247a2ed6d7c1852bcc282488da7` (TK-21 dashboard metrics). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, and health/readiness have supporting local tests. A03, A04, A09, A13, A18, A19, A20, A21 and A29 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Browser journeys, complete Docker application startup, CI, and deployment are pending.
+**Latest implementation source SHA:** `49f0a2c5c94cf24efe980d6862cda34e8d99985c` (TK-22 health/readiness and API contract). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |

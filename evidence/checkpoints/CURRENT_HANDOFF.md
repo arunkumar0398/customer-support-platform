@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; TK-21 implementation is committed and reviewed; checkpoint evidence is recorded in `TK-21.md`.
+Last source SHA: `49f0a2c5c94cf24efe980d6862cda34e8d99985c`; TK-22 implementation is committed and reviewed; checkpoint evidence is recorded in `TK-22.md`.
 
 ## Current task state
 
@@ -25,6 +25,7 @@ Last source SHA: `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; TK-21 implementatio
 - TK-19 source `1e458fbd74ba79c78a789a1bbc83865aaf64f352` adds tenant/customer-scoped comment read/create, bounded chronological pages, closed-ticket write denial, current-membership reload, and atomic COMMENT_ADDED events. Focused suite and independent replay 11/11; full check API353/353, web1/1/lint/type/build; docs contract and diff checks pass. Both reviewer-kit passes report no findings. A05/A06/A14/A15/A16 remain NOT_RUN for their complete scopes; G3 remains NOT_RUN. See TK-19/review.
 - TK-20 source `84106fa3fff66ad304b1e56d7a690d4e20445a28` adds strong version ETags and required `If-Match` compare-and-swap checks to content and assignment PATCH. Same-version concurrent requests allow one success and one 409; stale no-op requests also return 409; only the winning write creates an event. Focused concurrency suite and independent replay 7/7, assignment suite 13/13, full check API360/360 and web1/1 with lint/typecheck/build passing; docs contract and diff checks pass. Parent reviewer closed prior P1; static reviewer closed P2 test gap; no remaining findings. A29 PASS for its stated API race-test scope; A15 remains NOT_RUN for full audit acceptance. G3 remains NOT_RUN pending dashboard and remaining backend criteria. See TK-20/review.
 - TK-21 source `93485ad0c10d4247a2ed6d7c1852bcc282488da7` adds staff-only `/api/dashboard` with organization-scoped status/priority totals, one UTC evaluation timestamp, overdue formula and active-agent workload rows; query params are rejected. Exact dashboard suite and independent replay 6/6; full check API366/366, web1/1, lint/typecheck/build; docs contract and diff checks pass. Static review's assumptions-role wording P2 was corrected; no remaining findings. A20/A21 PASS for API/DB scopes. A07 remains NOT_RUN pending combined list/dashboard acceptance; G3 remains NOT_RUN pending health/docs and other backend criteria. See TK-21/review.
+- TK-22 source `49f0a2c5c94cf24efe980d6862cda34e8d99985c` adds database-independent `/api/health`, real-query `/api/health/ready` with sanitized 503, accurate API route documentation, and contract-content checks. Health suite 3/3, documentation regression suite 6/6, full check API369/369 and web1/1 plus lint/typecheck/build passed. Parent reviewer independently replayed health 3/3 against guarded `support_test`; static review found no issue. Playwright was listed only. A22/A23 and G3 remain NOT_RUN; see `TK-22.md` and its review report.
 - A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
@@ -35,7 +36,7 @@ Last source SHA: `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; TK-21 implementatio
 | G0 | PASS for the existing local baseline: pinned install evidence in TK-01, unchanged lockfile, current lint/type/build passed. |
 | G1 | PASS for local schema/test DB criteria: TK-02, TK-04–TK-06 plus current real-DB suite and migration/identity proof in TK-08. Application release is still incomplete. |
 | G2 | NOT_RUN as a whole; HTTP auth/current membership and unit policies verified; actual product-route isolation still pending. |
-| G3 | NOT_RUN; ticket/comment/event/dashboard APIs exist and have scoped evidence; health/docs acceptance and remaining backend criteria are pending. |
+| G3 | NOT_RUN; ticket/comment/event/dashboard/health APIs exist and have scoped evidence; combined acceptance and remaining backend criteria are pending. |
 | G4 | NOT_RUN; React remains a shell and browser journeys are absent. |
 | G5 | NOT_RUN; full Docker app launch, clean checkout, CI and security release suite pending. |
 | G6 | NOT_RUN; deployment has not been authorized. |
@@ -49,6 +50,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-Begin TK-22 health/readiness and API contract documentation: ensure liveness is database-independent, readiness reports database availability without secrets, and route/error docs match observed API behavior. Keep A05/A06/A07/A14/A15/A16 NOT_RUN until their full acceptance scopes are proved. A03/A04/A09/A13/A18/A19/A20/A21/A29 remain PASS for documented API scopes; G3 and release gates remain NOT_RUN. Continue using the sibling `100xdevs_assessment_review_agent_skill` for the next independent checkpoint review. TK-12's one-off timeout remains unexplained and successful replays are documented.
+Begin TK-23: build the API client, React auth providers/router, accessible sign-in, invalid-credential feedback, session reload, and logged-out redirect. Write browser tests first and run them only against the guarded local app/database. The existing browser setup has one shell test, and this environment may not have Playwright browser binaries; report actual availability rather than claiming the browser checks. Keep A01/A22/A23 and G4 NOT_RUN until real E2E evidence exists. Keep A05/A06/A07/A14/A15/A16 NOT_RUN until their full acceptance scopes are proved. A03/A04/A09/A13/A18/A19/A20/A21/A29 remain PASS only for documented API scopes; G3 and release gates remain NOT_RUN. Continue using the sibling `100xdevs_assessment_review_agent_skill` for the next independent checkpoint review. TK-12's one-off timeout remains unexplained and successful replays are documented.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
