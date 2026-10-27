@@ -17,7 +17,7 @@ const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl,
 const organizationId = randomUUID();
 const agentId = randomUUID();
 const customerId = randomUUID();
-const ticketIds = [randomUUID(), randomUUID()];
+const ticketIds = [randomUUID(), randomUUID(), randomUUID()];
 const agentEmail = `dashboard-ui-${agentId}@example.test`;
 const customerEmail = `dashboard-ui-${customerId}@example.test`;
 const password = 'synthetic-dashboard-ui-fixture-password';
@@ -68,10 +68,18 @@ test.beforeAll(async () => {
       title: 'Dashboard active fixture', description: 'In-progress synthetic dashboard ticket.',
       status: 'IN_PROGRESS', priority: 'MEDIUM', dueAt: new Date(Date.now() - 86_400_000),
     },
+    {
+      id: ticketIds[2], organizationId, ticketNumber: 3, requesterUserId: customerId,
+      title: 'Dashboard unassigned fixture', description: 'Unassigned synthetic dashboard ticket.',
+      status: 'OPEN', priority: 'LOW', dueAt: new Date(Date.now() + 86_400_000),
+    },
   ] });
   await db.activityEvent.createMany({ data: ticketIds.map((ticketId, index) => ({
     organizationId, ticketId, actorUserId: customerId, type: 'TICKET_CREATED',
-    newValue: { title: index === 0 ? 'Dashboard open fixture' : 'Dashboard active fixture', status: index === 0 ? 'OPEN' : 'IN_PROGRESS' },
+    newValue: {
+      title: ['Dashboard open fixture', 'Dashboard active fixture', 'Dashboard unassigned fixture'][index],
+      status: index === 1 ? 'IN_PROGRESS' : 'OPEN',
+    },
   })) });
 });
 
@@ -101,8 +109,8 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
   await page.unroute('**/api/dashboard');
   const totals = page.getByRole('region', { name: 'Support totals' });
-  await expect(totals.getByText('2', { exact: true })).toBeVisible();
-  await expect(page.getByTestId('status-count-OPEN').getByText('1', { exact: true })).toBeVisible();
+  await expect(totals.getByText('3', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('status-count-OPEN').getByText('2', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-IN_PROGRESS').getByText('1', { exact: true })).toBeVisible();
   await expect(page.getByText('1 overdue ticket')).toBeVisible();
   await expect(page.getByText('Overdue means a due date before this snapshot while the ticket is still open or in progress.')).toBeVisible();
@@ -110,6 +118,7 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByText(/Metrics as of .* UTC/)).toBeVisible();
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 open');
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 in progress');
+  await expect(page.getByRole('region', { name: 'Agent workload' })).toContainText('2 assigned active tickets');
 
   await page.getByRole('link', { name: 'Support Desk home' }).click();
   await page.getByRole('link', { name: /Dashboard open fixture/ }).click();
@@ -126,7 +135,7 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByRole('alert')).toContainText('Dashboard temporarily unavailable.');
   await page.unroute('**/api/dashboard');
   await page.getByRole('button', { name: 'Try again' }).click();
-  await expect(page.getByTestId('status-count-OPEN').getByText('0', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('status-count-OPEN').getByText('1', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-IN_PROGRESS').getByText('1', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-RESOLVED').getByText('1', { exact: true })).toBeVisible();
   await expect(page.getByText('1 overdue ticket')).toBeVisible();

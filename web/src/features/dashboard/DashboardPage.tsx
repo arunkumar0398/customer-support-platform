@@ -73,7 +73,7 @@ export function DashboardPage({ identity, organizationId }: { identity: Identity
 }
 
 function DashboardOverview({ data, refreshing, refresh }: { data: DashboardMetrics; refreshing: boolean; refresh: () => void }) {
-  const activeStatuses = data.statusCounts.OPEN + data.statusCounts.IN_PROGRESS;
+  const assignedActiveTickets = data.agentWorkloads.reduce((total, agent) => total + agent.activeCount, 0);
 
   return (
     <main className="dashboard-page" aria-labelledby="dashboard-title">
@@ -150,7 +150,7 @@ function DashboardOverview({ data, refreshing, refresh }: { data: DashboardMetri
         <section className="dashboard-panel dashboard-workload-panel" aria-labelledby="dashboard-workload-title">
           <div className="dashboard-panel-heading">
             <div><p className="eyebrow">TEAM CAPACITY</p><h2 id="dashboard-workload-title">Agent workload</h2></div>
-            <span className="dashboard-panel-total">{activeStatuses} active {activeStatuses === 1 ? 'ticket' : 'tickets'}</span>
+            <span className="dashboard-panel-total">{assignedActiveTickets} assigned active {assignedActiveTickets === 1 ? 'ticket' : 'tickets'}</span>
           </div>
           <p id="dashboard-workload-definition" className="dashboard-definition dashboard-workload-definition">
             Active workload includes assigned open and in-progress tickets only.
