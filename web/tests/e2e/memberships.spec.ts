@@ -105,6 +105,17 @@ test('admin can add an existing account and update its organization role and act
   await addedRow.getByRole('button', { name: `Reactivate ${emails.otherOrgUser}` }).click();
   await expect(addedRow).toContainText('Active');
 
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+    data: { role: 'CUSTOMER' },
+  });
+  await addedRow.getByRole('button', { name: `Deactivate ${emails.otherOrgUser}` }).click();
+  const agentRow = page.getByRole('row', { name: new RegExp(emails.agent) });
+  await expect(agentRow).toContainText('Customer');
+  await expect(agentRow.getByLabel(`Role for ${emails.agent}`)).toHaveValue('CUSTOMER');
+  await expect(agentRow.getByRole('button', { name: `Save ${emails.agent}` })).toBeDisabled();
+  await addedRow.getByRole('button', { name: `Reactivate ${emails.otherOrgUser}` }).click();
+
   const adminRow = page.getByRole('row', { name: new RegExp(emails.admin) });
   await adminRow.getByLabel(`Role for ${emails.admin}`).selectOption('AGENT');
   await adminRow.getByRole('button', { name: `Save ${emails.admin}` }).click();

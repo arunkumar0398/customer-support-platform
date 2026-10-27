@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { addMembership, ApiError, getMemberships, updateMembership } from '../../lib/api';
@@ -27,6 +27,12 @@ function MembershipRow({
   toggleActive: (member: OrganizationMember) => void;
 }) {
   const [role, setRole] = useState(member.role);
+  const lastSavedRole = useRef(member.role);
+
+  useEffect(() => {
+    setRole((draftRole) => draftRole === lastSavedRole.current ? member.role : draftRole);
+    lastSavedRole.current = member.role;
+  }, [member.role]);
 
   return (
     <tr>
