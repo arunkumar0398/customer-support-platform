@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, and ticket creation/list/search/pagination/detail/update/assignment have supporting local tests. A03, A04, A09, A13, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Comments/history, dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `ad8416f27be8ad095f4b514c340aed78c13e4230` (TK-18 activity history). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `1e458fbd74ba79c78a789a1bbc83865aaf64f352` (TK-19 comments). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -10,8 +10,8 @@
 | A02 | NOT_RUN | [TK-08](TK-08.md): expiry/revocation/replay denied on auth endpoints; protected product endpoints pending. |
 | A03 | PASS | Source `3a94144e93875d75b24a2f9a286e6444e836c1ba`; `npm run test:api -- tests/memberships/memberships.test.ts` exit 0, 45/45 real PostgreSQL/HTTP cases; independently replayed. [TK-11](TK-11.md), [review](../reviews/tk11-2026-10-26-3a94144.md). |
 | A04 | PASS | Source `22598cad56d45d1cb7a2c73a44517e9756aea34f`; `npm run test:api -- tests/tickets/detail.test.ts` exit 0, 7/7 real PostgreSQL/API; independently replayed. Foreign-org ticket GET denied with generic 404. [TK-15](TK-15.md), [review](../reviews/tk15-2026-10-27-22598ca.md). |
-| A05 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/action policies; actual tenant mutation routes pending. |
-| A06 | NOT_RUN | [TK-15](TK-15.md): same-org other-customer detail read denied; mutation denial is not implemented/verified. Full acceptance remains incomplete. |
+| A05 | NOT_RUN | [TK-17](TK-17.md), [TK-19](TK-19.md): assignment and comment cross-org mutations have scoped denials; full cross-route mutation acceptance remains incomplete. |
+| A06 | NOT_RUN | [TK-15](TK-15.md), [TK-19](TK-19.md): same-org other-customer read/write comment denials have scoped evidence; complete ticket/comment mutation acceptance remains incomplete. |
 | A07 | NOT_RUN | [TK-13](TK-13.md): list counts are tenant-scoped; dashboard counts remain pending. |
 | A08 | NOT_RUN | [TK-11](TK-11.md): scoped roster/add/role/deactivate/reactivate API with concurrent last-admin protection; browser administration pending. |
 | A09 | PASS | Source `3f7598c80a490fffce6b7be40c32714b1cf98ec6`; `npm run test:api -- tests/tickets/assignment.test.ts` exit 0, 13/13 real PostgreSQL/API, independently replayed. API eligibility denials and actual composite-FK cross-org rejection. [TK-17](TK-17.md), [review](../reviews/tk17-2026-10-27-3f7598c.md). |
@@ -19,9 +19,9 @@
 | A11 | NOT_RUN | [TK-12](TK-12.md): create allowlist/range API cases; other operation/browser field journeys pending. |
 | A12 | NOT_RUN | [TK-10](TK-10.md): staff policy unit cases; actual update/assignment journey pending. |
 | A13 | PASS | Source `d5cce1829cc0fd5790869a05302a0f2c0911e5bd`; `npm run test:api -- tests/tickets/update.test.ts` exit 0, 30/30 real PostgreSQL/API, independently replayed. Legal/illegal transitions and no-side-effect rejection verified. [TK-16](TK-16.md), [review](../reviews/tk16-2026-10-27-d5cce18.md). |
-| A14 | NOT_RUN | [TK-10](TK-10.md): comment permission foundation; persistence/order/API/browser checks pending. |
-| A15 | NOT_RUN | [TK-12](TK-12.md), [TK-16](TK-16.md), [TK-17](TK-17.md), [TK-18](TK-18.md): create/update/assignment event behavior and history read have scoped evidence; complete mutation/comment acceptance remains pending. |
-| A16 | NOT_RUN | [TK-12](TK-12.md), [TK-18](TK-18.md): create and ticket-update event-failure rollback tested against PostgreSQL; complete required mutation-path coverage remains pending. |
+| A14 | NOT_RUN | [TK-19](TK-19.md): comment persistence, chronological API history, and visibility have PostgreSQL/API evidence; browser conversation flow remains pending. |
+| A15 | NOT_RUN | [TK-12](TK-12.md), [TK-16](TK-16.md), [TK-17](TK-17.md), [TK-18](TK-18.md), [TK-19](TK-19.md): create/update/assignment/comment events and history reads have scoped evidence; full acceptance review remains pending. |
+| A16 | NOT_RUN | [TK-12](TK-12.md), [TK-18](TK-18.md), [TK-19](TK-19.md): create/update/comment event-failure rollback tested against PostgreSQL; assignment rollback/full acceptance review remains pending. |
 | A17 | NOT_RUN | [TK-13](TK-13.md): API filter coverage; browser filtering journey pending. |
 | A18 | PASS | Source `00120c7fa2ad2ffff7dd7af687b6cfb145098899`; `npm run test:api -- tests/tickets/list.test.ts` exit0, 36/36 real PostgreSQL/API cases; independently replayed after literal wildcard correction. [TK-13](TK-13.md), [review](../reviews/tk13-2026-10-26-15a4095.md). |
 | A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage; 100,000-row offset limit documented. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |
