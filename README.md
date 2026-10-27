@@ -1,15 +1,15 @@
 # Multi-Tenant Customer Support Platform
 
-**Status (2026-10-26):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, tenant-scoped membership administration, role-scoped ticket creation with transactional history, and tenant-scoped ticket listing/search/filtering. Ticket editing and user-facing workflows are still pending. No hosted deployment is configured or claimed.
+**Status (2026-10-27):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, a Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, tenant-scoped membership administration, ticket creation/list/detail/update/assignment/comment/history APIs, and tenant-scoped dashboard metrics. The React sign-in and authenticated shell are implemented and browser-tested against the real API and disposable PostgreSQL fixture. User-facing ticket workflows and full Docker app launch remain pending. No hosted deployment is configured or claimed.
 
 The employer assessment PDF is the product contract in [`reference/assessment.pdf`](reference/assessment.pdf). The approved design, task plan, acceptance matrix, security contract, and assumptions are under `docs/` and `harness/`.
 
 ## Current checkpoint
 
 - C0 workspace and local database foundation are in place.
-- TK-03–TK-12 design/schema/seed/auth/tenant/policy, membership APIs, and ticket creation are closed. TK-13–TK-17 add tenant-scoped ticket list/detail/update/assignment APIs; G3 remains incomplete until comments/history, dashboard, and the complete API journey are verified.
-- `api/src/app.ts` exposes health, authentication, membership, ticket creation, and ticket list endpoints documented in [`docs/api.md`](docs/api.md); `web/src/App.tsx` is still a shell. There is no login screen or local app launch command yet.
-- A03 has passed its API role-check scope. Other complete acceptance IDs remain `NOT_RUN`; `npm run check` verifies the current unit/database tests, build, and Playwright discovery but does not execute browser journeys or complete release acceptance.
+- TK-03–TK-22 design/schema/seed/auth/tenant/policy, membership, ticket, dashboard, health, and readiness APIs are closed with scoped evidence. TK-23 adds the sign-in flow and authenticated React shell; ticket list and other customer/staff product screens remain pending.
+- `api/src/app.ts` exposes health/readiness, authentication, membership, ticket, activity, comment, and dashboard endpoints documented in [`docs/api.md`](docs/api.md). The browser uses a same-origin `/api` proxy in development; authentication stays in the server session cookie.
+- A03, A04, A09, A13, A18–A21, and A29 have passed only their recorded API/database scopes. A22/A23 and other complete acceptance IDs remain `NOT_RUN` until their full journeys are tested. `npm run check` runs unit/database tests, lint, typecheck, test discovery, and builds; `npm run test:e2e` executes the browser suite.
 
 ## Local database setup
 
@@ -28,7 +28,7 @@ The seed command verifies a loopback `support_dev` connection before writing. It
 
 ## Demo accounts
 
-The eight Alpha/Beta synthetic accounts cover admin, agent, and customer roles. Their shared demo password and fixtures are documented in [`docs/demo-accounts.md`](docs/demo-accounts.md). The authentication HTTP tests use isolated fixtures in the verified disposable database. The seeded accounts' hashes are verified separately; browser sign-in and the complete local launch path come later. A25 remains `NOT_RUN` until that setup/sign-in journey is implemented and verified.
+The eight Alpha/Beta synthetic accounts cover admin, agent, and customer roles. Their shared demo password and fixtures are documented in [`docs/demo-accounts.md`](docs/demo-accounts.md). Browser authentication tests create and clean up an isolated fixture in the verified disposable `support_test` database; they do not use the seeded demo accounts or developer database. A25 remains `NOT_RUN` until the documented local setup and seeded-account sign-in journey is verified.
 
 ## Checks
 
@@ -37,7 +37,7 @@ npm run check
 py -3 scripts/check-doc-contract.py
 ```
 
-`npm run check` runs lint, typecheck, API and web tests, Playwright test listing, and API/web builds. The Playwright listing is discovery only; browser journeys must be run explicitly when implemented.
+`npm run check` runs lint, typecheck, API and web tests, Playwright test listing, and API/web builds. The listing is discovery only; run `npm run test:e2e` to execute browser journeys against the guarded local test database.
 
 ## Deployment
 
