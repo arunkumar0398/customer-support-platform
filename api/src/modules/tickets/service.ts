@@ -50,6 +50,19 @@ export async function createTicket(client: PrismaClient, actor: ActiveMembership
   }, { maxWait: 5000, timeout: 10000 });
 }
 
+export async function getTicketDetail(client: PrismaClient, actor: ActiveMembershipContext, id: string) {
+  const ticket = await client.ticket.findFirst({
+    where: ticketScope(actor, { id }),
+    select: {
+      id: true, organizationId: true, ticketNumber: true, requesterUserId: true,
+      assigneeUserId: true, title: true, description: true, status: true, priority: true,
+      dueAt: true, version: true, createdAt: true, updatedAt: true,
+    },
+  });
+  if (!ticket) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
+  return ticket;
+}
+
 export async function listTickets(client: PrismaClient, actor: ActiveMembershipContext, query: TicketListQuery) {
   // Prisma maps contains to SQL LIKE/ILIKE; escape pattern metacharacters so
   // the public contract remains a literal substring search.

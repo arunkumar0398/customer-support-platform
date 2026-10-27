@@ -1,6 +1,6 @@
 # API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, membership administration, ticket creation, and ticket listing with filters/search. Ticket detail/update, comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health, authentication, membership administration, ticket creation, ticket detail, and ticket listing with filters/search/pagination. Ticket update, comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
 
 ## Health
 
@@ -32,7 +32,7 @@ Tenant-owned product routes will require `X-Organization-ID` after session authe
 
 Body/query role or organization fields never grant membership or replace the selector. Endpoint-specific body schemas must still reject forbidden properties. Users with memberships in multiple organizations can choose each valid selector with that organization's own current role. Removing membership or changing role takes effect on the next request with the same session.
 
-`createActiveMembership` is used by the membership and ticket product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Ticket detail/mutation and dashboard routes, and full ticket/customer isolation acceptance, remain pending.
+`createActiveMembership` is used by the membership and ticket product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Ticket mutation and dashboard routes, and full ticket/customer isolation acceptance, remain pending.
 
 ## Membership administration
 
@@ -70,6 +70,12 @@ Title is trimmed and must contain 1–200 characters. Description is trimmed and
 The ticket row and one `TICKET_CREATED` event are nested in the same Prisma transaction. Event data captures title, OPEN status, priority, and requester ID; it does not store credentials. An event insert failure rolls back the ticket and does not consume its number. Repeating the same POST creates another ticket; there is no idempotency key and no duplicate-request suppression in this checkpoint.
 
 The response contains only id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. `npm run test:api -- tests/tickets/create.test.ts` runs the real HTTP/PostgreSQL creation contract, including role-specific fields, cross-org negatives, concurrent numbering, and forced event rollback.
+
+## Ticket detail
+
+`GET /api/tickets/{ticketId}` requires an authenticated session and valid active `X-Organization-ID`. ADMIN/AGENT memberships can read tickets in their selected organization. A CUSTOMER can read only tickets whose requester is that active customer. Missing, foreign-organization, and same-organization other-customer tickets return the same 404 `NOT_FOUND` envelope; the identifier and inaccessible record details are not returned. The path must be a UUID or the request returns 422 `VALIDATION_ERROR`.
+
+The response contains the ticket's id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. It contains no credentials or activity/comments; those have separate planned endpoints. Authenticated responses set `Cache-Control: no-store`. `npm run test:api -- tests/tickets/detail.test.ts` covers both roles, customer ownership, foreign and absent records, both organizations, and malformed identifiers.
 
 ## Ticket list, filters, and search
 

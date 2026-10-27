@@ -53,6 +53,12 @@ export function parseTicketListQuery(input: unknown): TicketListQuery {
   return result.data;
 }
 
+export function parseTicketId(input: unknown): string {
+  const result = uuid.safeParse(input);
+  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'Request path is invalid.');
+  return result.data;
+}
+
 export function parseCreateTicket(input: unknown, role: MembershipRole): CreateTicketInput {
   if (!['ADMIN', 'AGENT', 'CUSTOMER'].includes(role)) {
     throw new ApiError(403, 'FORBIDDEN', 'This action is not permitted.');
