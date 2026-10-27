@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `1e458fbd74ba79c78a789a1bbc83865aaf64f352`; TK-19 implementation is committed and reviewed; checkpoint evidence is being recorded.
+Last source SHA: `84106fa3fff66ad304b1e56d7a690d4e20445a28`; TK-20 implementation is committed and reviewed; checkpoint evidence is recorded in `TK-20.md`.
 
 ## Current task state
 
@@ -23,6 +23,7 @@ Last source SHA: `1e458fbd74ba79c78a789a1bbc83865aaf64f352`; TK-19 implementatio
 - TK-17 source `3f7598c80a490fffce6b7be40c32714b1cf98ec6` adds staff assignment/unassignment to active same-org AGENTs, with current actor reload, DB tenant scope, composite FK verification, transaction event, and version increment. Focused suite 13/13; full check API331/331, web1/1/lint/type/build; independent replay 13/13; static review no findings. A09 PASS; A12 remains NOT_RUN for browser/full scope. See TK-17/review.
 - TK-18 source `ad8416f27be8ad095f4b514c340aed78c13e4230` adds read-only tenant/customer-scoped activity history with bounded deterministic paging and real PostgreSQL update/event rollback fault injection. Focused suite and independent replay 11/11; full check API342/342, web1/1/lint/type/build; docs contract and diff checks pass. Parent reviewer kit used; stale docs P2 corrected, no remaining code findings. A15/A16 remain NOT_RUN for complete scope; G3 remains NOT_RUN. See TK-18/review.
 - TK-19 source `1e458fbd74ba79c78a789a1bbc83865aaf64f352` adds tenant/customer-scoped comment read/create, bounded chronological pages, closed-ticket write denial, current-membership reload, and atomic COMMENT_ADDED events. Focused suite and independent replay 11/11; full check API353/353, web1/1/lint/type/build; docs contract and diff checks pass. Both reviewer-kit passes report no findings. A05/A06/A14/A15/A16 remain NOT_RUN for their complete scopes; G3 remains NOT_RUN. See TK-19/review.
+- TK-20 source `84106fa3fff66ad304b1e56d7a690d4e20445a28` adds strong version ETags and required `If-Match` compare-and-swap checks to content and assignment PATCH. Same-version concurrent requests allow one success and one 409; stale no-op requests also return 409; only the winning write creates an event. Focused concurrency suite and independent replay 7/7, assignment suite 13/13, full check API360/360 and web1/1 with lint/typecheck/build passing; docs contract and diff checks pass. Parent reviewer closed prior P1; static reviewer closed P2 test gap; no remaining findings. A29 PASS for its stated API race-test scope; A15 remains NOT_RUN for full audit acceptance. G3 remains NOT_RUN pending dashboard and remaining backend criteria. See TK-20/review.
 - A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
@@ -33,7 +34,7 @@ Last source SHA: `1e458fbd74ba79c78a789a1bbc83865aaf64f352`; TK-19 implementatio
 | G0 | PASS for the existing local baseline: pinned install evidence in TK-01, unchanged lockfile, current lint/type/build passed. |
 | G1 | PASS for local schema/test DB criteria: TK-02, TK-04–TK-06 plus current real-DB suite and migration/identity proof in TK-08. Application release is still incomplete. |
 | G2 | NOT_RUN as a whole; HTTP auth/current membership and unit policies verified; actual product-route isolation still pending. |
-| G3 | NOT_RUN; ticket/comment/event/dashboard endpoints absent. |
+| G3 | NOT_RUN; ticket/comment/event APIs exist and have scoped evidence; dashboard, health/docs acceptance, and remaining backend criteria are pending. |
 | G4 | NOT_RUN; React remains a shell and browser journeys are absent. |
 | G5 | NOT_RUN; full Docker app launch, clean checkout, CI and security release suite pending. |
 | G6 | NOT_RUN; deployment has not been authorized. |
@@ -47,6 +48,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-Begin TK-20 stale-version concurrency with a real concurrent PostgreSQL/API test: two PATCH requests based on one ticket version, exactly one success, one 409, one version increment, and one winning event. Keep A05/A06/A14/A15/A16 NOT_RUN until full acceptance scope is proved. A03/A04/A09/A13/A18/A19 remain PASS for documented API scopes; G3 and release gates remain NOT_RUN. Continue using the sibling `100xdevs_assessment_review_agent_skill` for the next independent checkpoint review. TK-12's one-off timeout remains unexplained and successful replays are documented.
+Begin TK-21 dashboard metrics with exact PostgreSQL fixtures for status/priority counts, overdue cutoff, and workload formulas. Keep A05/A06/A14/A15/A16 NOT_RUN until their full acceptance scope is proved. A03/A04/A09/A13/A18/A19/A29 remain PASS for documented API scopes; G3 and release gates remain NOT_RUN. Continue using the sibling `100xdevs_assessment_review_agent_skill` for the next independent checkpoint review. TK-12's one-off timeout remains unexplained and successful replays are documented.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.

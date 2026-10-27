@@ -225,10 +225,10 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 
 **Depends on:** TK-16, TK-18. **Gate:** G3. **Acceptance:** A29.
 
-**Files:** Update ticket service; create `api/tests/tickets/concurrency.test.ts`.
+**Files:** Update `api/src/modules/tickets/{routes,schemas,service}.ts`, ticket update/assignment API tests, `api/tests/tickets/concurrency.test.ts`, and `docs/api.md`.
 
-**RED:** Two concurrent updates with the same version both succeed or both write audit history.  
-**GREEN:** Exactly one compare-and-swap succeeds; loser gets 409, version increments once, and only the winning change has an event.
+**RED:** Two concurrent content updates or assignments using the same strong `If-Match` version both succeed or both write audit history; stale/no-op mutations are accepted.
+**GREEN:** Detail returns the strong version ETag; every ticket content or assignment PATCH requires a valid ETag and compares it inside the organization-locked transaction after authorization. Exactly one same-version concurrent write succeeds; the loser gets 409, stale no-op requests also get 409, version increments once, one winning event is recorded, and successful writes return the current ETag. Missing preconditions return 428 and malformed values return 422.
 
 ### TK-21 — Dashboard metrics
 

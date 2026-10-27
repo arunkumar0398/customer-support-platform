@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, and ticket creation/list/search/pagination/detail/update/assignment have supporting local tests. A03, A04, A09, A13, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Comments/history, dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `1e458fbd74ba79c78a789a1bbc83865aaf64f352` (TK-19 comments). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `84106fa3fff66ad304b1e56d7a690d4e20445a28` (TK-20 optimistic concurrency). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -34,7 +34,7 @@
 | A26 | NOT_RUN | [TK-03](TK-03.md), [TK-07](TK-07.md), [TK-08](TK-08.md): partial documentation/API contracts; full submission audit pending. |
 | A27 | NOT_RUN | [TK-03](TK-03.md): architecture/operational design documents; final delivery audit pending. |
 | A28 | NOT_RUN | [TK-03](TK-03.md): assumptions and operational design; engineering-defense rehearsal pending. |
-| A29 | NOT_RUN | [TK-05](TK-05.md): version field present; concurrent stale PATCH proof pending. |
+| A29 | PASS | Source `84106fa3fff66ad304b1e56d7a690d4e20445a28`; `npm run test:api -- tests/tickets/concurrency.test.ts` exit 0, 7/7 guarded PostgreSQL/API tests, independently replayed. Concurrent content and assignment writes using one ETag produce one success, one 409, one version increment, and one matching event. Stale no-op requests also reject with 409. See [TK-20](TK-20.md) and [review](../reviews/tk20-2026-10-27-84106fa.md). |
 | A30 | NOT_RUN | |
 | A31 | NOT_RUN | [TK-07](TK-07.md), [TK-09](TK-09.md): allowlist/context foundations; product-route attack suite pending. |
 | A32 | NOT_RUN | [TK-08](TK-08.md): cookie flags and HTTP origin/CSRF tests; browser/proxy proof pending. |
