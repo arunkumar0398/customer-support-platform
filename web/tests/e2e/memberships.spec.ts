@@ -87,8 +87,10 @@ test('admin can add an existing account and update its organization role and act
   const adminRow = page.getByRole('row', { name: new RegExp(emails.admin) });
   await expect(adminRow.getByRole('button', { name: `Save ${emails.admin}` })).toHaveText('Save');
   await expect(adminRow.getByRole('button', { name: `Deactivate ${emails.admin}` })).toHaveText('Deactivate');
+  await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   await captureCheckpointScreenshot(page, '11-memberships-desktop.png');
   await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   const membersTable = await page.locator('.members-table').evaluate((element) => ({
     tableWidth: element.scrollWidth,

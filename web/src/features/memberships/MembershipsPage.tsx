@@ -168,6 +168,7 @@ export function MembershipsPage({
 
       <section className="members-panel" aria-labelledby="members-roster-title">
         <div className="members-panel-heading"><div><p className="eyebrow">ACCESS ROSTER</p><h2 id="members-roster-title">Members and roles</h2></div></div>
+        <p className="members-scroll-hint">Scroll horizontally to see roles, access, and actions <span aria-hidden="true">→</span></p>
         <div className="members-table-wrap">
           <table className="members-table">
             <thead><tr><th scope="col">Account</th><th scope="col">Current role</th><th scope="col">Access</th><th scope="col">Change role</th><th scope="col">Actions</th></tr></thead>

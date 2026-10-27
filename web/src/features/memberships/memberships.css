@@ -30,6 +30,7 @@
 .members-panel { overflow: hidden; padding: 0; }
 .members-panel-heading { padding: 22px 24px 18px; border-bottom: 1px solid var(--line); }
 .members-table-wrap { overflow-x: auto; }
+.members-scroll-hint { display: none; }
 .members-table { width: 100%; min-width: 850px; border-collapse: collapse; text-align: left; }
 .members-table th,
 .members-table td { padding: 13px 16px; border-bottom: 1px solid #e7ece6; color: #56675f; font-size: 11px; }
@@ -63,6 +64,7 @@
   .membership-state { width: min(100% - 32px, 1120px); padding-top: 36px; }
   .members-add-form { grid-template-columns: 1fr 1fr; }
   .members-add-form .button { justify-self: start; }
+  .members-scroll-hint { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; padding: 10px 16px; background: #f5f7f2; color: #52645b; font-size: 11px; }
 }
 
 @media (max-width: 520px) {
