@@ -95,6 +95,7 @@ export function TicketDetailPage({
       queryClient.invalidateQueries({ queryKey: ['ticket-comments', identity.user.id, membershipScope, organizationId, ticketId] }),
       queryClient.invalidateQueries({ queryKey: ['ticket-activity', identity.user.id, membershipScope, organizationId, ticketId] }),
       queryClient.invalidateQueries({ queryKey: ['tickets', identity.user.id, organizationId] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard', identity.user.id] }),
     ]);
   }
 

@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './providers';
+import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { TicketCreatePage } from '../features/tickets/create/TicketCreatePage';
 import { TicketDetailPage } from '../features/tickets/detail/TicketDetailPage';
 import { TicketListPage } from '../features/tickets/list/TicketListPage';
@@ -136,6 +137,12 @@ function WorkspacePage() {
     <div className="workspace-layout">
       <header className="workspace-header">
         <Link className="workspace-brand" to="/" aria-label="Support Desk home"><span className="brand-mark" aria-hidden="true">S</span>Support Desk</Link>
+        <nav className="workspace-nav" aria-label="Workspace navigation">
+          <Link className={location.pathname === '/' ? 'workspace-nav-active' : undefined} to="/">Ticket queue</Link>
+          {['ADMIN', 'AGENT'].includes(membership?.role ?? '') && (
+            <Link className={location.pathname === '/dashboard' ? 'workspace-nav-active' : undefined} to="/dashboard">Dashboard</Link>
+          )}
+        </nav>
         <div className="account-block">
           <div className="account-copy">
             <span>{membership?.organization.name ?? 'No active organization'}</span>
@@ -150,6 +157,9 @@ function WorkspacePage() {
           <TicketListPage identity={state.identity} organizationId={membership?.organizationId} />
         </main>
       )}
+      {location.pathname === '/dashboard' && (
+        <DashboardPage identity={state.identity} organizationId={membership?.organizationId} />
+      )}
       {location.pathname === '/tickets/new' && (
         <TicketCreatePage identity={state.identity} organizationId={membership?.organizationId} />
       )}
@@ -161,7 +171,7 @@ function WorkspacePage() {
           createdTicket={createdTicket}
         />
       )}
-      {location.pathname !== '/' && location.pathname !== '/tickets/new' && !createdTicketPath && (
+      {location.pathname !== '/' && location.pathname !== '/dashboard' && location.pathname !== '/tickets/new' && !createdTicketPath && (
         <Navigate to="/" replace />
       )}
     </div>

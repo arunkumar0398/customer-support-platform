@@ -48,6 +48,7 @@ export function TicketCreatePage({ identity, organizationId }: { identity: Ident
         ...(isStaff ? { requesterUserId: requesterUserId.trim(), priority } : {}),
       });
       await queryClient.invalidateQueries({ queryKey: ['tickets', identity.user.id, organizationId] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard', identity.user.id] });
       navigate(`/tickets/${ticket.id}`, { state: { createdTicket: ticket } });
     } catch (cause) {
       const message = cause instanceof ApiError

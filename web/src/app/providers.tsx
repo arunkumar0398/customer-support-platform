@@ -19,8 +19,8 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function clearUserTicketQueries(queryClient: ReturnType<typeof useQueryClient>, userId: string) {
-  for (const family of ['tickets', 'ticket-detail', 'ticket-comments', 'ticket-activity']) {
+function clearUserScopedQueries(queryClient: ReturnType<typeof useQueryClient>, userId: string) {
+  for (const family of ['tickets', 'ticket-detail', 'ticket-comments', 'ticket-activity', 'dashboard']) {
     queryClient.removeQueries({ queryKey: [family, userId] });
   }
 }
@@ -65,14 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .sort()
         .join('|');
       if (previous.user.id !== identity.user.id || accessScope(previous) !== accessScope(identity)) {
-        clearUserTicketQueries(queryClient, previous.user.id);
+        clearUserScopedQueries(queryClient, previous.user.id);
         setState({ status: 'authenticated', identity, error: null });
       } else if (previous.csrfToken !== identity.csrfToken) {
         setState({ status: 'authenticated', identity, error: null });
       }
     } catch (error) {
       if (generation !== authGeneration.current) return;
-      clearUserTicketQueries(queryClient, state.identity.user.id);
+      clearUserScopedQueries(queryClient, state.identity.user.id);
       if (error instanceof ApiError && error.status === 401) {
         setState({ status: 'anonymous', identity: null, error: null });
       } else {
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const generation = ++authGeneration.current;
     await signOut(state.identity.csrfToken);
     if (generation === authGeneration.current) {
-      clearUserTicketQueries(queryClient, state.identity.user.id);
+      clearUserScopedQueries(queryClient, state.identity.user.id);
       setState({ status: 'anonymous', identity: null, error: null });
     }
   }, [queryClient, state]);

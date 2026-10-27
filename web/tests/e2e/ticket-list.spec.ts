@@ -148,8 +148,8 @@ test('customers only see their own tickets in the queue', async ({ page }) => {
   await expect(page.getByLabel('Assignee ID')).toBeHidden();
 });
 
-test('staff can filter tickets by customer membership id', async ({ page }) => {
-  await signIn(page, agentEmails[1]);
+test('staff can filter tickets by customer membership and specific assignee', async ({ page }) => {
+  await signIn(page, agentEmails[6]);
 
   await page.getByLabel('Customer ID').fill(customerId);
   await page.getByRole('button', { name: 'Search' }).click();
@@ -157,11 +157,7 @@ test('staff can filter tickets by customer membership id', async ({ page }) => {
   await expect(page.getByText('25 tickets')).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 25/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 26/ })).toHaveCount(0);
-});
-
-test('staff can filter tickets by a specific assignee', async ({ page }) => {
-  await signIn(page, agentEmails[6]);
-
+  await page.getByLabel('Customer ID').fill('');
   await page.getByLabel('Assignee ID').fill(agentIds[1]);
   await page.getByRole('button', { name: 'Search' }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get('assigneeId')).toBe(agentIds[1]);

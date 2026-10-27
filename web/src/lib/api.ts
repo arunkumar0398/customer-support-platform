@@ -67,6 +67,21 @@ export interface TicketPage<T> {
   pageSize: number;
 }
 
+export interface DashboardMetrics {
+  evaluationTime: string;
+  totalTickets: number;
+  statusCounts: Record<TicketListItem['status'], number>;
+  priorityCounts: Record<TicketListItem['priority'], number>;
+  overdueCount: number;
+  agentWorkloads: Array<{
+    userId: string;
+    email: string;
+    openCount: number;
+    inProgressCount: number;
+    activeCount: number;
+  }>;
+}
+
 export interface UpdateTicketPayload {
   title?: string;
   description?: string;
@@ -222,6 +237,12 @@ export function createTicketComment(
 
 export function getTicketActivity(organizationId: string, ticketId: string): Promise<TicketPage<TicketActivityEvent>> {
   return request<TicketPage<TicketActivityEvent>>(`/api/tickets/${encodeURIComponent(ticketId)}/activity`, {
+    headers: { 'X-Organization-ID': organizationId },
+  });
+}
+
+export function getDashboard(organizationId: string): Promise<DashboardMetrics> {
+  return request<DashboardMetrics>('/api/dashboard', {
     headers: { 'X-Organization-ID': organizationId },
   });
 }
