@@ -82,6 +82,17 @@ export function parseTicketId(input: unknown): string {
   return result.data;
 }
 
+const expectedVersion = z.string()
+  .regex(/^"[1-9]\d*"$/)
+  .transform((value) => Number(value.slice(1, -1)))
+  .pipe(z.number().int().min(1).max(2147483647));
+
+export function parseExpectedVersion(input: unknown): number {
+  const result = expectedVersion.safeParse(input);
+  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'If-Match version is invalid.');
+  return result.data;
+}
+
 export function parseUpdateTicket(input: unknown, role: MembershipRole): UpdateTicketInput {
   const schema = role === 'CUSTOMER' ? customerTicketUpdate : staffTicketUpdate;
   const result = schema.safeParse(input);

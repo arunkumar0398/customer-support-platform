@@ -7,7 +7,8 @@ import type { AuthOptions } from '../auth/session.js';
 import { createActivityRouter } from '../activity/routes.js';
 import { createCommentsRouter } from '../comments/routes.js';
 import { assignTicket, createTicket, getTicketDetail, listTickets, updateTicket } from './service.js';
-import { parseTicketId, parseTicketListQuery } from './schemas.js';
+import { parseExpectedVersion, parseTicketId, parseTicketListQuery } from './schemas.js';
+import { ApiError } from '../../middleware/errors.js';
 
 export function createTicketRouter(options: AuthOptions): Router {
   const router = Router();
@@ -20,15 +21,29 @@ export function createTicketRouter(options: AuthOptions): Router {
   });
   router.get('/:ticketId', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
-    response.json(await getTicketDetail((options.getClient ?? getPrismaClient)(), actor, parseTicketId(request.params.ticketId)));
+    const ticket = await getTicketDetail((options.getClient ?? getPrismaClient)(), actor, parseTicketId(request.params.ticketId));
+    response.setHeader('ETag', `"${ticket.version}"`);
+    response.json(ticket);
   });
   router.patch('/:ticketId', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
-    response.json(await updateTicket((options.getClient ?? getPrismaClient)(), actor, parseTicketId(request.params.ticketId), request.body));
+    const ticketId = parseTicketId(request.params.ticketId);
+    const ifMatch = request.get('If-Match');
+    if (ifMatch === undefined) throw new ApiError(428, 'PRECONDITION_REQUIRED', 'If-Match with the current ticket version is required.');
+    const expectedVersion = parseExpectedVersion(ifMatch);
+    const ticket = await updateTicket((options.getClient ?? getPrismaClient)(), actor, ticketId, request.body, expectedVersion);
+    response.setHeader('ETag', `"${ticket.version}"`);
+    response.json(ticket);
   });
   router.patch('/:ticketId/assignment', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
-    response.json(await assignTicket((options.getClient ?? getPrismaClient)(), actor, parseTicketId(request.params.ticketId), request.body));
+    const ticketId = parseTicketId(request.params.ticketId);
+    const ifMatch = request.get('If-Match');
+    if (ifMatch === undefined) throw new ApiError(428, 'PRECONDITION_REQUIRED', 'If-Match with the current ticket version is required.');
+    const expectedVersion = parseExpectedVersion(ifMatch);
+    const ticket = await assignTicket((options.getClient ?? getPrismaClient)(), actor, ticketId, request.body, expectedVersion);
+    response.setHeader('ETag', `"${ticket.version}"`);
+    response.json(ticket);
   });
   router.post('/', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;

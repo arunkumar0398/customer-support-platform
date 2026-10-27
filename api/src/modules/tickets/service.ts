@@ -71,7 +71,7 @@ const allowedStatusTransitions: Record<string, readonly string[]> = {
   CLOSED: [],
 };
 
-export async function updateTicket(client: PrismaClient, actor: ActiveMembershipContext, id: string, payload: unknown) {
+export async function updateTicket(client: PrismaClient, actor: ActiveMembershipContext, id: string, payload: unknown, expectedVersion: number) {
   return client.$transaction(async (transaction) => {
     // Serialize ticket changes with membership writes in this organization and
     // re-check the actor after acquiring the same organization lock.
@@ -96,6 +96,9 @@ export async function updateTicket(client: PrismaClient, actor: ActiveMembership
     });
     if (!ticket) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
     assertCanEditTicketContent(currentActor, ticket);
+    if (ticket.version !== expectedVersion) {
+      throw new ApiError(409, 'VERSION_CONFLICT', 'Ticket version is stale. Reload the ticket and retry.');
+    }
 
     const isReopen = ticket.status === 'RESOLVED' && input.status === 'IN_PROGRESS';
     if (input.reopenReason !== undefined && !isReopen) {
@@ -153,7 +156,7 @@ export async function updateTicket(client: PrismaClient, actor: ActiveMembership
   }, { maxWait: 5000, timeout: 10000 });
 }
 
-export async function assignTicket(client: PrismaClient, actor: ActiveMembershipContext, id: string, payload: unknown) {
+export async function assignTicket(client: PrismaClient, actor: ActiveMembershipContext, id: string, payload: unknown, expectedVersion: number) {
   return client.$transaction(async (transaction) => {
     const organizations = await transaction.$queryRaw<{ id: string }[]>`
       SELECT "id" FROM "Organization" WHERE "id" = ${actor.organizationId}::uuid FOR UPDATE
@@ -176,6 +179,9 @@ export async function assignTicket(client: PrismaClient, actor: ActiveMembership
       },
     });
     if (!ticket) throw new ApiError(404, 'NOT_FOUND', 'Resource not found.');
+    if (ticket.version !== expectedVersion) {
+      throw new ApiError(409, 'VERSION_CONFLICT', 'Ticket version is stale. Reload the ticket and retry.');
+    }
     if (input.assigneeUserId !== null) {
       const eligible = await transaction.membership.findFirst({
         where: { organizationId: membership.organizationId, userId: input.assigneeUserId, isActive: true, role: 'AGENT' },

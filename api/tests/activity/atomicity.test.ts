@@ -53,7 +53,8 @@ function activity(account: Account, ticketId: string, organizationId = alphaId) 
 function update(account: Account, ticketId: string, body: object, organizationId = alphaId) {
   const identity = identities.get(account)!;
   return request(app).patch(`/api/tickets/${ticketId}`).set('Cookie', identity.cookie)
-    .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId).send(body);
+    .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId)
+    .set('If-Match', '"1"').send(body);
 }
 
 describe('tenant-scoped immutable activity history and transaction atomicity', () => {
