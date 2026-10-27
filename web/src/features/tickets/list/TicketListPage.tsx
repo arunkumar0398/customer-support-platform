@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { ApiError, getTickets } from '../../../lib/api';
@@ -30,6 +30,8 @@ function TicketRow({ ticket }: { ticket: TicketListItem }) {
 
 export function TicketListPage({ identity, organizationId }: { identity: Identity; organizationId?: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const latestSearchParams = useRef(new URLSearchParams(searchParams));
+  const pendingSearchParams = useRef<string | null>(null);
   const [searchValue, setSearchValue] = useState(searchParams.get('search') ?? '');
   const [customerIdValue, setCustomerIdValue] = useState(searchParams.get('customerId') ?? '');
   const [assigneeIdValue, setAssigneeIdValue] = useState(searchParams.get('assigneeId') ?? '');
@@ -49,6 +51,21 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
     setCustomerIdValue(searchParams.get('customerId') ?? '');
     setAssigneeIdValue(searchParams.get('assigneeId') ?? '');
   }, [searchParams]);
+
+  useLayoutEffect(() => {
+    const renderedParams = searchParams.toString();
+    if (pendingSearchParams.current === renderedParams) pendingSearchParams.current = null;
+    if (pendingSearchParams.current === null) {
+      latestSearchParams.current = new URLSearchParams(searchParams);
+    }
+  }, [searchParams]);
+
+  function updateSearchParams(next: URLSearchParams) {
+    latestSearchParams.current = new URLSearchParams(next);
+    const nextValue = next.toString();
+    pendingSearchParams.current = nextValue === searchParams.toString() ? null : nextValue;
+    setSearchParams(next);
+  }
 
   const queryString = useMemo(() => {
     const query = new URLSearchParams();
@@ -72,16 +89,16 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
   });
 
   function updateFilter(key: 'status' | 'priority', value: string) {
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(latestSearchParams.current);
     if (value) next.set(key, value);
     else next.delete(key);
     next.delete('page');
-    setSearchParams(next);
+    updateSearchParams(next);
   }
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(latestSearchParams.current);
     const search = searchValue.trim();
     if (search) next.set('search', search);
     else next.delete('search');
@@ -94,14 +111,14 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
       else next.delete('assigneeId');
     }
     next.delete('page');
-    setSearchParams(next);
+    updateSearchParams(next);
   }
 
   function changePage(value: number) {
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(latestSearchParams.current);
     if (value <= 1) next.delete('page');
     else next.set('page', String(value));
-    setSearchParams(next);
+    updateSearchParams(next);
   }
 
   const pageCount = Math.max(1, Math.ceil((tickets.data?.total ?? 0) / PAGE_SIZE));
