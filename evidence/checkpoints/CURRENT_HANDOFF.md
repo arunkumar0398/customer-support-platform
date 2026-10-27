@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `49f0a2c5c94cf24efe980d6862cda34e8d99985c`; TK-22 implementation is committed and reviewed; checkpoint evidence is recorded in `TK-22.md`.
+Last source SHA: `c1ddb17018329bd5cbd8cc58f2db58d6551bb4d8`; TK-24 source and review are committed; checkpoint evidence is recorded in `TK-24.md`.
 
 ## Current task state
 
@@ -54,8 +54,14 @@ TK-23 auth shell source 24c48a30577cd6e46cd60dea1bccb4003d4fbf38 was independent
 
 G4 remains NOT_RUN; TK-23 delivered the auth shell but not the complete A22/A23 journeys. A01 remains NOT_RUN until API and browser evidence are explicitly mapped together. A22/A23 remain NOT_RUN pending ticket/dashboard/admin and broader state coverage. A32 production/proxy behavior remains NOT_RUN.
 
+## TK-24 completion and current state
+
+TK-24 ticket queue UI is committed at `c1ddb17018329bd5cbd8cc58f2db58d6551bb4d8`. The parent-folder reviewer-kit browser reviewer independently verified guarded `support_test` identity and replayed `ticket-list.spec.ts` at that exact SHA: 10/10 passed. Static review at the same SHA found no P0–P2 code issues. A reported stale-query bug was reproduced at intermediate SHA `e37ad48a4fc839e0a1840de827d1e6e30cad8e0c`; URL updates now compose against the latest requested state, and the exact failing sequence is green. Root also ran the focused API list suite 36/36, `npm run check` (API369/369, web3/3, lint/typecheck/build pass), and the full browser suite 15/15. Detailed evidence is in `TK-24.md` and `../reviews/tk24-2026-10-27-c1ddb17.md`.
+
+A17 is PASS for its scoped API + browser filter criterion. A18/A19 retain API-only PASS scope; the queue adds positive search and page-navigation evidence but does not re-prove cross-tenant search isolation or duplicate-free ordering. A22/A23 and G4 remain NOT_RUN because detail/create/dashboard/admin and complete product states are outstanding. The static reviewer recommended adding history navigation during a pending route update; no defect was confirmed, and the reported rapid combined update sequence is covered and green.
+
 ## Next action
 
-Proceed with TK-24: ticket list, search, filters, and pagination UI in web/src/features/tickets/list/, with browser tests first in web/tests/e2e/ticket-list.spec.ts. Cover customer own-ticket list, filter/search, empty/loading/error states, stable page navigation, and tenant-safe API behavior using only the guarded support_test database. Use the sibling 100xdevs_assessment_review_agent_skill after implementation for its independent spec/security/UI review and exact-SHA replay where safe. Keep A17–A19 and A22/A23 NOT_RUN until their full scopes are evidenced. Keep A05/A06/A07/A14/A15/A16 NOT_RUN until their full acceptance scopes are proved. G3 and G4 remain NOT_RUN. TK-12's one-off timeout remains unexplained and successful replays are documented.
+Proceed with TK-25: create the role-aware new-ticket form and real-browser tests first, including required/invalid input, successful creation, and customer requester spoof rejection. Use only the guarded disposable `support_test` database. A10/A11 and A22/A23 remain NOT_RUN until their complete scopes are proven. Preserve the exact source/evidence SHA and use the parent-folder reviewer kit for independent review before closing the checkpoint.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
