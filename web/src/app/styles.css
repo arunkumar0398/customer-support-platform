@@ -90,6 +90,10 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .auth-panel { padding-right: 36px; padding-left: 36px; }
 }
 
+@media (max-width: 650px) {
+  .auth-layout { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 620px) {
   .auth-layout { grid-template-columns: 1fr; }
   .auth-story { min-height: auto; padding: 25px 24px 24px; }

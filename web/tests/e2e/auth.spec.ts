@@ -62,6 +62,17 @@ test('redirects unauthenticated visits to the sign-in page', async ({ page }) =>
   await expect(page.getByRole('heading', { name: 'Sign in to Support Desk' })).toBeVisible();
 });
 
+test('keeps the sign-in page within narrow tablet viewport bounds', async ({ page }) => {
+  await page.setViewportSize({ width: 640, height: 900 });
+  await page.goto('/sign-in');
+
+  const story = await page.locator('.auth-story').boundingBox();
+  const panel = await page.locator('.auth-panel').boundingBox();
+  expect(story).not.toBeNull();
+  expect(panel).not.toBeNull();
+  expect(panel!.y).toBeGreaterThanOrEqual(story!.y + story!.height);
+});
+
 test('shows invalid credentials without creating an authenticated session', async ({ page }) => {
   await page.goto('/sign-in');
   await page.getByLabel('Email').fill(email);
