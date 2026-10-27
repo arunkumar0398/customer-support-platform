@@ -32,6 +32,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState(searchParams.get('search') ?? '');
   const [customerIdValue, setCustomerIdValue] = useState(searchParams.get('customerId') ?? '');
+  const [assigneeIdValue, setAssigneeIdValue] = useState(searchParams.get('assigneeId') === 'unassigned' ? '' : searchParams.get('assigneeId') ?? '');
   const status = searchParams.get('status') ?? '';
   const priority = searchParams.get('priority') ?? '';
   const assigneeId = searchParams.get('assigneeId') ?? '';
@@ -42,13 +43,14 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
   useEffect(() => {
     setSearchValue(searchParams.get('search') ?? '');
     setCustomerIdValue(searchParams.get('customerId') ?? '');
+    setAssigneeIdValue(searchParams.get('assigneeId') === 'unassigned' ? '' : searchParams.get('assigneeId') ?? '');
   }, [searchParams]);
 
   const queryString = useMemo(() => {
     const query = new URLSearchParams();
     if (status) query.set('status', status);
     if (priority) query.set('priority', priority);
-    if (assigneeId) query.set('assigneeId', assigneeId);
+    if (isStaff && assigneeId) query.set('assigneeId', assigneeId);
     const customerId = searchParams.get('customerId')?.trim();
     if (isStaff && customerId) query.set('customerId', customerId);
     const search = searchParams.get('search')?.trim();
@@ -65,7 +67,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
     retry: false,
   });
 
-  function updateFilter(key: 'status' | 'priority' | 'assigneeId', value: string) {
+  function updateFilter(key: 'status' | 'priority', value: string) {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value);
     else next.delete(key);
@@ -83,6 +85,9 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
       const customerId = customerIdValue.trim();
       if (customerId) next.set('customerId', customerId);
       else next.delete('customerId');
+      const assigneeId = assigneeIdValue.trim();
+      if (assigneeId) next.set('assigneeId', assigneeId);
+      else if (next.get('assigneeId') !== 'unassigned') next.delete('assigneeId');
     }
     next.delete('page');
     setSearchParams(next);
@@ -143,6 +148,19 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
                   />
                 </label>
               )}
+              {isStaff && (
+                <label htmlFor="assignee-filter">
+                  Assignee ID
+                  <input
+                    id="assignee-filter"
+                    type="text"
+                    maxLength={36}
+                    placeholder="Agent UUID or unassigned"
+                    value={assigneeIdValue}
+                    onChange={(event) => setAssigneeIdValue(event.target.value)}
+                  />
+                </label>
+              )}
               <button className="button button-primary" type="submit">Search</button>
             </div>
           </form>
@@ -161,15 +179,6 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
                 {priorities.map((value) => <option key={value} value={value}>{titleCase(value)}</option>)}
               </select>
             </label>
-            {isStaff && (
-              <label>
-                Assignment
-                <select value={assigneeId} onChange={(event) => updateFilter('assigneeId', event.target.value)}>
-                  <option value="">All tickets</option>
-                  <option value="unassigned">Unassigned</option>
-                </select>
-              </label>
-            )}
           </div>
         </div>
 

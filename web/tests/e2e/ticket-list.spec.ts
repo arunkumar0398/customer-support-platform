@@ -17,7 +17,7 @@ const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
-const agentIds = Array.from({ length: 6 }, () => randomUUID());
+const agentIds = Array.from({ length: 7 }, () => randomUUID());
 const customerId = randomUUID();
 const otherCustomerId = randomUUID();
 const password = 'synthetic-ticket-list-fixture-password';
@@ -70,6 +70,8 @@ test.beforeAll(async () => {
         organizationId,
         ticketNumber: index + 1,
         requesterUserId: index === 25 ? otherCustomerId : customerId,
+        assigneeOrganizationId: index === 0 ? organizationId : null,
+        assigneeUserId: index === 0 ? agentIds[1] : null,
         title: index === 6 ? 'Invoice discrepancy seven' : `Queue request ${String(index + 1).padStart(2, '0')}`,
         description: index === 6 ? 'Invoice charge needs review.' : 'Synthetic queue test record.',
         status: index === 6 ? 'IN_PROGRESS' as const : 'OPEN' as const,
@@ -120,7 +122,8 @@ test('staff search and status filters update the queue and URL', async ({ page }
   await page.getByLabel('Priority').selectOption('HIGH');
   await expect(page).toHaveURL(/priority=HIGH/);
   await expect(page.getByRole('row', { name: /Invoice discrepancy seven/ })).toBeVisible();
-  await page.getByLabel('Assignment').selectOption('unassigned');
+  await page.getByLabel('Assignee ID').fill('unassigned');
+  await page.getByRole('button', { name: 'Search' }).click();
   await expect(page).toHaveURL(/assigneeId=unassigned/);
   await expect(page.getByText('1 ticket')).toBeVisible();
 });
@@ -143,6 +146,17 @@ test('staff can filter tickets by customer membership id', async ({ page }) => {
   await expect(page.getByText('25 tickets')).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 25/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 26/ })).toHaveCount(0);
+});
+
+test('staff can filter tickets by a specific assignee', async ({ page }) => {
+  await signIn(page, agentEmails[6]);
+
+  await page.getByLabel('Assignee ID').fill(agentIds[1]);
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('assigneeId')).toBe(agentIds[1]);
+  await expect(page.getByText('1 ticket')).toBeVisible();
+  await expect(page.getByRole('row', { name: /Queue request 01/ })).toBeVisible();
+  await expect(page.getByRole('row', { name: /Queue request 02/ })).toHaveCount(0);
 });
 
 test('queue pagination keeps page state in the URL', async ({ page }) => {

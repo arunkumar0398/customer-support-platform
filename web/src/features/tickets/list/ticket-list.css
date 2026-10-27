@@ -8,7 +8,7 @@
 .queue-card { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--white); box-shadow: 0 14px 38px rgb(21 56 59 / 5%); }
 .queue-toolbar { display: grid; gap: 21px; padding: 22px 24px 20px; border-bottom: 1px solid var(--line); background: #f8faf6; }
 .ticket-search label, .queue-filters label { display: grid; gap: 7px; color: #43554f; font-size: 11px; font-weight: 700; }
-.search-field { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(210px, 0.8fr) auto; align-items: end; gap: 9px; }
+.search-field { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 9px; }
 .search-field input, .queue-filters select { min-height: 42px; border: 1px solid #cbd7cd; border-radius: 5px; background: var(--white); color: var(--ink); font-size: 12px; }
 .search-field input { width: 100%; min-width: 0; padding: 0 12px; }
 .search-field input:focus, .queue-filters select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
@@ -59,6 +59,11 @@
   .queue-filters label, .queue-filters select { min-width: 132px; }
   .queue-pagination { align-items: flex-start; flex-direction: column; padding: 14px 16px; }
   .queue-pagination > div { width: 100%; justify-content: space-between; }
+}
+
+@media (max-width: 850px) {
+  .search-field { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .search-field .button { justify-self: start; }
 }
 
 @media (max-width: 420px) {
