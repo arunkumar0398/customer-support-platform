@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket creation/list/search, and ticket pagination have supporting local tests. A03 and A18 have passed their API-only scopes; other complete checks remain NOT_RUN. Ticket detail/mutation/dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `c68d652db632090bbcde89d5d725a1ae2d224fca` (TK-14 ticket pagination). Each checkpoint binds its executed commands to its own exact source SHA and environment. A19 is pending independent checkpoint/security review.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket creation/list/search/pagination, and ticket detail have supporting local tests. A03, A04, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Ticket mutations/comments/dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
+**Latest implementation source SHA:** `22598cad56d45d1cb7a2c73a44517e9756aea34f` (TK-15 ticket detail; a later evidence commit corrects one docs sentence). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -9,9 +9,9 @@
 | A01 | NOT_RUN | [TK-08](TK-08.md): real-DB credential/session API checks; browser login pending. |
 | A02 | NOT_RUN | [TK-08](TK-08.md): expiry/revocation/replay denied on auth endpoints; protected product endpoints pending. |
 | A03 | PASS | Source `3a94144e93875d75b24a2f9a286e6444e836c1ba`; `npm run test:api -- tests/memberships/memberships.test.ts` exit 0, 45/45 real PostgreSQL/HTTP cases; independently replayed. [TK-11](TK-11.md), [review](../reviews/tk11-2026-10-26-3a94144.md). |
-| A04 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/visibility foundations; ticket GET pending. |
+| A04 | PASS | Source `22598cad56d45d1cb7a2c73a44517e9756aea34f`; `npm run test:api -- tests/tickets/detail.test.ts` exit 0, 7/7 real PostgreSQL/API; independently replayed. Foreign-org ticket GET denied with generic 404. [TK-15](TK-15.md), [review](../reviews/tk15-2026-10-27-22598ca.md). |
 | A05 | NOT_RUN | [TK-09](TK-09.md), [TK-10](TK-10.md): context/action policies; actual tenant mutation routes pending. |
-| A06 | NOT_RUN | [TK-10](TK-10.md): ownership policy unit cases; customer product-route/browser negatives pending. |
+| A06 | NOT_RUN | [TK-15](TK-15.md): same-org other-customer detail read denied; mutation denial is not implemented/verified. Full acceptance remains incomplete. |
 | A07 | NOT_RUN | [TK-13](TK-13.md): list counts are tenant-scoped; dashboard counts remain pending. |
 | A08 | NOT_RUN | [TK-11](TK-11.md): scoped roster/add/role/deactivate/reactivate API with concurrent last-admin protection; browser administration pending. |
 | A09 | NOT_RUN | [TK-05](TK-05.md): real cross-org FK negatives; assignment API and role eligibility pending. |

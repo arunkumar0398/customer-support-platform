@@ -93,7 +93,7 @@ The response contains the ticket's id, organizationId, ticketNumber, requesterUs
 
 Unknown/repeated/nested parameters, non-integer/out-of-range page values, invalid enums/IDs, blank or oversized search, and body-controlled organization/requester fields are not accepted; invalid query fields return 422. Query matching and the result count use one repeatable-read snapshot. Results use deterministic `createdAt DESC, id DESC` ordering before applying the bounded page offset. Result items omit descriptions and credentials; `{ items, total, page, pageSize }` counts only rows visible through the same SQL scope. Because `page` is capped at 1,000 and `pageSize` at 100, this offset API can retrieve at most the first 100,000 matching rows; `total` can exceed that limit. Cursor pagination is the scale path if an organization grows beyond that range. Search is a case-insensitive literal substring (including literal `%` and `_` characters), not full text/ranking.
 
-`npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation. Detail/update/comment routes are not implemented yet.
+`npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation. Update and comment routes are not implemented yet.
 
 ## Central authorization policies
 
