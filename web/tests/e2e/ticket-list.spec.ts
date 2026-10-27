@@ -17,7 +17,7 @@ const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
-const agentIds = Array.from({ length: 8 }, () => randomUUID());
+const agentIds = Array.from({ length: 9 }, () => randomUUID());
 const customerId = randomUUID();
 const otherCustomerId = randomUUID();
 const password = 'synthetic-ticket-list-fixture-password';
@@ -183,6 +183,35 @@ test('staff queue refreshes when membership is downgraded while open', async ({ 
   await expect(page.getByText(`${agentEmails[7]} · customer`)).toBeVisible();
   await expect(page.getByLabel('Assignee ID')).toHaveCount(0);
   await expect(page.getByText('0 tickets')).toBeVisible();
+});
+
+test('a delayed membership refresh cannot restore the UI after sign-out', async ({ page }) => {
+  await signIn(page, agentEmails[8]);
+  await expect(page.getByText('26 tickets')).toBeVisible();
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: agentIds[8] } },
+    data: { role: 'CUSTOMER' },
+  });
+
+  let releaseResponse!: () => void;
+  let markResponseReady!: () => void;
+  const heldResponse = new Promise<void>((resolve) => { releaseResponse = resolve; });
+  const responseReady = new Promise<void>((resolve) => { markResponseReady = resolve; });
+  await page.route('**/api/auth/me', async (route) => {
+    const response = await route.fetch();
+    markResponseReady();
+    await heldResponse;
+    await route.fulfill({ response });
+  });
+
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await responseReady;
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page).toHaveURL('/sign-in');
+  releaseResponse();
+  await expect(page.getByRole('heading', { name: 'Sign in to Support Desk' })).toBeVisible();
+  await expect(page).toHaveURL('/sign-in');
+  await page.unroute('**/api/auth/me');
 });
 
 test('queue pagination keeps page state in the URL', async ({ page }) => {

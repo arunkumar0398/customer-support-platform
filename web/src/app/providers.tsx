@@ -23,13 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading', identity: null, error: null });
   const queryClient = useQueryClient();
   const revalidating = useRef(false);
+  const authGeneration = useRef(0);
 
   const refresh = useCallback(async () => {
+    const generation = ++authGeneration.current;
     setState({ status: 'loading', identity: null, error: null });
     try {
       const identity = await getCurrentIdentity();
+      if (generation !== authGeneration.current) return;
       setState({ status: 'authenticated', identity, error: null });
     } catch (error) {
+      if (generation !== authGeneration.current) return;
       if (error instanceof ApiError && error.status === 401) {
         setState({ status: 'anonymous', identity: null, error: null });
       } else {
@@ -45,9 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const revalidate = useCallback(async () => {
     if (state.status !== 'authenticated' || revalidating.current) return;
     revalidating.current = true;
+    const generation = authGeneration.current;
     try {
       const previous = state.identity;
       const identity = await getCurrentIdentity();
+      if (generation !== authGeneration.current) return;
       const accessScope = (value: Identity) => value.memberships
         .map((membership) => `${membership.organizationId}:${membership.role}`)
         .sort()
@@ -59,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setState({ status: 'authenticated', identity, error: null });
       }
     } catch (error) {
+      if (generation !== authGeneration.current) return;
       queryClient.removeQueries({ queryKey: ['tickets', state.identity.user.id] });
       if (error instanceof ApiError && error.status === 401) {
         setState({ status: 'anonymous', identity: null, error: null });
@@ -69,8 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           error: error instanceof Error ? error.message : 'The service could not be reached.',
         });
       }
-    }
-    finally {
+    } finally {
       revalidating.current = false;
     }
   }, [queryClient, state]);
@@ -91,14 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [revalidate, state.status]);
 
   const login = useCallback(async (email: string, password: string) => {
+    const generation = ++authGeneration.current;
     const identity = await signIn(email, password);
-    setState({ status: 'authenticated', identity, error: null });
+    if (generation === authGeneration.current) setState({ status: 'authenticated', identity, error: null });
   }, []);
 
   const logout = useCallback(async () => {
     if (state.status !== 'authenticated') return;
+    const generation = ++authGeneration.current;
     await signOut(state.identity.csrfToken);
-    setState({ status: 'anonymous', identity: null, error: null });
+    if (generation === authGeneration.current) setState({ status: 'anonymous', identity: null, error: null });
   }, [state]);
 
   const value = useMemo(() => ({ state, login, logout, refresh }), [state, login, logout, refresh]);
