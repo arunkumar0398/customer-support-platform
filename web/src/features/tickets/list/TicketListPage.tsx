@@ -32,10 +32,14 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState(searchParams.get('search') ?? '');
   const [customerIdValue, setCustomerIdValue] = useState(searchParams.get('customerId') ?? '');
-  const [assigneeIdValue, setAssigneeIdValue] = useState(searchParams.get('assigneeId') === 'unassigned' ? '' : searchParams.get('assigneeId') ?? '');
+  const [assigneeIdValue, setAssigneeIdValue] = useState(searchParams.get('assigneeId') ?? '');
   const status = searchParams.get('status') ?? '';
   const priority = searchParams.get('priority') ?? '';
   const assigneeId = searchParams.get('assigneeId') ?? '';
+  const membershipScope = identity.memberships
+    .map((membership) => `${membership.organizationId}:${membership.role}`)
+    .sort()
+    .join('|');
   const parsedPage = Number(searchParams.get('page') ?? 1);
   const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const isStaff = ['ADMIN', 'AGENT'].includes(identity.memberships[0]?.role ?? '');
@@ -43,7 +47,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
   useEffect(() => {
     setSearchValue(searchParams.get('search') ?? '');
     setCustomerIdValue(searchParams.get('customerId') ?? '');
-    setAssigneeIdValue(searchParams.get('assigneeId') === 'unassigned' ? '' : searchParams.get('assigneeId') ?? '');
+    setAssigneeIdValue(searchParams.get('assigneeId') ?? '');
   }, [searchParams]);
 
   const queryString = useMemo(() => {
@@ -61,7 +65,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
   }, [assigneeId, isStaff, page, priority, searchParams, status]);
 
   const tickets = useQuery({
-    queryKey: ['tickets', identity.user.id, organizationId, queryString],
+    queryKey: ['tickets', identity.user.id, organizationId, membershipScope, queryString],
     queryFn: () => getTickets(organizationId!, queryString),
     enabled: Boolean(organizationId),
     retry: false,
@@ -87,7 +91,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
       else next.delete('customerId');
       const assigneeId = assigneeIdValue.trim();
       if (assigneeId) next.set('assigneeId', assigneeId);
-      else if (next.get('assigneeId') !== 'unassigned') next.delete('assigneeId');
+      else next.delete('assigneeId');
     }
     next.delete('page');
     setSearchParams(next);

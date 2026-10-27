@@ -17,7 +17,7 @@ const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
-const agentIds = Array.from({ length: 7 }, () => randomUUID());
+const agentIds = Array.from({ length: 8 }, () => randomUUID());
 const customerId = randomUUID();
 const otherCustomerId = randomUUID();
 const password = 'synthetic-ticket-list-fixture-password';
@@ -122,10 +122,21 @@ test('staff search and status filters update the queue and URL', async ({ page }
   await page.getByLabel('Priority').selectOption('HIGH');
   await expect(page).toHaveURL(/priority=HIGH/);
   await expect(page.getByRole('row', { name: /Invoice discrepancy seven/ })).toBeVisible();
+  await page.getByLabel('Search tickets').fill('');
+  await page.getByLabel('Search tickets').press('Enter');
+  await page.getByLabel('Status').selectOption('');
+  await page.getByLabel('Priority').selectOption('');
+  await expect(page.getByText('26 tickets')).toBeVisible();
   await page.getByLabel('Assignee ID').fill('unassigned');
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page).toHaveURL(/assigneeId=unassigned/);
-  await expect(page.getByText('1 ticket')).toBeVisible();
+  await expect(page.getByText('25 tickets')).toBeVisible();
+  await expect(page.getByRole('row', { name: /Queue request 01/ })).toHaveCount(0);
+  await expect(page.getByRole('row', { name: /Queue request 02/ })).toBeVisible();
+  await page.getByLabel('Assignee ID').fill('');
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect(page).not.toHaveURL(/assigneeId/);
+  await expect(page.getByText('26 tickets')).toBeVisible();
 });
 
 test('customers only see their own tickets in the queue', async ({ page }) => {
@@ -134,7 +145,7 @@ test('customers only see their own tickets in the queue', async ({ page }) => {
   await expect(page.getByText('25 tickets')).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 25/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 26/ })).toHaveCount(0);
-  await expect(page.getByLabel('Assignment')).toBeHidden();
+  await expect(page.getByLabel('Assignee ID')).toBeHidden();
 });
 
 test('staff can filter tickets by customer membership id', async ({ page }) => {
@@ -157,6 +168,21 @@ test('staff can filter tickets by a specific assignee', async ({ page }) => {
   await expect(page.getByText('1 ticket')).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 01/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 02/ })).toHaveCount(0);
+});
+
+test('staff queue refreshes when membership is downgraded while open', async ({ page }) => {
+  await signIn(page, agentEmails[7]);
+  await expect(page.getByText('26 tickets')).toBeVisible();
+
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: agentIds[7] } },
+    data: { role: 'CUSTOMER' },
+  });
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+  await expect(page.getByText(`${agentEmails[7]} · customer`)).toBeVisible();
+  await expect(page.getByLabel('Assignee ID')).toHaveCount(0);
+  await expect(page.getByText('0 tickets')).toBeVisible();
 });
 
 test('queue pagination keeps page state in the URL', async ({ page }) => {

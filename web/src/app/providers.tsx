@@ -1,5 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ApiError, getCurrentIdentity, signIn, signOut } from '../lib/api';
 import type { Identity } from '../lib/api';
 
@@ -20,6 +21,8 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading', identity: null, error: null });
+  const queryClient = useQueryClient();
+  const revalidating = useRef(false);
 
   const refresh = useCallback(async () => {
     setState({ status: 'loading', identity: null, error: null });
@@ -39,9 +42,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const revalidate = useCallback(async () => {
+    if (state.status !== 'authenticated' || revalidating.current) return;
+    revalidating.current = true;
+    try {
+      const previous = state.identity;
+      const identity = await getCurrentIdentity();
+      const accessScope = (value: Identity) => value.memberships
+        .map((membership) => `${membership.organizationId}:${membership.role}`)
+        .sort()
+        .join('|');
+      if (previous.user.id !== identity.user.id || accessScope(previous) !== accessScope(identity)) {
+        queryClient.removeQueries({ queryKey: ['tickets', previous.user.id] });
+        setState({ status: 'authenticated', identity, error: null });
+      } else if (previous.csrfToken !== identity.csrfToken) {
+        setState({ status: 'authenticated', identity, error: null });
+      }
+    } catch (error) {
+      queryClient.removeQueries({ queryKey: ['tickets', state.identity.user.id] });
+      if (error instanceof ApiError && error.status === 401) {
+        setState({ status: 'anonymous', identity: null, error: null });
+      } else {
+        setState({
+          status: 'unavailable',
+          identity: null,
+          error: error instanceof Error ? error.message : 'The service could not be reached.',
+        });
+      }
+    }
+    finally {
+      revalidating.current = false;
+    }
+  }, [queryClient, state]);
+
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (state.status !== 'authenticated') return;
+    const check = () => { void revalidate(); };
+    const timer = window.setInterval(check, 30_000);
+    window.addEventListener('focus', check);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', check);
+    };
+  }, [revalidate, state.status]);
 
   const login = useCallback(async (email: string, password: string) => {
     const identity = await signIn(email, password);
