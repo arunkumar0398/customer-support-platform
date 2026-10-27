@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, and ticket creation/list/search/pagination/detail/update/assignment have supporting local tests. A03, A04, A09, A13, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Comments/history, dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `3f7598c80a490fffce6b7be40c32714b1cf98ec6` (TK-17 assignment). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `ad8416f27be8ad095f4b514c340aed78c13e4230` (TK-18 activity history). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -20,8 +20,8 @@
 | A12 | NOT_RUN | [TK-10](TK-10.md): staff policy unit cases; actual update/assignment journey pending. |
 | A13 | PASS | Source `d5cce1829cc0fd5790869a05302a0f2c0911e5bd`; `npm run test:api -- tests/tickets/update.test.ts` exit 0, 30/30 real PostgreSQL/API, independently replayed. Legal/illegal transitions and no-side-effect rejection verified. [TK-16](TK-16.md), [review](../reviews/tk16-2026-10-27-d5cce18.md). |
 | A14 | NOT_RUN | [TK-10](TK-10.md): comment permission foundation; persistence/order/API/browser checks pending. |
-| A15 | NOT_RUN | [TK-12](TK-12.md): atomic creation event tested; events for update/comment/assignment still pending. |
-| A16 | NOT_RUN | [TK-12](TK-12.md): create/event DB fault rollback tested; remaining ticket mutation paths pending. |
+| A15 | NOT_RUN | [TK-12](TK-12.md), [TK-16](TK-16.md), [TK-17](TK-17.md), [TK-18](TK-18.md): create/update/assignment event behavior and history read have scoped evidence; complete mutation/comment acceptance remains pending. |
+| A16 | NOT_RUN | [TK-12](TK-12.md), [TK-18](TK-18.md): create and ticket-update event-failure rollback tested against PostgreSQL; complete required mutation-path coverage remains pending. |
 | A17 | NOT_RUN | [TK-13](TK-13.md): API filter coverage; browser filtering journey pending. |
 | A18 | PASS | Source `00120c7fa2ad2ffff7dd7af687b6cfb145098899`; `npm run test:api -- tests/tickets/list.test.ts` exit0, 36/36 real PostgreSQL/API cases; independently replayed after literal wildcard correction. [TK-13](TK-13.md), [review](../reviews/tk13-2026-10-26-15a4095.md). |
 | A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage; 100,000-row offset limit documented. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |

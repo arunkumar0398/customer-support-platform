@@ -1,10 +1,10 @@
 # Current session handoff
 
-Date: 2026-10-26; timezone Asia/Calcutta (UTC+05:30).
+Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `c68d652db632090bbcde89d5d725a1ae2d224fca`; TK-14 checkpoint evidence is pending independent review completion.
+Last source SHA: `ad8416f27be8ad095f4b514c340aed78c13e4230`; TK-18 implementation is committed and reviewed; checkpoint evidence is being recorded.
 
 ## Current task state
 
@@ -21,6 +21,7 @@ Last source SHA: `c68d652db632090bbcde89d5d725a1ae2d224fca`; TK-14 checkpoint ev
 - TK-15 source `22598cad56d45d1cb7a2c73a44517e9756aea34f` adds UUID-validated `GET /api/tickets/{ticketId}`, with tenant/customer scope inside the DB predicate and a generic 404 for inaccessible/missing tickets. Focused suite 7/7, full `npm run check` API288/288 plus web1/1/lint/type/build; Playwright listed only. Independent replay 7/7 and separate static review found no source issue. A04 PASS for API-only foreign-ticket GET; A06 remains NOT_RUN until mutation denial is implemented; A10 remains NOT_RUN pending browser journey. One stale docs sentence was corrected in the evidence follow-up. See TK-15 and review report.
 - TK-16 source `d5cce1829cc0fd5790869a05302a0f2c0911e5bd` adds strict role-based ticket PATCH, legal status transitions, reasoned reopen, per-field event creation in the update transaction, no-op suppression, and version increment. Focused suite 30/30; full check API318/318, web1/1/lint/type/build; Playwright listed only. Independent reviewer replay 30/30, separate static review no findings. A13 PASS for API lifecycle; A12, A15, A31 remain NOT_RUN for broader scope. See TK-16/review.
 - TK-17 source `3f7598c80a490fffce6b7be40c32714b1cf98ec6` adds staff assignment/unassignment to active same-org AGENTs, with current actor reload, DB tenant scope, composite FK verification, transaction event, and version increment. Focused suite 13/13; full check API331/331, web1/1/lint/type/build; independent replay 13/13; static review no findings. A09 PASS; A12 remains NOT_RUN for browser/full scope. See TK-17/review.
+- TK-18 source `ad8416f27be8ad095f4b514c340aed78c13e4230` adds read-only tenant/customer-scoped activity history with bounded deterministic paging and real PostgreSQL update/event rollback fault injection. Focused suite and independent replay 11/11; full check API342/342, web1/1/lint/type/build; docs contract and diff checks pass. Parent reviewer kit used; stale docs P2 corrected, no remaining code findings. A15/A16 remain NOT_RUN for complete scope; G3 remains NOT_RUN. See TK-18/review.
 - A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
@@ -45,6 +46,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-TK-17 source `3f7598c80a490fffce6b7be40c32714b1cf98ec6` is reviewed and closed. A09 PASS for API target eligibility and PostgreSQL same-org FK. A12 still needs browser/full scope; A15 needs complete history and mutation coverage. Begin TK-18 atomic immutable activity history. A03/A04/A09/A13/A18/A19 PASS for documented API scopes; other complete scopes remain NOT_RUN; G3/release gates are incomplete. TK-12's one-off timeout remains unexplained and successful replays are documented.
+Begin TK-19 comments and conversation history with TDD: strict comment payloads, current tenant/customer visibility, closed-ticket rejection, stable chronology, and atomic comment/event writes. Keep A15/A16 NOT_RUN until full acceptance scope is proved. A03/A04/A09/A13/A18/A19 remain PASS for documented API scopes; G3 and release gates remain NOT_RUN. Continue using the sibling `100xdevs_assessment_review_agent_skill` for the next independent checkpoint review. TK-12's one-off timeout remains unexplained and successful replays are documented.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
