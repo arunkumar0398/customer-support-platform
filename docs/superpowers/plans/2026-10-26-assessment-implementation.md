@@ -234,7 +234,7 @@ Each TK task has one owner and one gate. For a new behavior, add the named faili
 
 **Depends on:** TK-13, TK-16. **Gate:** G3. **Acceptance:** A07, A20, A21.
 
-**Files:** Create `api/src/modules/dashboard/{routes,service}.ts`, `api/tests/dashboard/dashboard.test.ts`.
+**Files:** Create `api/src/modules/dashboard/{routes,service}.ts`, mount it in `api/src/app.ts`, add `api/tests/dashboard/dashboard.test.ts`, and document exact formulas in `docs/api.md` and `docs/assumptions.md`.
 
 **RED:** Fixture assertions fail for org-scope, status/priority totals, overdue exclusions, or agent workload.  
 **GREEN:** Metrics use one captured UTC evaluation time and match formulas in spec/docs; customer dashboard access is denied.
