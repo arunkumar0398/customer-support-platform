@@ -20,6 +20,14 @@ export type CreateTicketInput = {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 };
 
+export type UpdateTicketInput = {
+  title?: string;
+  description?: string;
+  status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  reopenReason?: string;
+};
+
 export type TicketListQuery = {
   status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
@@ -46,6 +54,18 @@ const ticketListQuery = z.object({
   page: pageNumber(1000, 1),
   pageSize: pageNumber(100, 25),
 }).strict();
+const customerTicketUpdate = z.object({
+  title: content.title.optional(),
+  description: content.description.optional(),
+}).strict().refine((value) => value.title !== undefined || value.description !== undefined);
+const staffTicketUpdate = z.object({
+  title: content.title.optional(),
+  description: content.description.optional(),
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
+  reopenReason: z.string().trim().min(1).max(500).optional(),
+}).strict().refine((value) => Object.values(value).some((field) => field !== undefined))
+  .refine((value) => value.reopenReason === undefined || value.status === 'IN_PROGRESS');
 
 export function parseTicketListQuery(input: unknown): TicketListQuery {
   const result = ticketListQuery.safeParse(input);
@@ -56,6 +76,13 @@ export function parseTicketListQuery(input: unknown): TicketListQuery {
 export function parseTicketId(input: unknown): string {
   const result = uuid.safeParse(input);
   if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'Request path is invalid.');
+  return result.data;
+}
+
+export function parseUpdateTicket(input: unknown, role: MembershipRole): UpdateTicketInput {
+  const schema = role === 'CUSTOMER' ? customerTicketUpdate : staffTicketUpdate;
+  const result = schema.safeParse(input);
+  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'Request body is invalid.');
   return result.data;
 }
 

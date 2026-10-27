@@ -1,6 +1,6 @@
 # API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, membership administration, ticket creation, ticket detail, and ticket listing with filters/search/pagination. Ticket update, comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health, authentication, membership administration, ticket create/detail/list/update, with list filters/search/pagination. Comments/history, assignment, dashboard, the local listener/launch command, and browser journeys remain later tasks.
 
 ## Health
 
@@ -77,6 +77,12 @@ The response contains only id, organizationId, ticketNumber, requesterUserId, as
 
 The response contains the ticket's id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. It contains no credentials or activity/comments; those have separate planned endpoints. Authenticated responses set `Cache-Control: no-store`. `npm run test:api -- tests/tickets/detail.test.ts` covers both roles, customer ownership, foreign and absent records, both organizations, and malformed identifiers.
 
+## Ticket updates
+
+`PATCH /api/tickets/{ticketId}` requires an authenticated session, exact approved `Origin`, session-bound `X-CSRF-Token`, and current active organization. ADMIN/AGENT may submit a strict object with one or more of `title`, `description`, `status`, and `priority`. CUSTOMER may submit only `title` and/or `description`, and only for their own OPEN ticket. Body fields including organization, requester, assignee, due date, version, and ticket number are server-controlled and rejected. Empty/no-op updates do not create events or increment the ticket version.
+
+Allowed status transitions are `OPEN → IN_PROGRESS`, `OPEN → RESOLVED`, `IN_PROGRESS → RESOLVED`, `RESOLVED → IN_PROGRESS`, and `RESOLVED → CLOSED`; CLOSED is final. `RESOLVED → IN_PROGRESS` requires a trimmed `reopenReason` (1–500 characters), recorded on its status event. Invalid transitions return 409 `INVALID_STATUS_TRANSITION`; missing/invalid reasons return 422 `VALIDATION_ERROR`. Each changed field creates an activity event in the same PostgreSQL transaction as the ticket update; the version increments once per meaningful PATCH. Optimistic expected-version conflicts are TK-20 work. `npm run test:api -- tests/tickets/update.test.ts` covers roles, field allowlists, transition rules, reopen reason, events, versioning, and scoped negative requests.
+
 ## Ticket list, filters, and search
 
 `GET /api/tickets` requires a session and valid active `X-Organization-ID`. ADMIN/AGENT see the selected organization's tickets. CUSTOMER queries are always restricted to the authenticated user's own requester ID, even when a `customerId` filter is supplied. The organization and customer predicates are combined with every optional filter in SQL using AND, so caller filters cannot replace the server scope.
@@ -120,6 +126,8 @@ Every request receives a new server-generated UUID in the `X-Request-ID` respons
 | 400 | `MALFORMED_JSON` | JSON could not be parsed. |
 | 404 | `NOT_FOUND` | Unknown route or unavailable resource; the response does not repeat the path or record identifier. |
 | 409 | `TICKET_NUMBER_LIMIT` | The organization's positive ticket number reached the PostgreSQL integer ceiling. |
+| 409 | `INVALID_STATUS_TRANSITION` | The current ticket status cannot transition to the requested status. |
+| 409 | `TICKET_VERSION_LIMIT` | The ticket's version reached the PostgreSQL integer ceiling. |
 | 413 | `PAYLOAD_TOO_LARGE` | JSON exceeds the 32 KiB request body limit. |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | Unsupported JSON charset or compressed body encoding. Send uncompressed JSON. |
 | 422 | `VALIDATION_ERROR` | Body, query, or path input fails its schema or allowlist. |
