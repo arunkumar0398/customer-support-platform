@@ -124,6 +124,14 @@ Unknown/repeated/nested parameters, non-integer/out-of-range page values, invali
 
 `npm run test:api -- tests/tickets/list.test.ts` uses real PostgreSQL and HTTP fixtures for two tenants, all three role scopes, combined filters, unassigned tickets, case-insensitive title/description search, Beta-only search matches and strict query validation.
 
+## Dashboard metrics
+
+`GET /api/dashboard` requires an authenticated ADMIN or AGENT membership and a valid active `X-Organization-ID`. CUSTOMER requests return 403; a missing or inaccessible organization selection returns the usual authentication/membership error. The endpoint takes no query parameters and returns `Cache-Control: no-store`. All queries use the current organization inside one PostgreSQL repeatable-read transaction, and the acting membership is rechecked in that transaction.
+
+The response contains one captured UTC `evaluationTime`, `totalTickets`, `statusCounts` for OPEN/IN_PROGRESS/RESOLVED/CLOSED, `priorityCounts` for LOW/MEDIUM/HIGH/URGENT, `overdueCount`, and `agentWorkloads`. Status and priority counts include every ticket in the active organization. `totalTickets` is the sum of status counts. A ticket is overdue only when `dueAt < evaluationTime` and status is neither RESOLVED nor CLOSED; tickets with no due time and tickets exactly at the evaluation instant are not overdue. Each workload row contains `userId`, `email`, `openCount`, `inProgressCount`, and `activeCount` (the sum of OPEN and IN_PROGRESS assigned tickets) for one active AGENT membership. Active agents with no matching tickets receive zero counts; inactive agents and customers are omitted. Workload rows sort by user ID.
+
+Due-time/SLA values are illustrative assumptions, not assessment-mandated policy. `npm run test:api -- tests/dashboard/dashboard.test.ts` verifies exact formulas, UTC boundary behavior, two-organization scoping, admin/agent access, customer denial and inaccessible organization handling against PostgreSQL.
+
 ## Central authorization policies
 
 `api/src/lib/policy.ts` consumes the server-derived membership context. Membership administration requires ADMIN; dashboard and staff ticket management require ADMIN or AGENT. Ticket visibility always requires the active organization, and CUSTOMER additionally requires its own requester ID. Inaccessible/missing tickets return the same 404 before action-specific restrictions disclose state. Customers may edit their own title/description only while OPEN; staff may edit visible ticket content. New comments require a visible non-closed ticket, with 409 `TICKET_CLOSED` on an otherwise visible closed ticket. A closed ticket's conversation/history remains readable within the same visibility policy, as clarified in ADR 0003.

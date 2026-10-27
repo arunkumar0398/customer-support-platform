@@ -29,7 +29,8 @@ The role comes from a current organization membership, not a global user field o
 | Edit title and description | Yes | Yes | Own ticket while `OPEN` |
 | Change status, priority, or assignee | Yes | Yes | No |
 | Assign to an eligible organization member | Yes | Yes | No |
-| Comment and view history | Non-closed tickets | Non-closed tickets | Own non-closed tickets |
+| Add a comment | Non-closed tickets | Non-closed tickets | Own non-closed tickets |
+| Read comments and activity history | Any visible ticket, including closed | Any visible ticket, including closed | Own visible ticket, including closed |
 | View dashboard | Yes | Yes | No |
 | Manage organization memberships and roles | Own organization | No | No |
 | Remove or demote the last active admin | No | No | No |
@@ -56,7 +57,7 @@ Statuses are `OPEN`, `IN_PROGRESS`, `RESOLVED`, and `CLOSED`. Allowed transition
 
 ## Dashboard definitions
 
-Each dashboard response captures one UTC `evaluationTime`. Counts are scoped to the selected organization. Status and priority counts include organization tickets visible to the requesting staff role. An overdue ticket has `dueAt < evaluationTime` and a status other than `RESOLVED` or `CLOSED`. Agent workload counts assigned `OPEN` and `IN_PROGRESS` tickets. Any due-time/SLA values are illustrative project assumptions, not employer-mandated policy, and must be deterministic in the seed and asserted by tests.
+Each dashboard response captures one UTC `evaluationTime`. Counts are scoped to the selected organization. Status and priority counts include organization tickets visible to the requesting staff role. An overdue ticket has `dueAt < evaluationTime` and a status other than `RESOLVED` or `CLOSED`. Workload rows list active AGENT memberships, including agents with zero active tickets; each workload counts that agent's assigned `OPEN` and `IN_PROGRESS` tickets. Inactive agents and customers are omitted from workload rows. Any due-time/SLA values are illustrative project assumptions, not employer-mandated policy, and must be deterministic in the seed and asserted by tests.
 
 ## Notification integration and failure behavior
 
