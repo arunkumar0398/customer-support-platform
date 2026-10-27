@@ -24,7 +24,7 @@
 | A16 | NOT_RUN | [TK-12](TK-12.md): create/event DB fault rollback tested; remaining ticket mutation paths pending. |
 | A17 | NOT_RUN | [TK-13](TK-13.md): API filter coverage; browser filtering journey pending. |
 | A18 | PASS | Source `00120c7fa2ad2ffff7dd7af687b6cfb145098899`; `npm run test:api -- tests/tickets/list.test.ts` exit0, 36/36 real PostgreSQL/API cases; independently replayed after literal wildcard correction. [TK-13](TK-13.md), [review](../reviews/tk13-2026-10-26-15a4095.md). |
-| A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage. Static review pending. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |
+| A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage; 100,000-row offset limit documented. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |
 | A20 | NOT_RUN | |
 | A21 | NOT_RUN | |
 | A22 | NOT_RUN | |
