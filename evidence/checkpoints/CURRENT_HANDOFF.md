@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `ef7b771bcc2c2a1b889329f8fcf5115768020ea9`; TK-25 source and review are committed; checkpoint evidence is recorded in `TK-25.md`.
+Last source SHA: `d731fffbbd0351ebb7021510787f71acf4578db4`; TK-26 source and review are committed; checkpoint evidence is recorded in `TK-26.md`.
 
 ## Current task state
 
@@ -37,7 +37,7 @@ Last source SHA: `ef7b771bcc2c2a1b889329f8fcf5115768020ea9`; TK-25 source and re
 | G1 | PASS for local schema/test DB criteria: TK-02, TK-04–TK-06 plus current real-DB suite and migration/identity proof in TK-08. Application release is still incomplete. |
 | G2 | NOT_RUN as a whole; HTTP auth/current membership and unit policies verified; actual product-route isolation still pending. |
 | G3 | NOT_RUN; ticket/comment/event/dashboard/health APIs exist and have scoped evidence; combined acceptance and remaining backend criteria are pending. |
-| G4 | NOT_RUN; React remains a shell and browser journeys are absent. |
+| G4 | NOT_RUN; auth, queue, create, and detail browser journeys are implemented, but dashboard/admin UI and complete responsive/state coverage remain pending. |
 | G5 | NOT_RUN; full Docker app launch, clean checkout, CI and security release suite pending. |
 | G6 | NOT_RUN; deployment has not been authorized. |
 | G7 | NOT_RUN; bounded task reviews exist, final candidate review does not. |
@@ -52,7 +52,7 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 TK-23 auth shell source 24c48a30577cd6e46cd60dea1bccb4003d4fbf38 was independently reviewed with browser replay and static inspection using the sibling reviewer kit. Static review found a likely P2 narrow-tablet layout issue. Root reproduced it with a failing 640px browser geometry assertion, fixed the breakpoint, then verified source 93c074d96ffa696624842e5b0628a694d1d2f6a8 with the regression, all five browser tests, full npm run check, documentation contract, and diff check. Evidence is in TK-23.md and ../reviews/tk23-2026-10-27-93c074d.md. External reviewers did not rerun the patch SHA.
 
-G4 remains NOT_RUN; TK-23 delivered the auth shell but not the complete A22/A23 journeys. A01 remains NOT_RUN until API and browser evidence are explicitly mapped together. A22/A23 remain NOT_RUN pending ticket/dashboard/admin and broader state coverage. A32 production/proxy behavior remains NOT_RUN.
+G4 remains NOT_RUN; TK-23–TK-26 deliver auth, queue, create, and detail journeys, but dashboard/admin and complete A22/A23 coverage remain pending. A01 remains NOT_RUN until API and browser evidence are explicitly mapped together. A32 production/proxy behavior remains NOT_RUN.
 
 ## TK-24 completion and current state
 
@@ -64,10 +64,14 @@ A17 is PASS for its scoped API + browser filter criterion. A18/A19 retain API-on
 
 TK-25 added the role-aware create form, server-authoritative validation/error handling, creation receipt, and cache invalidation. Exact source `ef7b771bcc2c2a1b889329f8fcf5115768020ea9` passed targeted create browser tests 4/4, full browser suite 19/19, targeted guarded PostgreSQL API suite 51/51, and `npm run check` (API369/369, web3/3, lint/typecheck/build). Parent-folder reviewer kit browser and static reviews ran against the exact source SHA with no findings. Evidence: `TK-25.md` and `../reviews/tk25-2026-10-27-ef7b771.md`.
 
-A10/A11 and A22/A23 remain NOT_RUN overall because complete detail/ownership, all field/range, error-state, responsive, dashboard, and admin coverage is not yet complete. G4 remains NOT_RUN.
+A10 is now PASS on the aggregate create/list/detail/ownership evidence. A11 remains NOT_RUN because complete field/range coverage is incomplete. A22/A23 remain NOT_RUN because dashboard/admin and full state/viewport coverage are pending. G4 remains NOT_RUN.
+
+## TK-26 completion and current state
+
+TK-26 is complete at source `d731fffbbd0351ebb7021510787f71acf4578db4`. The parent-folder reviewer kit browser replay passed 18/18 and its static review found no remaining P0–P3 issues after a P1 cache-leak fix. See [TK-26](TK-26.md) and [review](../reviews/tk26-2026-10-27-d731fff.md). A10, A12, A14, and A15 pass for their documented aggregate scope; A16 remains NOT_RUN.
 
 ## Next action
 
-Proceed with TK-26: implement ticket detail, editing, assignment, comments, history, and stale-version conflict recovery. Start with role journeys, including agent/customer, invalid transition, assignment denial, comments/history, and stale `If-Match` behavior. Use only the guarded disposable `support_test` database. Keep A12–A16, A22–A23, A29, and G4 scoped to their complete criteria and use the parent-folder reviewer kit against the exact final source SHA.
+Proceed with TK-27: dashboard UI over the existing tenant-scoped API. Begin with RED browser tests for staff metrics, customer denial, refresh after mutation, and loading/error/empty states. Use only guarded disposable `support_test`; keep A22/A23 and G4 scoped to complete criteria.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
