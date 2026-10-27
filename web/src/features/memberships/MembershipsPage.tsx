@@ -30,7 +30,8 @@ function MembershipRow({
   const lastSavedRole = useRef(member.role);
 
   useEffect(() => {
-    setRole((draftRole) => draftRole === lastSavedRole.current ? member.role : draftRole);
+    const previousSavedRole = lastSavedRole.current;
+    setRole((draftRole) => draftRole === previousSavedRole ? member.role : draftRole);
     lastSavedRole.current = member.role;
   }, [member.role]);
 

@@ -109,9 +109,17 @@ test('admin can add an existing account and update its organization role and act
     where: { organizationId_userId: { organizationId, userId: agentId } },
     data: { role: 'CUSTOMER' },
   });
+  await addedRow.getByLabel(`Role for ${emails.otherOrgUser}`).selectOption('ADMIN');
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: otherOrgUserId } },
+    data: { role: 'AGENT' },
+  });
   await addedRow.getByRole('button', { name: `Deactivate ${emails.otherOrgUser}` }).click();
+  await expect(addedRow.locator('td').nth(0)).toHaveText('Agent');
+  await expect(addedRow.getByLabel(`Role for ${emails.otherOrgUser}`)).toHaveValue('ADMIN');
+  await expect(addedRow.getByRole('button', { name: `Save ${emails.otherOrgUser}` })).toBeEnabled();
   const agentRow = page.getByRole('row', { name: new RegExp(emails.agent) });
-  await expect(agentRow).toContainText('Customer');
+  await expect(agentRow.locator('td').nth(0)).toHaveText('Customer');
   await expect(agentRow.getByLabel(`Role for ${emails.agent}`)).toHaveValue('CUSTOMER');
   await expect(agentRow.getByRole('button', { name: `Save ${emails.agent}` })).toBeDisabled();
   await addedRow.getByRole('button', { name: `Reactivate ${emails.otherOrgUser}` }).click();
