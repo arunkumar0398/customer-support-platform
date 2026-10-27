@@ -4,7 +4,7 @@ Date: 2026-10-26; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `00120c7fa2ad2ffff7dd7af687b6cfb145098899`; the checkpoint/handoff commit contains evidence only.
+Last source SHA: `c68d652db632090bbcde89d5d725a1ae2d224fca`; TK-14 checkpoint evidence is pending independent review completion.
 
 ## Current task state
 
@@ -17,6 +17,7 @@ Last source SHA: `00120c7fa2ad2ffff7dd7af687b6cfb145098899`; the checkpoint/hand
 - TK-12 source adds `POST /api/tickets`, strict role-specific schemas, active same-org CUSTOMER requester validation, org-locked current membership recheck, local max+1 ticket numbering and nested atomic `TICKET_CREATED` event. Exact source `npm run check` exit0: API228/228, web1/1, lint/type/build pass; Playwright listed only. A 51-case real PostgreSQL targeted suite includes actual trigger failure rollback/recovery and a blocked transaction with actor role change. Reviewer pending. See TK-12.md.
 - TK-12 was independently statically reviewed with no code finding. Its reviewer test run had 50/51 pass and one beforeEach timeout; root replayed named case and complete targeted suite, both passed, no source changes. Cause remains unexplained and is disclosed in the persisted review report. TK-13 removed its own repeated five-account login setup after encountering slow fixture setup during RED. Do not conflate the two test setup observations.
 - TK-13 source adds tenant/customer-scoped `GET /api/tickets` with status, priority, assignee/unassigned, customer and case-insensitive text filters plus scoped count in RepeatableRead. Review found LIKE wildcard semantics on `_`; regression reproduced, corrected by escaping backslash/%/_, independently replayed at source00120c7 with 36/36. Corrected-source `npm run check` exit0: API264/264, web1/1, lint/type/build pass; Playwright listed only. A18 PASS; A07 needs dashboard, A17 needs browser. See TK-13.md and review report.
+- TK-14 source `c68d652db632090bbcde89d5d725a1ae2d224fca` adds strict bounded `page` (1–1000) / `pageSize` (1–100), deterministic `createdAt DESC, id DESC`, offset paging, and `{items,total,page,pageSize}` metadata. Real guarded PostgreSQL/API tests cover same-timestamp IDs, exact non-overlapping pages, bounds/defaults, filters, repeated/unknown keys. Exact-source `npm run check` exit0: API281/281, web1/1, lint/typecheck/build pass; Playwright listed only. Independent checkpoint replay exit0 17/17; A19 PASS for API scope. Static review found a P2 scale ceiling of 100,000 rows; API docs now disclose the limit and cursor-pagination growth path. See `TK-14.md` and review report.
 - A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
 
@@ -41,6 +42,6 @@ No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the
 
 ## Next action
 
-TK-13 review is closed at source00120c7: independent list suite36/36, static correction accepted. Begin TK-14 bounded pagination/stable ordering tests. A03/A18 PASS; other complete acceptance scopes remain NOT_RUN; G3/release gates not complete. TK-12's one-off timeout remains unexplained and successful replays are documented.
+TK-14 source is committed at `c68d652db632090bbcde89d5d725a1ae2d224fca`; reviewer-kit DB replay 17/17 and static review are complete. A19 PASS for its API scope. Static P2 100,000-row page ceiling is disclosed in `docs/api.md`; cursor pagination remains the scale path. Start TK-15 ticket detail authorization. A03/A18/A19 PASS for their documented API scopes; other complete scopes remain NOT_RUN; G3/release gates are not complete. TK-12's one-off timeout remains unexplained and successful replays are documented.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
