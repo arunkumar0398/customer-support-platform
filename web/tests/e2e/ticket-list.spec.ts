@@ -242,7 +242,7 @@ test('ticket queue fits a narrow viewport and keeps the table scrollable', async
   expect(table.contentWidth).toBeGreaterThan(table.viewportWidth);
 });
 
-test('queue request errors show a retry action', async ({ page }) => {
+test('queue request errors show retry and loading feedback while a response is pending', async ({ page }) => {
   await signIn(page, agentEmails[4]);
   await page.route('**/api/tickets?*', (route) => route.fulfill({
     status: 503,
@@ -253,10 +253,7 @@ test('queue request errors show a retry action', async ({ page }) => {
 
   await expect(page.getByRole('alert')).toContainText('We could not load tickets');
   await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
-});
-
-test('queue announces loading while the ticket response is pending', async ({ page }) => {
-  await signIn(page, agentEmails[5]);
+  await page.unroute('**/api/tickets?*');
   await page.route('**/api/tickets?*', async (route) => {
     await page.waitForTimeout(300);
     await route.continue();

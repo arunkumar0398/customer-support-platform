@@ -36,6 +36,44 @@ export interface CreatedTicket extends TicketListItem {
   description: string;
 }
 
+export type TicketDetail = CreatedTicket;
+
+export interface TicketComment {
+  id: string;
+  organizationId: string;
+  ticketId: string;
+  authorUserId: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface TicketActivityEvent {
+  id: string;
+  organizationId: string;
+  ticketId: string;
+  actorUserId: string;
+  type: 'TICKET_CREATED' | 'TITLE_CHANGED' | 'DESCRIPTION_CHANGED' | 'STATUS_CHANGED'
+    | 'PRIORITY_CHANGED' | 'ASSIGNMENT_CHANGED' | 'COMMENT_ADDED';
+  previousValue: unknown;
+  newValue: unknown;
+  reason: string | null;
+  createdAt: string;
+}
+
+export interface TicketPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface UpdateTicketPayload {
+  title?: string;
+  description?: string;
+  status?: TicketListItem['status'];
+  priority?: TicketListItem['priority'];
+}
+
 export interface CreateTicketPayload {
   title: string;
   description: string;
@@ -120,5 +158,70 @@ export function createTicket(
       'X-CSRF-Token': csrfToken,
     },
     body: JSON.stringify(payload),
+  });
+}
+
+export function getTicketDetail(organizationId: string, ticketId: string): Promise<TicketDetail> {
+  return request<TicketDetail>(`/api/tickets/${encodeURIComponent(ticketId)}`, {
+    headers: { 'X-Organization-ID': organizationId },
+  });
+}
+
+export function updateTicket(
+  organizationId: string,
+  csrfToken: string,
+  ticket: TicketDetail,
+  payload: UpdateTicketPayload,
+): Promise<TicketDetail> {
+  return request<TicketDetail>(`/api/tickets/${encodeURIComponent(ticket.id)}`, {
+    method: 'PATCH',
+    headers: {
+      'X-Organization-ID': organizationId,
+      'X-CSRF-Token': csrfToken,
+      'If-Match': `"${ticket.version}"`,
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function assignTicket(
+  organizationId: string,
+  csrfToken: string,
+  ticket: TicketDetail,
+  assigneeUserId: string | null,
+): Promise<TicketDetail> {
+  return request<TicketDetail>(`/api/tickets/${encodeURIComponent(ticket.id)}/assignment`, {
+    method: 'PATCH',
+    headers: {
+      'X-Organization-ID': organizationId,
+      'X-CSRF-Token': csrfToken,
+      'If-Match': `"${ticket.version}"`,
+    },
+    body: JSON.stringify({ assigneeUserId }),
+  });
+}
+
+export function getTicketComments(organizationId: string, ticketId: string): Promise<TicketPage<TicketComment>> {
+  return request<TicketPage<TicketComment>>(`/api/tickets/${encodeURIComponent(ticketId)}/comments`, {
+    headers: { 'X-Organization-ID': organizationId },
+  });
+}
+
+export function createTicketComment(
+  organizationId: string,
+  csrfToken: string,
+  ticketId: string,
+  body: string,
+): Promise<TicketComment> {
+  return request<TicketComment>(`/api/tickets/${encodeURIComponent(ticketId)}/comments`, {
+    method: 'POST',
+    headers: { 'X-Organization-ID': organizationId, 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify({ body }),
+  });
+}
+
+export function getTicketActivity(organizationId: string, ticketId: string): Promise<TicketPage<TicketActivityEvent>> {
+  return request<TicketPage<TicketActivityEvent>>(`/api/tickets/${encodeURIComponent(ticketId)}/activity`, {
+    headers: { 'X-Organization-ID': organizationId },
   });
 }

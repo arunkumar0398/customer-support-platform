@@ -18,7 +18,7 @@ function TicketRow({ ticket }: { ticket: TicketListItem }) {
     <tr>
       <td className="ticket-number">#{ticket.ticketNumber}</td>
       <th scope="row" className="ticket-title-cell">
-        <span>{ticket.title}</span>
+        <Link className="ticket-row-link" to={`/tickets/${ticket.id}`}>{ticket.title}</Link>
         <small>Updated {new Date(ticket.updatedAt).toLocaleDateString()}</small>
       </th>
       <td><span className={`status-pill status-${ticket.status.toLowerCase()}`}>{titleCase(ticket.status)}</span></td>

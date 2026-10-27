@@ -24,6 +24,8 @@
 .ticket-table tbody tr:hover { background: #fbfcf9; }
 .ticket-number { width: 90px; color: #71817a; font-family: var(--mono); font-size: 11px !important; }
 .ticket-title-cell { min-width: 220px; color: var(--ink); font-size: 12px !important; font-weight: 700; }
+.ticket-row-link { color: inherit; text-decoration: none; }
+.ticket-row-link:hover, .ticket-row-link:focus-visible { color: var(--deep); text-decoration: underline; text-underline-offset: 3px; }
 .ticket-title-cell small { display: block; margin-top: 5px; color: #829089; font-size: 10px; font-weight: 400; }
 .status-pill { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 20px; background: #edf1e9; color: #53625b; font-size: 10px; font-weight: 700; white-space: nowrap; }
 .status-open { background: #edf1e9; color: #53625b; }

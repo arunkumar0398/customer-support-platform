@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './providers';
 import { TicketCreatePage } from '../features/tickets/create/TicketCreatePage';
+import { TicketDetailPage } from '../features/tickets/detail/TicketDetailPage';
 import { TicketListPage } from '../features/tickets/list/TicketListPage';
 import type { CreatedTicket } from '../lib/api';
 import './styles.css';
@@ -152,25 +153,17 @@ function WorkspacePage() {
       {location.pathname === '/tickets/new' && (
         <TicketCreatePage identity={state.identity} organizationId={membership?.organizationId} />
       )}
-      {createdTicketPath && createdTicketPath[1] === createdTicket?.id && (
-        <main className="ticket-created" aria-labelledby="ticket-created-title">
-          <p className="eyebrow">SUPPORT DESK · RECEIVED</p>
-          <h1 id="ticket-created-title">Ticket submitted</h1>
-          <p className="ticket-created-number">Ticket #{createdTicket.ticketNumber}</p>
-          <div className="ticket-created-card">
-            <span className="status-pill status-open">Open</span>
-            <h2>{createdTicket.title}</h2>
-            <p>{createdTicket.description}</p>
-            <p className="ticket-created-priority">{createdTicket.priority[0] + createdTicket.priority.slice(1).toLowerCase()} priority</p>
-          </div>
-          <p className="ticket-created-note">Your request is in the queue. You can return to your workspace at any time.</p>
-          <Link className="button button-primary" to="/">Return to ticket queue</Link>
-        </main>
+      {createdTicketPath && (
+        <TicketDetailPage
+          identity={state.identity}
+          organizationId={membership?.organizationId}
+          ticketId={createdTicketPath[1]}
+          createdTicket={createdTicket}
+        />
       )}
       {location.pathname !== '/' && location.pathname !== '/tickets/new' && !createdTicketPath && (
         <Navigate to="/" replace />
       )}
-      {createdTicketPath && createdTicketPath[1] !== createdTicket?.id && <Navigate to="/" replace />}
     </div>
   );
 }
