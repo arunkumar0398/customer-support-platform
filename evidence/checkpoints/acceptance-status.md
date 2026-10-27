@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket creation/list/search/pagination/detail, and ticket content/lifecycle updates have supporting local tests. A03, A04, A13, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Assignment, comments/history, dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `d5cce1829cc0fd5790869a05302a0f2c0911e5bd` (TK-16 ticket update). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, and ticket creation/list/search/pagination/detail/update/assignment have supporting local tests. A03, A04, A09, A13, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Comments/history, dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
+**Latest implementation source SHA:** `3f7598c80a490fffce6b7be40c32714b1cf98ec6` (TK-17 assignment). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -14,7 +14,7 @@
 | A06 | NOT_RUN | [TK-15](TK-15.md): same-org other-customer detail read denied; mutation denial is not implemented/verified. Full acceptance remains incomplete. |
 | A07 | NOT_RUN | [TK-13](TK-13.md): list counts are tenant-scoped; dashboard counts remain pending. |
 | A08 | NOT_RUN | [TK-11](TK-11.md): scoped roster/add/role/deactivate/reactivate API with concurrent last-admin protection; browser administration pending. |
-| A09 | NOT_RUN | [TK-05](TK-05.md): real cross-org FK negatives; assignment API and role eligibility pending. |
+| A09 | PASS | Source `3f7598c80a490fffce6b7be40c32714b1cf98ec6`; `npm run test:api -- tests/tickets/assignment.test.ts` exit 0, 13/13 real PostgreSQL/API, independently replayed. API eligibility denials and actual composite-FK cross-org rejection. [TK-17](TK-17.md), [review](../reviews/tk17-2026-10-27-3f7598c.md). |
 | A10 | NOT_RUN | [TK-12](TK-12.md): role-scoped create API; actual list/detail/visibility and browser journey pending. |
 | A11 | NOT_RUN | [TK-12](TK-12.md): create allowlist/range API cases; other operation/browser field journeys pending. |
 | A12 | NOT_RUN | [TK-10](TK-10.md): staff policy unit cases; actual update/assignment journey pending. |
