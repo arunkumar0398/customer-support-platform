@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `d731fffbbd0351ebb7021510787f71acf4578db4`; TK-26 source and review are committed; checkpoint evidence is recorded in `TK-26.md`.
+Last source SHA: `1fe5731589890e0f40ddbfe7edff34ccaac65102`; TK-27 source and independent parent-folder review are committed; checkpoint evidence is being recorded in `TK-27.md`.
 
 ## Current task state
 
@@ -70,8 +70,14 @@ A10 is now PASS on the aggregate create/list/detail/ownership evidence. A11 rema
 
 TK-26 is complete at source `d731fffbbd0351ebb7021510787f71acf4578db4`. The parent-folder reviewer kit browser replay passed 18/18 and its static review found no remaining P0–P3 issues after a P1 cache-leak fix. See [TK-26](TK-26.md) and [review](../reviews/tk26-2026-10-27-d731fff.md). A10, A12, A14, and A15 pass for their documented aggregate scope; A16 remains NOT_RUN.
 
+## TK-27 completion and current state
+
+TK-27 dashboard UI is committed at `e98279aa887f2bde403c7d6d473d3433aac27bec`, with the parent-review P2 correction at final source `1fe5731589890e0f40ddbfe7edff34ccaac65102`. The static reviewer found that the workload badge included unassigned active tickets. Added an unassigned fixture and observed the expected RED, then changed the badge to sum assigned agent workloads. Focused dashboard browser test passed 1/1; `npm run check` passed (API369/369, web3/3, lint/type/build); full guarded E2E passed 23/23. Parent-kit browser replay of dashboard and ticket-list specs passed 9/9; static review found no remaining P0–P3. See [TK-27](TK-27.md) and [review](../reviews/tk27-2026-10-27-1fe5731.md).
+
+A20/A21 remain PASS for their earlier scoped PostgreSQL/API evidence. Dashboard UI coverage is recorded, but A22/A23 remain NOT_RUN overall because admin and complete viewport/state criteria remain open. G4 remains NOT_RUN.
+
 ## Next action
 
-Proceed with TK-27: dashboard UI over the existing tenant-scoped API. Begin with RED browser tests for staff metrics, customer denial, refresh after mutation, and loading/error/empty states. Use only guarded disposable `support_test`; keep A22/A23 and G4 scoped to complete criteria.
+Proceed with TK-28: admin-only membership controls over the existing API. Start with failing real-browser tests for roster/add/change role/activation, last-active-admin denial, non-admin-hidden controls, and server denial. Use guarded disposable `support_test` and the sibling `100xdevs_assessment_review_agent_skill`; do not claim complete A08, A22/A23, or G4 from this checkpoint.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
