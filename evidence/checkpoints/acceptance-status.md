@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, and health/readiness have supporting local tests. A03–A04, A09–A10, A12–A15, A17–A21 and A29 have passed their documented scoped criteria; other complete checks remain NOT_RUN. Browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `1fe5731589890e0f40ddbfe7edff34ccaac65102` (TK-27 staff dashboard UI and assigned-workload badge correction; independently replayed by parent-folder reviewer kit). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `6260fd55853917eb966f2468dfb28b2de3480df2` (TK-28 admin membership controls and role-draft refresh correction; independently replayed by parent-folder reviewer kit). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -13,7 +13,7 @@
 | A05 | NOT_RUN | [TK-17](TK-17.md), [TK-19](TK-19.md): assignment and comment cross-org mutations have scoped denials; full cross-route mutation acceptance remains incomplete. |
 | A06 | NOT_RUN | [TK-15](TK-15.md), [TK-19](TK-19.md): same-org other-customer read/write comment denials have scoped evidence; complete ticket/comment mutation acceptance remains incomplete. |
 | A07 | NOT_RUN | [TK-13](TK-13.md) and [TK-21](TK-21.md): list counts and dashboard metrics have tenant-scoped evidence; combined acceptance review that dashboard/list counts stay mutually tenant-scoped remains pending. |
-| A08 | NOT_RUN | [TK-11](TK-11.md): scoped roster/add/role/deactivate/reactivate API with concurrent last-admin protection; browser administration pending. |
+| A08 | PASS | API + browser scope: real PostgreSQL/API membership administration, current-org restriction, and concurrent last-admin protection ([TK-11](TK-11.md)); browser add/edit/activation/last-admin flows, preservation of the other-org membership, and exact-SHA independent replay ([TK-28](TK-28.md), [review](../reviews/tk28-2026-10-27-6260fd5.md)). |
 | A09 | PASS | Source `3f7598c80a490fffce6b7be40c32714b1cf98ec6`; `npm run test:api -- tests/tickets/assignment.test.ts` exit 0, 13/13 real PostgreSQL/API, independently replayed. API eligibility denials and actual composite-FK cross-org rejection. [TK-17](TK-17.md), [review](../reviews/tk17-2026-10-27-3f7598c.md). |
 | A10 | PASS | Scoped aggregate evidence: valid customer create [TK-12](TK-12.md)/[TK-25](TK-25.md), customer-owned queue [TK-24](TK-24.md), and ticket detail/customer visibility and generic inaccessible-ticket denial [TK-15](TK-15.md)/[TK-26](TK-26.md). Browser and PostgreSQL/API evidence cover the acceptance path. |
 | A11 | NOT_RUN | [TK-12](TK-12.md), [TK-25](TK-25.md): API allowlist/range evidence and browser required/whitespace/spoof cases are scoped; full operation/browser field coverage remains incomplete. |
@@ -27,8 +27,8 @@
 | A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage; 100,000-row offset limit documented. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |
 | A20 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Exact organization status and priority totals match seeded rows. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
 | A21 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Tests match overdue boundary/exclusions and assigned OPEN/IN_PROGRESS workload formulas for active agents, including zero-workload agent. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
-| A22 | NOT_RUN | [TK-23](TK-23.md)–[TK-27](TK-27.md): auth, queue, create, detail, and dashboard browser journeys have scoped coverage; admin and complete narrow/desktop viewport journeys remain pending. |
-| A23 | NOT_RUN | [TK-23](TK-23.md)–[TK-27](TK-27.md): sign-in/queue states, create validation, detail denial/conflict, dashboard loading/empty/forbidden/failure-retry, and selected failures are covered; full product state coverage remains pending. |
+| A22 | NOT_RUN | [TK-23](TK-23.md)–[TK-28](TK-28.md): auth, queue, create, detail, dashboard, and membership journeys have scoped coverage; membership viewport and complete narrow/desktop product flows remain pending. |
+| A23 | NOT_RUN | [TK-23](TK-23.md)–[TK-28](TK-28.md): sign-in/queue states, create validation, detail denial/conflict, dashboard loading/empty/forbidden/failure-retry, and membership denial/last-admin states are covered; full product state coverage remains pending. |
 | A24 | NOT_RUN | [TK-02](TK-02.md): Compose database only; full fresh Docker app startup pending. |
 | A25 | NOT_RUN | [TK-06](TK-06.md): deterministic seed and hashes verified; complete setup/sign-in journey pending. |
 | A26 | NOT_RUN | [TK-03](TK-03.md), [TK-07](TK-07.md), [TK-08](TK-08.md): partial documentation/API contracts; full submission audit pending. |

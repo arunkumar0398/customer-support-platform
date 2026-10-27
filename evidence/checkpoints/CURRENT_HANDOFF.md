@@ -76,8 +76,14 @@ TK-27 dashboard UI is committed at `e98279aa887f2bde403c7d6d473d3433aac27bec`, w
 
 A20/A21 remain PASS for their earlier scoped PostgreSQL/API evidence. Dashboard UI coverage is recorded, but A22/A23 remain NOT_RUN overall because admin and complete viewport/state criteria remain open. G4 remains NOT_RUN.
 
+## TK-28 completion and current state
+
+TK-28 admin membership controls and the follow-up role-draft correction are committed at exact source `6260fd55853917eb966f2468dfb28b2de3480df2`. The prior-role value is captured before scheduling React state reconciliation; the browser test verifies that a clean selector follows refreshed server data while a deliberate unsaved role choice remains dirty. Parent-folder reviewer-kit browser replay at this SHA verified disposable `support_test` and passed membership + ticket-list tests 8/8. Static review closed the prior P2 and found no new P0–P3 in scope. Root `npm run check` passed (API369/369, web3/3, lint/typecheck/discovery/build), and guarded full E2E passed 23/23. See [TK-28](TK-28.md) and [review](../reviews/tk28-2026-10-27-6260fd5.md).
+
+A08 is PASS for the documented API + browser membership administration criterion, using TK-11 real PostgreSQL/API evidence and TK-28 browser flows plus exact-SHA independent replay. A03 retains its scoped API PASS. A22/A23 and G4 remain NOT_RUN overall; full viewport and product-state coverage is incomplete.
+
 ## Next action
 
-Proceed with TK-28: admin-only membership controls over the existing API. Start with failing real-browser tests for roster/add/change role/activation, last-active-admin denial, non-admin-hidden controls, and server denial. Use guarded disposable `support_test` and the sibling `100xdevs_assessment_review_agent_skill`; do not claim complete A08, A22/A23, or G4 from this checkpoint.
+Proceed with TK-29: responsive, keyboard, and user-state coverage across the delivered frontend. Inspect the exact TK-29 requirements in the task ledger, acceptance matrix, and assessment PDF; map existing tests and evidence-backed gaps before adding focused regressions. Cover narrow/desktop journeys and loading, empty, validation, forbidden, conflict, and failure states where the relevant screens still lack evidence. Use the sibling `100xdevs_assessment_review_agent_skill` for independent exact-SHA review. Keep A22/A23 and G4 NOT_RUN until their complete criteria pass.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
