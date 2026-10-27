@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `c1ddb17018329bd5cbd8cc58f2db58d6551bb4d8`; TK-24 source and review are committed; checkpoint evidence is recorded in `TK-24.md`.
+Last source SHA: `ef7b771bcc2c2a1b889329f8fcf5115768020ea9`; TK-25 source and review are committed; checkpoint evidence is recorded in `TK-25.md`.
 
 ## Current task state
 
@@ -60,8 +60,14 @@ TK-24 ticket queue UI is committed at `c1ddb17018329bd5cbd8cc58f2db58d6551bb4d8`
 
 A17 is PASS for its scoped API + browser filter criterion. A18/A19 retain API-only PASS scope; the queue adds positive search and page-navigation evidence but does not re-prove cross-tenant search isolation or duplicate-free ordering. A22/A23 and G4 remain NOT_RUN because detail/create/dashboard/admin and complete product states are outstanding. The static reviewer recommended adding history navigation during a pending route update; no defect was confirmed, and the reported rapid combined update sequence is covered and green.
 
+## TK-25 completion and current state
+
+TK-25 added the role-aware create form, server-authoritative validation/error handling, creation receipt, and cache invalidation. Exact source `ef7b771bcc2c2a1b889329f8fcf5115768020ea9` passed targeted create browser tests 4/4, full browser suite 19/19, targeted guarded PostgreSQL API suite 51/51, and `npm run check` (API369/369, web3/3, lint/typecheck/build). Parent-folder reviewer kit browser and static reviews ran against the exact source SHA with no findings. Evidence: `TK-25.md` and `../reviews/tk25-2026-10-27-ef7b771.md`.
+
+A10/A11 and A22/A23 remain NOT_RUN overall because complete detail/ownership, all field/range, error-state, responsive, dashboard, and admin coverage is not yet complete. G4 remains NOT_RUN.
+
 ## Next action
 
-Proceed with TK-25: create the role-aware new-ticket form and real-browser tests first, including required/invalid input, successful creation, and customer requester spoof rejection. Use only the guarded disposable `support_test` database. A10/A11 and A22/A23 remain NOT_RUN until their complete scopes are proven. Preserve the exact source/evidence SHA and use the parent-folder reviewer kit for independent review before closing the checkpoint.
+Proceed with TK-26: implement ticket detail, editing, assignment, comments, history, and stale-version conflict recovery. Start with role journeys, including agent/customer, invalid transition, assignment denial, comments/history, and stale `If-Match` behavior. Use only the guarded disposable `support_test` database. Keep A12–A16, A22–A23, A29, and G4 scoped to their complete criteria and use the parent-folder reviewer kit against the exact final source SHA.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
