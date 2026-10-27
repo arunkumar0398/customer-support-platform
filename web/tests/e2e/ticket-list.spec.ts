@@ -17,11 +17,11 @@ const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
-const agentId = randomUUID();
+const agentIds = Array.from({ length: 6 }, () => randomUUID());
 const customerId = randomUUID();
 const otherCustomerId = randomUUID();
 const password = 'synthetic-ticket-list-fixture-password';
-const agentEmail = `queue-agent-${agentId}@example.test`;
+const agentEmails = agentIds.map((id) => `queue-agent-${id}@example.test`);
 const customerEmail = `queue-customer-${customerId}@example.test`;
 let verified = false;
 
@@ -39,14 +39,14 @@ test.beforeAll(async () => {
   await db.organization.create({
     data: { id: organizationId, slug: `queue-${organizationId}`, name: 'Ticket queue fixture' },
   });
-  await db.user.create({
+  await Promise.all(agentIds.map((id, index) => db.user.create({
     data: {
-      id: agentId,
-      email: agentEmail,
+      id,
+      email: agentEmails[index],
       passwordHash,
       memberships: { create: { organizationId, role: 'AGENT' } },
     },
-  });
+  })));
   await db.user.create({
     data: {
       id: customerId,
@@ -84,9 +84,9 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (verified) {
     await db.ticket.deleteMany({ where: { organizationId } });
-    await db.session.deleteMany({ where: { userId: { in: [agentId, customerId, otherCustomerId] } } });
+    await db.session.deleteMany({ where: { userId: { in: [...agentIds, customerId, otherCustomerId] } } });
     await db.membership.deleteMany({ where: { organizationId } });
-    await db.user.deleteMany({ where: { id: { in: [agentId, customerId, otherCustomerId] } } });
+    await db.user.deleteMany({ where: { id: { in: [...agentIds, customerId, otherCustomerId] } } });
     await db.organization.deleteMany({ where: { id: organizationId } });
   }
   await db.$disconnect();
@@ -102,7 +102,7 @@ async function signIn(page: Page, email: string) {
 }
 
 test('staff search and status filters update the queue and URL', async ({ page }) => {
-  await signIn(page, agentEmail);
+  await signIn(page, agentEmails[0]);
 
   await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
   await expect(page.getByText('26 tickets')).toBeVisible();
@@ -134,8 +134,19 @@ test('customers only see their own tickets in the queue', async ({ page }) => {
   await expect(page.getByLabel('Assignment')).toBeHidden();
 });
 
+test('staff can filter tickets by customer membership id', async ({ page }) => {
+  await signIn(page, agentEmails[1]);
+
+  await page.getByLabel('Customer ID').fill(customerId);
+  await page.getByRole('button', { name: 'Search' }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('customerId')).toBe(customerId);
+  await expect(page.getByText('25 tickets')).toBeVisible();
+  await expect(page.getByRole('row', { name: /Queue request 25/ })).toBeVisible();
+  await expect(page.getByRole('row', { name: /Queue request 26/ })).toHaveCount(0);
+});
+
 test('queue pagination keeps page state in the URL', async ({ page }) => {
-  await signIn(page, agentEmail);
+  await signIn(page, agentEmails[2]);
 
   await expect(page.getByText('Page 1 of 2')).toBeVisible();
   await page.getByRole('button', { name: 'Next page' }).click();
@@ -148,8 +159,22 @@ test('queue pagination keeps page state in the URL', async ({ page }) => {
   await expect(page.getByText('No tickets match these filters')).toBeVisible();
 });
 
+test('ticket queue fits a narrow viewport and keeps the table scrollable', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, agentEmails[3]);
+
+  await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
+  const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(documentWidth).toBeLessThanOrEqual(375);
+  const table = await page.locator('.ticket-table').evaluate((element) => ({
+    contentWidth: element.scrollWidth,
+    viewportWidth: element.parentElement!.clientWidth,
+  }));
+  expect(table.contentWidth).toBeGreaterThan(table.viewportWidth);
+});
+
 test('queue request errors show a retry action', async ({ page }) => {
-  await signIn(page, agentEmail);
+  await signIn(page, agentEmails[4]);
   await page.route('**/api/tickets?*', (route) => route.fulfill({
     status: 503,
     contentType: 'application/json',
@@ -162,7 +187,7 @@ test('queue request errors show a retry action', async ({ page }) => {
 });
 
 test('queue announces loading while the ticket response is pending', async ({ page }) => {
-  await signIn(page, agentEmail);
+  await signIn(page, agentEmails[5]);
   await page.route('**/api/tickets?*', async (route) => {
     await page.waitForTimeout(300);
     await route.continue();

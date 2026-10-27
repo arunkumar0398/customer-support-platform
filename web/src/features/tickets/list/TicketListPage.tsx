@@ -31,6 +31,7 @@ function TicketRow({ ticket }: { ticket: TicketListItem }) {
 export function TicketListPage({ identity, organizationId }: { identity: Identity; organizationId?: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState(searchParams.get('search') ?? '');
+  const [customerIdValue, setCustomerIdValue] = useState(searchParams.get('customerId') ?? '');
   const status = searchParams.get('status') ?? '';
   const priority = searchParams.get('priority') ?? '';
   const assigneeId = searchParams.get('assigneeId') ?? '';
@@ -40,6 +41,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
 
   useEffect(() => {
     setSearchValue(searchParams.get('search') ?? '');
+    setCustomerIdValue(searchParams.get('customerId') ?? '');
   }, [searchParams]);
 
   const queryString = useMemo(() => {
@@ -47,12 +49,14 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
     if (status) query.set('status', status);
     if (priority) query.set('priority', priority);
     if (assigneeId) query.set('assigneeId', assigneeId);
+    const customerId = searchParams.get('customerId')?.trim();
+    if (isStaff && customerId) query.set('customerId', customerId);
     const search = searchParams.get('search')?.trim();
     if (search) query.set('search', search);
     query.set('page', String(page));
     query.set('pageSize', String(PAGE_SIZE));
     return query.toString();
-  }, [assigneeId, page, priority, searchParams, status]);
+  }, [assigneeId, isStaff, page, priority, searchParams, status]);
 
   const tickets = useQuery({
     queryKey: ['tickets', identity.user.id, organizationId, queryString],
@@ -75,6 +79,11 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
     const search = searchValue.trim();
     if (search) next.set('search', search);
     else next.delete('search');
+    if (isStaff) {
+      const customerId = customerIdValue.trim();
+      if (customerId) next.set('customerId', customerId);
+      else next.delete('customerId');
+    }
     next.delete('page');
     setSearchParams(next);
   }
@@ -109,16 +118,31 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
       <div className="queue-card">
         <div className="queue-toolbar">
           <form className="ticket-search" onSubmit={submitSearch} role="search">
-            <label htmlFor="ticket-search">Search tickets</label>
             <div className="search-field">
-              <input
-                id="ticket-search"
-                type="search"
-                maxLength={100}
-                placeholder="Search subject or details"
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-              />
+              <label htmlFor="ticket-search">
+                Search tickets
+                <input
+                  id="ticket-search"
+                  type="search"
+                  maxLength={100}
+                  placeholder="Search subject or details"
+                  value={searchValue}
+                  onChange={(event) => setSearchValue(event.target.value)}
+                />
+              </label>
+              {isStaff && (
+                <label htmlFor="customer-filter">
+                  Customer ID
+                  <input
+                    id="customer-filter"
+                    type="text"
+                    maxLength={36}
+                    placeholder="Paste customer UUID"
+                    value={customerIdValue}
+                    onChange={(event) => setCustomerIdValue(event.target.value)}
+                  />
+                </label>
+              )}
               <button className="button button-primary" type="submit">Search</button>
             </div>
           </form>
