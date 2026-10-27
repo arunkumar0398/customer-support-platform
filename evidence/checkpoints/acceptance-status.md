@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, health/readiness, and scoped frontend journeys have supporting local evidence. A03–A04, A08–A10, A12–A15, A17–A21 and A29 have passed their documented scoped criteria; other complete checks remain NOT_RUN. Full acceptance of responsive/state/accessibility behavior, Docker application startup, CI, and deployment remains pending.
-**Latest implementation source SHA:** 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e (TK-30 cross-route security attack suite; independently replayed by parent-folder static and runtime reviewers). TK-29 remains the latest UI implementation SHA. Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** a74ee31f3198425f9afed8dda58b63cdb3eddb9c (TK-31 tenant ticket-list query-plan assessment utility; exact-SHA parent-folder static and runtime reviews completed). TK-31 changes assessment tooling and evidence, not application behavior. Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -35,7 +35,7 @@
 | A27 | NOT_RUN | [TK-03](TK-03.md): architecture/operational design documents; final delivery audit pending. |
 | A28 | NOT_RUN | [TK-03](TK-03.md): assumptions and operational design; engineering-defense rehearsal pending. |
 | A29 | PASS | Source `84106fa3fff66ad304b1e56d7a690d4e20445a28`; `npm run test:api -- tests/tickets/concurrency.test.ts` exit 0, 7/7 guarded PostgreSQL/API tests, independently replayed. Concurrent content and assignment writes using one ETag produce one success, one 409, one version increment, and one matching event. Stale no-op requests also reject with 409. See [TK-20](TK-20.md) and [review](../reviews/tk20-2026-10-27-84106fa.md). |
-| A30 | NOT_RUN | |
+| A30 | N/A | TK-31 exact-SHA create replay confirms repeated POSTs create distinct tickets; idempotency key behavior is not implemented. The acceptance matrix permits N/A when this optional behavior is unimplemented. Clients must not automatically retry ambiguous creates. See [TK-31](TK-31.md), [review](../reviews/tk31-2026-10-27-a74ee31.md), and [performance note](../../docs/performance.md). |
 | A31 | NOT_RUN | [TK-30](TK-30.md): comment actor/tenant/prototype payload and non-admin role escalation denied without mutation; existing strict ticket/membership allowlist tests also ran. Consolidated all-route acceptance remains pending. |
 | A32 | NOT_RUN | [TK-30](TK-30.md): guarded API matrix covers missing CSRF and hostile Origin on seven cookie-authenticated write routes; cookie evidence exists in [TK-08](TK-08.md), but full production/proxy/browser acceptance remains pending. |
 | A33 | NOT_RUN | [TK-30](TK-30.md): guarded replay includes throttling, safe error/request ID, and secret-redaction suites; [OPEN P2 capacity concern](../reviews/security-foundation-2026-10-26-2f95a1a.md) still needs exhaustion/recovery evidence and disposition. |
@@ -43,6 +43,6 @@
 | A35 | NOT_RUN | |
 | A36 | NOT_RUN | |
 | A37 | NOT_RUN | [TK-29](TK-29.md): native labels, accessible names, and a keyboard Tab/focus-treatment path have scoped evidence; a dedicated broader keyboard/focus accessibility pass remains pending. |
-| A38 | NOT_RUN | [TK-04](TK-04.md), [TK-05](TK-05.md): schema/index foundation; representative EXPLAIN pending. |
+| A38 | PASS | Source `a74ee31f3198425f9afed8dda58b63cdb3eddb9c`; guarded PostgreSQL 18.6 EXPLAIN ANALYZE assessed tenant/status list query on 50,000 rollback-only synthetic tickets and selected `Ticket_org_status_created_id_idx` for first page. Scoped to the required representative list/filter plan; this is not a load/SLO claim. See [TK-31](TK-31.md), [review](../reviews/tk31-2026-10-27-a74ee31.md), and [performance note](../../docs/performance.md). |
 | A39 | NOT_RUN | [TK-06](TK-06.md): notifications scoped as future work; final limitation/demo review pending. |
 | A40 | NOT_RUN | [TK-06](TK-06.md): optional feature scope recorded; final backlog/limitations audit pending. |

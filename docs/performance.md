@@ -4,7 +4,7 @@
 
 This is a local PostgreSQL query-plan assessment, not a production latency claim or a million-row load test.
 
-- Repository source before TK-31 evidence: 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e.
+- Assessment utility source: a74ee31f3198425f9afed8dda58b63cdb3eddb9c (based on application source 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e).
 - Environment: Windows local workspace, Node 24.22.1, npm 11.19.1, PostgreSQL 18.6, disposable database support_test / user support_test.
 - Fixture: 50,000 synthetic tickets distributed evenly across ten synthetic organizations; the target tenant had 5,000 rows, split evenly between OPEN and IN_PROGRESS.
 - The assessment starts a transaction, sets 30-second statement and 5-second lock timeouts, ANALYZEs the Ticket table, runs EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON), then rolls the transaction back. The runner confirmed that no synthetic organization remained.

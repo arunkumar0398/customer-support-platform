@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last implementation source SHA: 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e (TK-30 security attack suite). TK-30 checkpoint/review evidence is being committed separately.
+Last implementation source SHA: a74ee31f3198425f9afed8dda58b63cdb3eddb9c (TK-31 guarded ticket-list plan assessment). TK-31 checkpoint/review evidence is being committed separately.
 
 ## Current task state
 
@@ -88,10 +88,12 @@ TK-29 responsive, keyboard, and state coverage is recorded at source `f834843094
 
 A22, A23, A37, and G4 remain `NOT_RUN`: this checkpoint adds screenshot, responsive, state, keyboard focus, and accessible-name evidence, but does not establish every route/viewport/state combination or a dedicated accessibility audit. The reviewer replay regenerated 10 tracked screenshot artifacts, now retained with the checkpoint evidence.
 
-## Current checkpoint and next action
+## TK-31 completion and next action
 
-TK-30 is complete at source 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e. The focused security suite passed 16/16; the full local check passed API 385/385 and web 3/3, with 23 E2E tests discovered. Parent-kit static and runtime reviews found no P0/P1; runtime replay passed 170/170 relevant API tests. An OPEN P2 login-limiter capacity/recovery risk remains. A31–A33 and G5 remain NOT_RUN at full acceptance scope.
+TK-31 implementation source `a74ee31f3198425f9afed8dda58b63cdb3eddb9c` adds a guarded rollback-only query-plan assessment utility. Root verification passed the query helper 1/1, the exact-source full check (API385/385, web3/3, 23 E2E discovered, lint/typecheck/build), and docs/diff checks. The parent-folder reviewer kit static replay reported no P0/P1 source findings; its P2 acceptance-ledger mismatch and P3 index-count wording were corrected in the evidence follow-up. Runtime replay found no P0–P3 findings, passed the guarded query-plan assessment and 58 create/concurrency API tests. See `TK-31.md` and `../reviews/tk31-2026-10-27-a74ee31.md`.
 
-Proceed to TK-31 reliability/performance. First inspect indexes and the actual tenant-scoped list query, then write a bounded plan and use guarded EXPLAIN evidence for a representative filter. Measure only what is actually executed; do not claim million-row load testing without a real run. Continue using the parent reviewer kit for an independent exact-SHA review. Preserve the disposable DB guard and do not run DB tests concurrently with reviewer replay.
+A38 is PASS for the representative tenant/status index plan; A30 is N/A because idempotency is not implemented and duplicate create/retry behavior is explicit. A29 remains PASS. These scoped results do not complete G5; overall release is NOT_READY. The login limiter capacity/recovery P2 remains open.
+
+Next: TK-32 CI and clean-checkout gates. Read the existing root scripts, package lock/workspaces, Compose/test DB lifecycle, README and CI conventions before changing them. Preserve or extend truthful gates: locked install, isolated PostgreSQL, migration/seed, lint/typecheck, API, web, E2E, build, sanitized artifacts. Add a failing-gate validation only in a disposable local fixture; do not weaken or fake CI success. Verify on a clean checkout/worktree if safely possible. Use the sibling parent-folder reviewer kit for exact-SHA static/runtime review, and do not overlap its DB runs. Record exact evidence, but leave G5 NOT_RUN until Docker clean-checkout, CI and remaining release criteria pass.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing DB identities remain support_dev and guarded disposable support_test; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
