@@ -1,7 +1,7 @@
 # Acceptance Status
 
-**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket creation/list/search/pagination, and ticket detail have supporting local tests. A03, A04, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Ticket mutations/comments/dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `22598cad56d45d1cb7a2c73a44517e9756aea34f` (TK-15 ticket detail; a later evidence commit corrects one docs sentence). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket creation/list/search/pagination/detail, and ticket content/lifecycle updates have supporting local tests. A03, A04, A13, A18, and A19 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Assignment, comments/history, dashboard, browser journeys, complete Docker application startup, CI, and deployment are pending.
+**Latest implementation source SHA:** `d5cce1829cc0fd5790869a05302a0f2c0911e5bd` (TK-16 ticket update). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -18,7 +18,7 @@
 | A10 | NOT_RUN | [TK-12](TK-12.md): role-scoped create API; actual list/detail/visibility and browser journey pending. |
 | A11 | NOT_RUN | [TK-12](TK-12.md): create allowlist/range API cases; other operation/browser field journeys pending. |
 | A12 | NOT_RUN | [TK-10](TK-10.md): staff policy unit cases; actual update/assignment journey pending. |
-| A13 | NOT_RUN | |
+| A13 | PASS | Source `d5cce1829cc0fd5790869a05302a0f2c0911e5bd`; `npm run test:api -- tests/tickets/update.test.ts` exit 0, 30/30 real PostgreSQL/API, independently replayed. Legal/illegal transitions and no-side-effect rejection verified. [TK-16](TK-16.md), [review](../reviews/tk16-2026-10-27-d5cce18.md). |
 | A14 | NOT_RUN | [TK-10](TK-10.md): comment permission foundation; persistence/order/API/browser checks pending. |
 | A15 | NOT_RUN | [TK-12](TK-12.md): atomic creation event tested; events for update/comment/assignment still pending. |
 | A16 | NOT_RUN | [TK-12](TK-12.md): create/event DB fault rollback tested; remaining ticket mutation paths pending. |
