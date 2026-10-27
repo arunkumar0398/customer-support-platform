@@ -63,7 +63,8 @@ describe('sign-in and session shell', () => {
   it('sends same-origin credentialed login and enters the active organization shell', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(apiError(401, 'UNAUTHENTICATED', 'Authentication is required.'))
-      .mockResolvedValueOnce(response(200, identity));
+      .mockResolvedValueOnce(response(200, identity))
+      .mockResolvedValueOnce(response(200, { items: [], total: 0, page: 1, pageSize: 25 }));
     vi.stubGlobal('fetch', fetchMock);
 
     render(<App />);
@@ -71,13 +72,16 @@ describe('sign-in and session shell', () => {
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'test-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await screen.findByRole('heading', { name: 'Your support workspace' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Ticket queue' })).toBeInTheDocument();
     expect(screen.getByText((text) => text.includes(identity.user.email))).toBeInTheDocument();
     expect(screen.getByText('Northstar Helpdesk')).toBeInTheDocument();
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
     const [url, options] = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
     expect(url).toBe('/api/auth/login');
     expect(options.credentials).toBe('include');
     expect(new Headers(options.headers).get('X-CSRF-Protection')).toBe('1');
+    const [ticketsUrl, ticketsOptions] = fetchMock.mock.calls[2] as unknown as [string, RequestInit];
+    expect(ticketsUrl).toBe('/api/tickets?page=1&pageSize=25');
+    expect(new Headers(ticketsOptions.headers).get('X-Organization-ID')).toBe(identity.memberships[0].organizationId);
   });
 });

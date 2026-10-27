@@ -90,11 +90,11 @@ test('restores a real server session after reload and signs out', async ({ page 
   await page.getByRole('button', { name: 'Sign in' }).click();
 
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('heading', { name: 'Your support workspace' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
   await expect(page.getByText(email)).toBeVisible();
 
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Your support workspace' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
   await expect(page.getByText(email)).toBeVisible();
 
   await page.getByRole('button', { name: 'Sign out' }).click();

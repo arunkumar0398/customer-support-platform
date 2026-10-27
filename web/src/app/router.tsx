@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './providers';
+import { TicketListPage } from '../features/tickets/list/TicketListPage';
 import './styles.css';
 
 function LoadingScreen() {
@@ -136,13 +138,8 @@ function WorkspacePage() {
           <button className="button button-quiet" onClick={() => void signOut()}>Sign out</button>
         </div>
       </header>
-      <section className="workspace-content" aria-labelledby="workspace-title">
-        <p className="eyebrow">{membership?.organization.slug ?? 'MEMBERSHIP REQUIRED'}</p>
-        <h1 id="workspace-title">Your support workspace</h1>
-        <p className="workspace-welcome">You’re signed in. Your organization’s ticket tools will appear here.</p>
-        {error && <p role="alert" className="form-error">{error}</p>}
-        <div className="workspace-note"><span className="note-mark" aria-hidden="true">↗</span><span>Each customer’s conversation stays with the right organization and owner.</span></div>
-      </section>
+      {error && <p role="alert" className="form-error workspace-signout-error">{error}</p>}
+      <TicketListPage identity={state.identity} organizationId={membership?.organizationId} />
     </main>
   );
 }
@@ -165,14 +162,20 @@ function SignInRoute() {
 }
 
 export function App() {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: { queries: { staleTime: 15_000, refetchOnWindowFocus: false } },
+  }));
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/sign-in" element={<SignInRoute />} />
-          <Route path="*" element={<AuthenticatedRoute />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/sign-in" element={<SignInRoute />} />
+            <Route path="*" element={<AuthenticatedRoute />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

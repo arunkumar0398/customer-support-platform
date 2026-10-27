@@ -10,6 +10,28 @@ export interface Identity {
   csrfToken: string;
 }
 
+export interface TicketListItem {
+  id: string;
+  organizationId: string;
+  ticketNumber: number;
+  requesterUserId: string;
+  assigneeUserId: string | null;
+  title: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  dueAt: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TicketListResponse {
+  items: TicketListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 interface ErrorEnvelope {
   error?: { code?: unknown; message?: unknown };
 }
@@ -66,5 +88,11 @@ export function signOut(csrfToken: string): Promise<void> {
   return request<void>('/api/auth/logout', {
     method: 'POST',
     headers: { 'X-CSRF-Token': csrfToken },
+  });
+}
+
+export function getTickets(organizationId: string, query: string): Promise<TicketListResponse> {
+  return request<TicketListResponse>(`/api/tickets?${query}`, {
+    headers: { 'X-Organization-ID': organizationId },
   });
 }
