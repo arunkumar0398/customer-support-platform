@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, and health/readiness have supporting local tests. A03, A04, A09, A13, A18, A19, A20, A21 and A29 have passed their documented API-only scopes; other complete checks remain NOT_RUN. Browser journeys, complete Docker application startup, CI, and deployment are pending.
-**Latest implementation source SHA:** `49f0a2c5c94cf24efe980d6862cda34e8d99985c` (TK-22 health/readiness and API contract). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** `93c074d96ffa696624842e5b0628a694d1d2f6a8` (TK-23 auth shell, narrow-tablet review fix). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -27,8 +27,8 @@
 | A19 | PASS | Source `c68d652db632090bbcde89d5d725a1ae2d224fca`; root `npm run check` exit 0 (API281/281), independent `npm run test:api -- tests/tickets/pagination.test.ts` exit 0 (17/17), guarded PostgreSQL. Stable tie order, bounds, filters, and unchanged-set page coverage; 100,000-row offset limit documented. [TK-14](TK-14.md), [review](../reviews/tk14-2026-10-26-c68d652.md). |
 | A20 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Exact organization status and priority totals match seeded rows. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
 | A21 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Tests match overdue boundary/exclusions and assigned OPEN/IN_PROGRESS workload formulas for active agents, including zero-workload agent. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
-| A22 | NOT_RUN | |
-| A23 | NOT_RUN | |
+| A22 | NOT_RUN | [TK-23](TK-23.md): auth-shell browser journeys and 640px responsive regression passed; ticket/dashboard/admin journeys and complete responsive/error/loading states remain pending. |
+| A23 | NOT_RUN | [TK-23](TK-23.md): sign-in invalid-credential and session states tested; forbidden/empty/full product UI state coverage remains pending. |
 | A24 | NOT_RUN | [TK-02](TK-02.md): Compose database only; full fresh Docker app startup pending. |
 | A25 | NOT_RUN | [TK-06](TK-06.md): deterministic seed and hashes verified; complete setup/sign-in journey pending. |
 | A26 | NOT_RUN | [TK-03](TK-03.md), [TK-07](TK-07.md), [TK-08](TK-08.md): partial documentation/API contracts; full submission audit pending. |
