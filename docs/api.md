@@ -75,7 +75,18 @@ The response contains only id, organizationId, ticketNumber, requesterUserId, as
 
 `GET /api/tickets/{ticketId}` requires an authenticated session and valid active `X-Organization-ID`. ADMIN/AGENT memberships can read tickets in their selected organization. A CUSTOMER can read only tickets whose requester is that active customer. Missing, foreign-organization, and same-organization other-customer tickets return the same 404 `NOT_FOUND` envelope; the identifier and inaccessible record details are not returned. The path must be a UUID or the request returns 422 `VALIDATION_ERROR`.
 
-The response contains the ticket's id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. It contains no credentials or activity/comments; those have separate planned endpoints. Authenticated responses set `Cache-Control: no-store`. `npm run test:api -- tests/tickets/detail.test.ts` covers both roles, customer ownership, foreign and absent records, both organizations, and malformed identifiers.
+The response contains the ticket's id, organizationId, ticketNumber, requesterUserId, assigneeUserId, title, description, status, priority, dueAt, version, createdAt, and updatedAt. It contains no credentials or activity/comments. Authenticated responses set `Cache-Control: no-store`. `npm run test:api -- tests/tickets/detail.test.ts` covers both roles, customer ownership, foreign and absent records, both organizations, and malformed identifiers.
+
+## Ticket activity history
+
+`GET /api/tickets/{ticketId}/activity` requires an authenticated session and valid active `X-Organization-ID`. It uses the same visibility rule as ticket detail: ADMIN/AGENT can read history within the selected organization, while CUSTOMER can read only their own tickets. Missing, foreign-organization, and other-customer tickets return the same generic 404. The route is read-only; event update/delete endpoints are not exposed. Authenticated responses set `Cache-Control: no-store`.
+
+| Query | Accepted value | Behavior |
+|---|---|---|
+| `page` | Integer 1–1000, default 1 | One-based page number. |
+| `pageSize` | Integer 1–100, default 25 | Maximum results on this page. |
+
+Unknown, repeated, or out-of-range query parameters return 422. The response is `{ items, total, page, pageSize }`; items are ordered by `createdAt ASC, id ASC` and contain only `id`, `organizationId`, `ticketId`, `actorUserId`, `type`, `previousValue`, `newValue`, `reason`, and `createdAt`. Ticket visibility, event count, and event page are read in one repeatable-read transaction; event queries include both the authorized organization and ticket IDs. The bounded offset API reaches at most 100,000 events for a ticket. `npm run test:api -- tests/activity/atomicity.test.ts` covers chronology, tenant and customer ownership, query validation, absence of mutation routes, and a PostgreSQL fault-injection rollback for ticket update plus event insert. Comments remain a separate endpoint planned in TK-19.
 
 ## Ticket updates
 
