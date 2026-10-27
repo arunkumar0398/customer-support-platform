@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './providers';
+import { TicketCreatePage } from '../features/tickets/create/TicketCreatePage';
 import { TicketListPage } from '../features/tickets/list/TicketListPage';
+import type { CreatedTicket } from '../lib/api';
 import './styles.css';
 
 function LoadingScreen() {
@@ -111,10 +113,13 @@ function SignInPage() {
 
 function WorkspacePage() {
   const { state, logout } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   if (state.status !== 'authenticated') return null;
   const membership = state.identity.memberships[0];
+  const createdTicketPath = location.pathname.match(/^\/tickets\/([0-9a-f-]+)$/i);
+  const createdTicket = (location.state as { createdTicket?: CreatedTicket } | null)?.createdTicket;
 
   async function signOut() {
     setError('');
@@ -127,9 +132,9 @@ function WorkspacePage() {
   }
 
   return (
-    <main className="workspace-layout">
+    <div className="workspace-layout">
       <header className="workspace-header">
-        <a className="workspace-brand" href="/" aria-label="Support Desk home"><span className="brand-mark" aria-hidden="true">S</span>Support Desk</a>
+        <Link className="workspace-brand" to="/" aria-label="Support Desk home"><span className="brand-mark" aria-hidden="true">S</span>Support Desk</Link>
         <div className="account-block">
           <div className="account-copy">
             <span>{membership?.organization.name ?? 'No active organization'}</span>
@@ -139,8 +144,34 @@ function WorkspacePage() {
         </div>
       </header>
       {error && <p role="alert" className="form-error workspace-signout-error">{error}</p>}
-      <TicketListPage identity={state.identity} organizationId={membership?.organizationId} />
-    </main>
+      {location.pathname === '/' && (
+        <main>
+          <TicketListPage identity={state.identity} organizationId={membership?.organizationId} />
+        </main>
+      )}
+      {location.pathname === '/tickets/new' && (
+        <TicketCreatePage identity={state.identity} organizationId={membership?.organizationId} />
+      )}
+      {createdTicketPath && createdTicketPath[1] === createdTicket?.id && (
+        <main className="ticket-created" aria-labelledby="ticket-created-title">
+          <p className="eyebrow">SUPPORT DESK · RECEIVED</p>
+          <h1 id="ticket-created-title">Ticket submitted</h1>
+          <p className="ticket-created-number">Ticket #{createdTicket.ticketNumber}</p>
+          <div className="ticket-created-card">
+            <span className="status-pill status-open">Open</span>
+            <h2>{createdTicket.title}</h2>
+            <p>{createdTicket.description}</p>
+            <p className="ticket-created-priority">{createdTicket.priority[0] + createdTicket.priority.slice(1).toLowerCase()} priority</p>
+          </div>
+          <p className="ticket-created-note">Your request is in the queue. You can return to your workspace at any time.</p>
+          <Link className="button button-primary" to="/">Return to ticket queue</Link>
+        </main>
+      )}
+      {location.pathname !== '/' && location.pathname !== '/tickets/new' && !createdTicketPath && (
+        <Navigate to="/" replace />
+      )}
+      {createdTicketPath && createdTicketPath[1] !== createdTicket?.id && <Navigate to="/" replace />}
+    </div>
   );
 }
 

@@ -32,6 +32,17 @@ export interface TicketListResponse {
   pageSize: number;
 }
 
+export interface CreatedTicket extends TicketListItem {
+  description: string;
+}
+
+export interface CreateTicketPayload {
+  title: string;
+  description: string;
+  requesterUserId?: string;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+}
+
 interface ErrorEnvelope {
   error?: { code?: unknown; message?: unknown };
 }
@@ -94,5 +105,20 @@ export function signOut(csrfToken: string): Promise<void> {
 export function getTickets(organizationId: string, query: string): Promise<TicketListResponse> {
   return request<TicketListResponse>(`/api/tickets?${query}`, {
     headers: { 'X-Organization-ID': organizationId },
+  });
+}
+
+export function createTicket(
+  organizationId: string,
+  csrfToken: string,
+  payload: CreateTicketPayload,
+): Promise<CreatedTicket> {
+  return request<CreatedTicket>('/api/tickets', {
+    method: 'POST',
+    headers: {
+      'X-Organization-ID': organizationId,
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify(payload),
   });
 }

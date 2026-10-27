@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ApiError, getTickets } from '../../../lib/api';
 import type { Identity, TicketListItem } from '../../../lib/api';
 import './ticket-list.css';
@@ -134,6 +134,7 @@ export function TicketListPage({ identity, organizationId }: { identity: Identit
           <h1 id="ticket-queue-title">Ticket queue</h1>
           <p className="queue-intro">A clear view of every conversation that needs your team.</p>
         </div>
+        <Link className="button button-primary" to="/tickets/new">Create ticket</Link>
         {tickets.data && (
           <p className="queue-total" aria-live="polite">
             <strong>{tickets.data.total}</strong> {tickets.data.total === 1 ? 'ticket' : 'tickets'}
