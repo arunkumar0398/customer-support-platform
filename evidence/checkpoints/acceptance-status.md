@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, health/readiness, and scoped frontend journeys have supporting local evidence. A03–A04, A08–A10, A12–A15, A17–A21 and A29 have passed their documented scoped criteria; other complete checks remain NOT_RUN. Full acceptance of responsive/state/accessibility behavior, Docker application startup, CI, and deployment remains pending.
-**Latest implementation source SHA:** `f834843094d8b23887e567e8314032e1deea0436` (TK-29 responsive/state evidence and mobile membership roster scroll cue; independently replayed by parent-folder browser and static reviewers). Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e (TK-30 cross-route security attack suite; independently replayed by parent-folder static and runtime reviewers). TK-29 remains the latest UI implementation SHA. Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -36,9 +36,9 @@
 | A28 | NOT_RUN | [TK-03](TK-03.md): assumptions and operational design; engineering-defense rehearsal pending. |
 | A29 | PASS | Source `84106fa3fff66ad304b1e56d7a690d4e20445a28`; `npm run test:api -- tests/tickets/concurrency.test.ts` exit 0, 7/7 guarded PostgreSQL/API tests, independently replayed. Concurrent content and assignment writes using one ETag produce one success, one 409, one version increment, and one matching event. Stale no-op requests also reject with 409. See [TK-20](TK-20.md) and [review](../reviews/tk20-2026-10-27-84106fa.md). |
 | A30 | NOT_RUN | |
-| A31 | NOT_RUN | [TK-07](TK-07.md), [TK-09](TK-09.md): allowlist/context foundations; product-route attack suite pending. |
-| A32 | NOT_RUN | [TK-08](TK-08.md): cookie flags and HTTP origin/CSRF tests; browser/proxy proof pending. |
-| A33 | NOT_RUN | [TK-07](TK-07.md), [TK-08](TK-08.md): errors/request IDs/logs/local throttling; [OPEN P2 capacity concern](../reviews/security-foundation-2026-10-26-2f95a1a.md), full attack suite pending. |
+| A31 | NOT_RUN | [TK-30](TK-30.md): comment actor/tenant/prototype payload and non-admin role escalation denied without mutation; existing strict ticket/membership allowlist tests also ran. Consolidated all-route acceptance remains pending. |
+| A32 | NOT_RUN | [TK-30](TK-30.md): guarded API matrix covers missing CSRF and hostile Origin on seven cookie-authenticated write routes; cookie evidence exists in [TK-08](TK-08.md), but full production/proxy/browser acceptance remains pending. |
+| A33 | NOT_RUN | [TK-30](TK-30.md): guarded replay includes throttling, safe error/request ID, and secret-redaction suites; [OPEN P2 capacity concern](../reviews/security-foundation-2026-10-26-2f95a1a.md) still needs exhaustion/recovery evidence and disposition. |
 | A34 | NOT_RUN | [TK-01](TK-01.md), [TK-08](TK-08.md): local checks only; actual browser and CI gate pending. |
 | A35 | NOT_RUN | |
 | A36 | NOT_RUN | |

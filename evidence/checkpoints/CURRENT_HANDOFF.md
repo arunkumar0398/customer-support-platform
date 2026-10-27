@@ -4,7 +4,7 @@ Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last source SHA: `1fe5731589890e0f40ddbfe7edff34ccaac65102`; TK-27 source and independent parent-folder review are committed; checkpoint evidence is being recorded in `TK-27.md`.
+Last implementation source SHA: 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e (TK-30 security attack suite). TK-30 checkpoint/review evidence is being committed separately.
 
 ## Current task state
 
@@ -88,8 +88,10 @@ TK-29 responsive, keyboard, and state coverage is recorded at source `f834843094
 
 A22, A23, A37, and G4 remain `NOT_RUN`: this checkpoint adds screenshot, responsive, state, keyboard focus, and accessible-name evidence, but does not establish every route/viewport/state combination or a dedicated accessibility audit. The reviewer replay regenerated 10 tracked screenshot artifacts, now retained with the checkpoint evidence.
 
-## Next action
+## Current checkpoint and next action
 
-Proceed with TK-30: security attack suite. Read its task ledger, acceptance, security contract, and current route/auth defenses; map existing real PostgreSQL/API attack coverage before adding test-first adversarial cases for role boundaries, mass assignment, CSRF/origin, and rate limiting. Record scoped outcomes and use the sibling `100xdevs_assessment_review_agent_skill` for fresh exact-SHA review. Keep A31–A33 and G5 `NOT_RUN` until their complete criteria pass.
+TK-30 is complete at source 469b3c9d1b8c75613cf4df6a9e751b6bfe8d551e. The focused security suite passed 16/16; the full local check passed API 385/385 and web 3/3, with 23 E2E tests discovered. Parent-kit static and runtime reviews found no P0/P1; runtime replay passed 170/170 relevant API tests. An OPEN P2 login-limiter capacity/recovery risk remains. A31–A33 and G5 remain NOT_RUN at full acceptance scope.
 
-Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing local DB identities are `support_dev` and guarded disposable `support_test`; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
+Proceed to TK-31 reliability/performance. First inspect indexes and the actual tenant-scoped list query, then write a bounded plan and use guarded EXPLAIN evidence for a representative filter. Measure only what is actually executed; do not claim million-row load testing without a real run. Continue using the parent reviewer kit for an independent exact-SHA review. Preserve the disposable DB guard and do not run DB tests concurrently with reviewer replay.
+
+Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing DB identities remain support_dev and guarded disposable support_test; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.

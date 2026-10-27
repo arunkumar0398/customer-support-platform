@@ -64,7 +64,7 @@
 
 - [x] Run guarded focused attack suite: 16/16 passed.
 - [x] Run guarded `npm run check`: API385/385, web3/3, 23 E2E tests discovered, lint/typecheck/build passed.
-- [ ] Run documentation contract and whitespace checks, commit the test-only source and plan, and request exact-SHA parent-folder review.
-- [ ] Record reviewer findings and checkpoint evidence; leave A31–A33/G5 pending unless the whole matrix is established.
+- [x] Run documentation contract and whitespace checks; commit test-only source/plan at 469b3c9; obtain exact-SHA parent-folder review.
+- [x] Record reviewer findings and checkpoint evidence; retain A31–A33 and G5 as NOT_RUN because full acceptance is not established.
 
 **Commit:** `test(security): add cross-route attack coverage` for the verified test source, then a separate evidence commit after exact-SHA review.
