@@ -13,13 +13,18 @@ spec.loader.exec_module(checker)
 
 
 class LedgerContractTests(unittest.TestCase):
-    def check_ledger(self, result="NOT_RUN", evidence="", initial=False):
+    def check_ledger(self, result="NOT_RUN", evidence="", initial=False, missing_api_requirement=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             for relative, sections in checker.DOC_REQUIREMENTS.items():
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text("\n".join(sections) + "\nflowchart LR\nflowchart LR", encoding="utf-8")
+                content = list(sections)
+                if relative == "docs/api.md":
+                    content.extend(checker.API_DOC_REQUIREMENTS)
+                    if missing_api_requirement is not None:
+                        content.remove(missing_api_requirement)
+                path.write_text("\n".join(content) + "\nflowchart LR\nflowchart LR", encoding="utf-8")
             ledger = root / "evidence/checkpoints/acceptance-status.md"
             ledger.parent.mkdir(parents=True)
             rows = [f"| A{number:02} | {result if number == 3 else 'NOT_RUN'} | {evidence if number == 3 else ''} |" for number in range(1, 41)]
@@ -41,6 +46,9 @@ class LedgerContractTests(unittest.TestCase):
 
     def test_unknown_status_is_rejected(self):
         self.assertEqual(self.check_ledger("DONE", "unsupported"), 1)
+
+    def test_api_contract_without_database_readiness_is_rejected(self):
+        self.assertEqual(self.check_ledger(missing_api_requirement="GET /api/health/ready"), 1)
 
 
 if __name__ == "__main__":

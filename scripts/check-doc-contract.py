@@ -33,6 +33,22 @@ DOC_REQUIREMENTS: dict[str, tuple[str, ...]] = {
         "## Constraints and indexes",
         "## Query and scale behavior",
     ),
+    "docs/api.md": (
+        "## Health",
+        "## Authentication",
+        "## Active organization context",
+        "## Membership administration",
+        "## Ticket creation",
+        "## Ticket detail",
+        "## Ticket activity history",
+        "## Ticket comments and conversation",
+        "## Ticket updates",
+        "## Ticket assignment",
+        "## Ticket list, filters, and search",
+        "## Dashboard metrics",
+        "## Requests and errors",
+        "## Safe error logging",
+    ),
     "docs/adr/0001-shared-postgres-and-membership-rbac.md": (
         "## Context",
         "## Decision",
@@ -46,6 +62,21 @@ DOC_REQUIREMENTS: dict[str, tuple[str, ...]] = {
         "## Acceptance impact",
     ),
 }
+API_DOC_REQUIREMENTS = (
+    "GET /api/health",
+    "GET /api/health/ready",
+    "SELECT 1",
+    "HTTP 200",
+    "HTTP 503",
+    '`{ "status": "unavailable" }`',
+    "Cache-Control: no-store",
+    "GET /api/dashboard",
+    "X-Organization-ID",
+    "X-Request-ID",
+    "VALIDATION_ERROR",
+    "VERSION_CONFLICT",
+    "INTERNAL_ERROR",
+)
 
 
 def main() -> int:
@@ -60,6 +91,10 @@ def main() -> int:
         for section in required_sections:
             if section not in content:
                 errors.append(f"{relative_path}: missing required section: {section}")
+        if relative_path == "docs/api.md":
+            for requirement in API_DOC_REQUIREMENTS:
+                if requirement not in content:
+                    errors.append(f"docs/api.md: missing API contract item: {requirement}")
 
     architecture_path = ROOT / "docs/architecture.md"
     if architecture_path.is_file():

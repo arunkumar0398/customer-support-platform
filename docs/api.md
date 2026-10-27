@@ -1,10 +1,10 @@
 # API contract — implemented foundation and ticket creation
 
-Implemented endpoints are health, authentication, membership administration, ticket create/detail/list/update/assignment, comments, and activity history, with bounded list filters/search/pagination. Dashboard, the local listener/launch command, and browser journeys remain later tasks.
+Implemented endpoints are health/liveness/readiness, authentication, membership administration, ticket create/detail/list/update/assignment, comments, activity history, and tenant-scoped dashboard metrics, with bounded list filters/search/pagination. The local listener/launch command and browser journeys remain later tasks.
 
 ## Health
 
-`GET /api/health` returns HTTP 200 with `{ "status": "ok" }`. This is application liveness, not a database readiness probe.
+`GET /api/health` is unauthenticated application liveness. It always returns HTTP 200 with `{ "status": "ok" }` without constructing or querying the database client. `GET /api/health/ready` is unauthenticated database readiness: it runs `SELECT 1` using the application database connection and returns HTTP 200 `{ "status": "ready" }` on success or HTTP 503 `{ "status": "unavailable" }` on any failure. Both endpoints set `Cache-Control: no-store`; the readiness response does not disclose connection details, database errors, or secrets.
 
 ## Authentication
 
@@ -32,7 +32,7 @@ Tenant-owned product routes require `X-Organization-ID` after session authentica
 
 Body/query role or organization fields never grant membership or replace the selector. Endpoint-specific body schemas must still reject forbidden properties. Users with memberships in multiple organizations can choose each valid selector with that organization's own current role. Removing membership or changing role takes effect on the next request with the same session.
 
-`createActiveMembership` is used by the membership and ticket product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Dashboard routes and complete ticket/customer isolation acceptance remain pending.
+`createActiveMembership` is used by the membership, ticket, and dashboard product routers and is also verified with test-only context-inspection routes. No context-inspection endpoint is exposed by the product app. Health and authentication routes do not require an organization selector; tenant-owned routers chain authentication and active membership before handling requests. Complete ticket/customer isolation acceptance and browser journeys remain pending.
 
 ## Membership administration
 
