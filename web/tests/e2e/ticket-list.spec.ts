@@ -7,6 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
+import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -137,6 +138,7 @@ test('staff search and status filters update the queue and URL', async ({ page }
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page).not.toHaveURL(/assigneeId/);
   await expect(page.getByText('26 tickets')).toBeVisible();
+  await captureCheckpointScreenshot(page, '03-ticket-queue-desktop.png');
 });
 
 test('customers only see their own tickets in the queue', async ({ page }) => {
@@ -239,6 +241,7 @@ test('ticket queue fits a narrow viewport and keeps loading and error states usa
   await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
   const documentWidth = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(documentWidth).toBeLessThanOrEqual(375);
+  await captureCheckpointScreenshot(page, '04-ticket-queue-mobile.png');
   const table = await page.locator('.ticket-table').evaluate((element) => ({
     contentWidth: element.scrollWidth,
     viewportWidth: element.parentElement!.clientWidth,

@@ -51,11 +51,11 @@ function MembershipRow({
         </label>
       </td>
       <td className="member-actions">
-        <button className="button button-quiet member-save" type="button" disabled={busy || role === member.role} onClick={() => saveRole(member, role)}>
-          Save {member.email}
+        <button className="button button-quiet member-save" type="button" aria-label={`Save ${member.email}`} disabled={busy || role === member.role} onClick={() => saveRole(member, role)}>
+          Save
         </button>
-        <button className="button button-quiet member-toggle" type="button" disabled={busy} onClick={() => toggleActive(member)}>
-          {member.isActive ? `Deactivate ${member.email}` : `Reactivate ${member.email}`}
+        <button className="button button-quiet member-toggle" type="button" aria-label={`${member.isActive ? 'Deactivate' : 'Reactivate'} ${member.email}`} disabled={busy} onClick={() => toggleActive(member)}>
+          {member.isActive ? 'Deactivate' : 'Reactivate'}
         </button>
       </td>
     </tr>

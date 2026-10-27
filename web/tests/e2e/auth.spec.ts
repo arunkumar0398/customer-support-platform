@@ -6,6 +6,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
+import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -60,10 +61,11 @@ test('redirects unauthenticated visits to the sign-in page', async ({ page }) =>
   await page.goto('/');
   await expect(page).toHaveURL(/\/sign-in$/);
   await expect(page.getByRole('heading', { name: 'Sign in to Support Desk' })).toBeVisible();
+  await captureCheckpointScreenshot(page, '01-sign-in-desktop.png');
 });
 
 test('keeps the sign-in page within narrow tablet viewport bounds', async ({ page }) => {
-  await page.setViewportSize({ width: 640, height: 900 });
+  await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/sign-in');
 
   const story = await page.locator('.auth-story').boundingBox();
@@ -71,6 +73,8 @@ test('keeps the sign-in page within narrow tablet viewport bounds', async ({ pag
   expect(story).not.toBeNull();
   expect(panel).not.toBeNull();
   expect(panel!.y).toBeGreaterThanOrEqual(story!.y + story!.height);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await captureCheckpointScreenshot(page, '02-sign-in-mobile.png');
 });
 
 test('shows invalid credentials without creating an authenticated session', async ({ page }) => {

@@ -7,6 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
+import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
 const envPath = fileURLToPath(new URL('../../../.env', import.meta.url));
 if (existsSync(envPath)) process.loadEnvFile(envPath);
@@ -119,6 +120,18 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 open');
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 in progress');
   await expect(page.getByRole('region', { name: 'Agent workload' })).toContainText('2 assigned active tickets');
+  await captureCheckpointScreenshot(page, '09-dashboard-desktop.png');
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await expect(page.getByRole('link', { name: 'Ticket queue', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toBeVisible();
+  await captureCheckpointScreenshot(page, '10-dashboard-mobile.png');
+  await page.getByRole('link', { name: 'Ticket queue', exact: true }).click();
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await expect(page).toHaveURL('/dashboard');
+  await page.setViewportSize({ width: 1280, height: 720 });
 
   await page.getByRole('link', { name: 'Support Desk home' }).click();
   await page.getByRole('link', { name: /Dashboard open fixture/ }).click();

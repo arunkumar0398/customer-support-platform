@@ -56,7 +56,7 @@
 .membership-state > p[role='alert'] { max-width: 570px; margin: 17px 0 22px; padding: 13px 15px; border-left: 3px solid var(--coral); border-radius: 3px; background: #fff1eb; color: #8d3429; font-size: 12px; line-height: 1.6; }
 .membership-state > .button { margin-right: 8px; }
 .membership-state > .button-quiet { text-decoration: none; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.visually-hidden { position: absolute; top: 0; left: 0; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 @media (max-width: 760px) {
   .members-page,

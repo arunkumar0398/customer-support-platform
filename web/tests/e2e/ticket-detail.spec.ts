@@ -7,6 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
+import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -106,6 +107,7 @@ test('customer opens an owned ticket, reads history, and adds a chronological co
   await expect(page).toHaveURL(`/tickets/${ticketIds[0]}`);
   await expect(page.getByRole('heading', { name: 'Detail fixture 1' })).toBeVisible();
   await expect(page.getByText('Synthetic detail description 1')).toBeVisible();
+  await captureCheckpointScreenshot(page, '07-ticket-detail-desktop.png');
   await expect(page.getByText('Ticket created')).toBeVisible();
   await expect(page.getByLabel('Add a reply')).toBeVisible();
   await expect(page.getByLabel('Ticket status')).toHaveCount(0);
@@ -140,9 +142,13 @@ test('customer opens an owned ticket, reads history, and adds a chronological co
 });
 
 test('staff can edit, transition, assign, and inspect ticket history', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, agentIds[0]);
   await page.goto(`/tickets/${ticketIds[0]}`);
   await expect(page.getByRole('heading', { name: 'Detail fixture 1' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  expect(await page.locator('.ticket-detail-grid').evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1);
+  await captureCheckpointScreenshot(page, '08-ticket-detail-mobile.png');
 
   await page.getByLabel('Subject').fill('Updated detail fixture');
   await page.getByLabel('Description').fill('Updated description from the support team.');

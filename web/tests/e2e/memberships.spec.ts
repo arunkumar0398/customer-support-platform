@@ -7,6 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
+import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -83,6 +84,19 @@ test('admin can add an existing account and update its organization role and act
   await expect(page.getByRole('row', { name: new RegExp(emails.admin) })).toBeVisible();
   await expect(page.getByRole('row', { name: new RegExp(emails.agent) })).toBeVisible();
   await expect(page.getByRole('row', { name: new RegExp(emails.otherOrgUser) })).toHaveCount(0);
+  const adminRow = page.getByRole('row', { name: new RegExp(emails.admin) });
+  await expect(adminRow.getByRole('button', { name: `Save ${emails.admin}` })).toHaveText('Save');
+  await expect(adminRow.getByRole('button', { name: `Deactivate ${emails.admin}` })).toHaveText('Deactivate');
+  await captureCheckpointScreenshot(page, '11-memberships-desktop.png');
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  const membersTable = await page.locator('.members-table').evaluate((element) => ({
+    tableWidth: element.scrollWidth,
+    viewportWidth: element.parentElement!.clientWidth,
+  }));
+  expect(membersTable.tableWidth).toBeGreaterThan(membersTable.viewportWidth);
+  await captureCheckpointScreenshot(page, '12-memberships-mobile.png');
+  await page.setViewportSize({ width: 1280, height: 720 });
 
   await page.getByLabel('Existing account email').fill(emails.otherOrgUser);
   await page.getByLabel('New member role').selectOption('AGENT');
@@ -124,7 +138,6 @@ test('admin can add an existing account and update its organization role and act
   await expect(agentRow.getByRole('button', { name: `Save ${emails.agent}` })).toBeDisabled();
   await addedRow.getByRole('button', { name: `Reactivate ${emails.otherOrgUser}` }).click();
 
-  const adminRow = page.getByRole('row', { name: new RegExp(emails.admin) });
   await adminRow.getByLabel(`Role for ${emails.admin}`).selectOption('AGENT');
   await adminRow.getByRole('button', { name: `Save ${emails.admin}` }).click();
   await expect(page.getByRole('alert')).toContainText('An active administrator must remain.');

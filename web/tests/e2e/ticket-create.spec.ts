@@ -7,6 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
+import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -86,11 +87,18 @@ async function openCreateForm(page: Page) {
 }
 
 test('customer ticket form requires nonblank fields and rejects whitespace-only content', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, customerIds[0]);
   await openCreateForm(page);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await captureCheckpointScreenshot(page, '05-ticket-create-mobile.png');
 
   const title = page.getByLabel('Subject');
   const description = page.getByLabel('Description');
+  await title.focus();
+  await page.keyboard.press('Tab');
+  await expect(description).toBeFocused();
+  expect(await description.evaluate((input) => getComputedStyle(input).boxShadow)).not.toBe('none');
   await page.getByRole('button', { name: 'Submit ticket' }).click();
   expect(await title.evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
   expect(await description.evaluate((input: HTMLTextAreaElement) => input.validity.valueMissing)).toBe(true);
@@ -107,6 +115,7 @@ test('customer ticket form requires nonblank fields and rejects whitespace-only 
 test('customer can create a ticket and reaches its submission confirmation', async ({ page }) => {
   await signIn(page, customerIds[1]);
   await openCreateForm(page);
+  await captureCheckpointScreenshot(page, '06-ticket-create-desktop.png');
   await page.getByLabel('Subject').fill('Cannot access billing history');
   await page.getByLabel('Description').fill('The billing history page returns an error after sign in.');
   await page.getByRole('button', { name: 'Submit ticket' }).click();
