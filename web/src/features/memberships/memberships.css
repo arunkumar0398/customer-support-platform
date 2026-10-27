@@ -1,0 +1,77 @@
+.members-page,
+.membership-state { width: min(100% - 48px, 1120px); margin: 0 auto; padding: 48px 0 76px; }
+.members-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+.members-heading .eyebrow,
+.membership-state .eyebrow { margin-bottom: 11px; color: #75877e; }
+.members-heading h1,
+.membership-state h1 { margin: 0; color: var(--ink); font-family: var(--display); font-size: clamp(38px, 5vw, 58px); font-weight: 500; letter-spacing: -0.045em; line-height: 1.04; }
+.members-heading > div > p:last-child { margin: 12px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.members-total { flex: 0 0 auto; margin: 0 0 4px; color: var(--muted); font-size: 12px; }
+.members-total strong { color: var(--deep); font-family: var(--display); font-size: 29px; font-weight: 500; }
+.members-add-panel,
+.members-panel { padding: 22px 24px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); box-shadow: 0 10px 28px rgb(21 56 59 / 4%); }
+.members-add-panel { margin-bottom: 16px; background: #f8faf6; }
+.members-add-panel .eyebrow,
+.members-panel .eyebrow { margin: 0 0 7px; color: #75877e; }
+.members-add-panel h2,
+.members-panel h2 { margin: 0; color: var(--ink); font-family: var(--display); font-size: 25px; font-weight: 500; letter-spacing: -0.03em; }
+.members-add-form { display: grid; grid-template-columns: minmax(210px, 1fr) minmax(150px, 0.55fr) auto; align-items: end; gap: 12px; margin-top: 18px; }
+.members-add-form label { display: grid; gap: 7px; color: #43554f; font-size: 11px; font-weight: 700; }
+.members-add-form input,
+.members-add-form select,
+.members-table select { min-height: 42px; padding: 0 10px; border: 1px solid #cbd7cd; border-radius: 5px; background: var(--white); color: var(--ink); font-size: 12px; }
+.members-add-form input:focus,
+.members-add-form select:focus,
+.members-table select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
+.members-add-form .button { min-height: 42px; white-space: nowrap; }
+.membership-feedback { margin: 0 0 16px; padding: 12px 14px; border-radius: 5px; font-size: 12px; line-height: 1.5; }
+.membership-error { border-left: 3px solid var(--coral); background: #fff1eb; color: #8d3429; }
+.membership-success { border-left: 3px solid #79a36c; background: #edf5e9; color: #315c41; }
+.members-panel { overflow: hidden; padding: 0; }
+.members-panel-heading { padding: 22px 24px 18px; border-bottom: 1px solid var(--line); }
+.members-table-wrap { overflow-x: auto; }
+.members-table { width: 100%; min-width: 850px; border-collapse: collapse; text-align: left; }
+.members-table th,
+.members-table td { padding: 13px 16px; border-bottom: 1px solid #e7ece6; color: #56675f; font-size: 11px; }
+.members-table thead th { background: #f5f7f2; color: #73817a; font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+.members-table tbody th { color: var(--ink); font-size: 11px; font-weight: 650; }
+.member-role-control { display: block; }
+.members-table select { min-width: 115px; min-height: 36px; }
+.member-role { color: var(--deep); font-weight: 650; }
+.member-status { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.member-status-active { background: #e3f1ea; color: #3f7159; }
+.member-status-inactive { background: #f7e8e2; color: #8d493d; }
+.member-actions { display: flex; gap: 7px; white-space: nowrap; }
+.member-actions .button { min-height: 34px; padding: 0 10px; font-size: 10px; }
+.member-actions .member-save { border-color: transparent; background: var(--deep); color: white; }
+.member-actions .member-save:hover:not(:disabled) { background: var(--deep-soft); }
+.member-actions .button:disabled { cursor: not-allowed; opacity: 0.45; }
+.members-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; color: #66756e; font-size: 11px; }
+.members-pagination > div { display: flex; gap: 8px; }
+.members-pagination .button { min-height: 36px; font-size: 10px; }
+.members-pagination .button:disabled { cursor: not-allowed; opacity: 0.45; }
+.members-empty { margin: 0; padding: 30px 20px; color: var(--muted); font-size: 12px; }
+.members-policy-note { margin: 12px 2px 0; color: #75837c; font-size: 10px; line-height: 1.5; }
+.membership-state { display: grid; justify-items: start; align-content: start; min-height: 420px; }
+.membership-state > p[role='alert'] { max-width: 570px; margin: 17px 0 22px; padding: 13px 15px; border-left: 3px solid var(--coral); border-radius: 3px; background: #fff1eb; color: #8d3429; font-size: 12px; line-height: 1.6; }
+.membership-state > .button { margin-right: 8px; }
+.membership-state > .button-quiet { text-decoration: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 760px) {
+  .members-page,
+  .membership-state { width: min(100% - 32px, 1120px); padding-top: 36px; }
+  .members-add-form { grid-template-columns: 1fr 1fr; }
+  .members-add-form .button { justify-self: start; }
+}
+
+@media (max-width: 520px) {
+  .members-heading { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .members-heading h1 { font-size: clamp(36px, 10vw, 46px); }
+  .members-add-panel { padding: 19px 16px; }
+  .members-add-form { grid-template-columns: 1fr; }
+  .members-add-form .button { width: 100%; }
+  .members-panel-heading { padding: 19px 16px 16px; }
+  .members-pagination { align-items: flex-start; flex-direction: column; }
+  .members-pagination > div { width: 100%; justify-content: space-between; }
+}

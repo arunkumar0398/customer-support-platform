@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './providers';
 import { DashboardPage } from '../features/dashboard/DashboardPage';
+import { MembershipsPage } from '../features/memberships/MembershipsPage';
 import { TicketCreatePage } from '../features/tickets/create/TicketCreatePage';
 import { TicketDetailPage } from '../features/tickets/detail/TicketDetailPage';
 import { TicketListPage } from '../features/tickets/list/TicketListPage';
@@ -114,7 +115,7 @@ function SignInPage() {
 }
 
 function WorkspacePage() {
-  const { state, logout } = useAuth();
+  const { state, logout, refresh } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -142,6 +143,9 @@ function WorkspacePage() {
           {['ADMIN', 'AGENT'].includes(membership?.role ?? '') && (
             <Link className={location.pathname === '/dashboard' ? 'workspace-nav-active' : undefined} to="/dashboard">Dashboard</Link>
           )}
+          {membership?.role === 'ADMIN' && (
+            <Link className={location.pathname === '/admin/members' ? 'workspace-nav-active' : undefined} to="/admin/members">Members</Link>
+          )}
         </nav>
         <div className="account-block">
           <div className="account-copy">
@@ -160,6 +164,9 @@ function WorkspacePage() {
       {location.pathname === '/dashboard' && (
         <DashboardPage identity={state.identity} organizationId={membership?.organizationId} />
       )}
+      {location.pathname === '/admin/members' && (
+        <MembershipsPage identity={state.identity} organizationId={membership?.organizationId} refreshIdentity={refresh} />
+      )}
       {location.pathname === '/tickets/new' && (
         <TicketCreatePage identity={state.identity} organizationId={membership?.organizationId} />
       )}
@@ -171,7 +178,7 @@ function WorkspacePage() {
           createdTicket={createdTicket}
         />
       )}
-      {location.pathname !== '/' && location.pathname !== '/dashboard' && location.pathname !== '/tickets/new' && !createdTicketPath && (
+      {location.pathname !== '/' && location.pathname !== '/dashboard' && location.pathname !== '/admin/members' && location.pathname !== '/tickets/new' && !createdTicketPath && (
         <Navigate to="/" replace />
       )}
     </div>

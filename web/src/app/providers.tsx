@@ -20,7 +20,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 function clearUserScopedQueries(queryClient: ReturnType<typeof useQueryClient>, userId: string) {
-  for (const family of ['tickets', 'ticket-detail', 'ticket-comments', 'ticket-activity', 'dashboard']) {
+  for (const family of ['tickets', 'ticket-detail', 'ticket-comments', 'ticket-activity', 'dashboard', 'memberships']) {
     queryClient.removeQueries({ queryKey: [family, userId] });
   }
 }

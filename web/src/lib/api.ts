@@ -82,6 +82,23 @@ export interface DashboardMetrics {
   }>;
 }
 
+export type MembershipRole = 'ADMIN' | 'AGENT' | 'CUSTOMER';
+
+export interface OrganizationMember {
+  organizationId: string;
+  userId: string;
+  email: string;
+  role: MembershipRole;
+  isActive: boolean;
+}
+
+export interface MembershipRoster {
+  items: OrganizationMember[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface UpdateTicketPayload {
   title?: string;
   description?: string;
@@ -244,5 +261,37 @@ export function getTicketActivity(organizationId: string, ticketId: string): Pro
 export function getDashboard(organizationId: string): Promise<DashboardMetrics> {
   return request<DashboardMetrics>('/api/dashboard', {
     headers: { 'X-Organization-ID': organizationId },
+  });
+}
+
+export function getMemberships(organizationId: string, page: number): Promise<MembershipRoster> {
+  const query = new URLSearchParams({ page: String(page), pageSize: '25' });
+  return request<MembershipRoster>(`/api/memberships?${query}`, {
+    headers: { 'X-Organization-ID': organizationId },
+  });
+}
+
+export function addMembership(
+  organizationId: string,
+  csrfToken: string,
+  payload: { email: string; role: MembershipRole },
+): Promise<OrganizationMember> {
+  return request<OrganizationMember>('/api/memberships', {
+    method: 'POST',
+    headers: { 'X-Organization-ID': organizationId, 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateMembership(
+  organizationId: string,
+  csrfToken: string,
+  userId: string,
+  payload: { role?: MembershipRole; isActive?: boolean },
+): Promise<OrganizationMember> {
+  return request<OrganizationMember>(`/api/memberships/${encodeURIComponent(userId)}`, {
+    method: 'PATCH',
+    headers: { 'X-Organization-ID': organizationId, 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify(payload),
   });
 }

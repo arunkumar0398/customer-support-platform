@@ -146,6 +146,14 @@ test('customers only see their own tickets in the queue', async ({ page }) => {
   await expect(page.getByRole('row', { name: /Queue request 25/ })).toBeVisible();
   await expect(page.getByRole('row', { name: /Queue request 26/ })).toHaveCount(0);
   await expect(page.getByLabel('Assignee ID')).toBeHidden();
+  await expect(page.getByRole('link', { name: 'Members', exact: true })).toHaveCount(0);
+
+  const deniedRoster = page.waitForResponse((response) =>
+    response.url().includes('/api/memberships') && response.request().method() === 'GET');
+  await page.goto('/admin/members');
+  expect((await deniedRoster).status()).toBe(403);
+  await expect(page.getByRole('heading', { name: 'Member management unavailable' })).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('This action is not permitted.');
 });
 
 test('staff can filter tickets by customer membership and specific assignee', async ({ page }) => {
@@ -224,7 +232,7 @@ test('queue pagination keeps page state in the URL', async ({ page }) => {
   await expect(page.getByText('No tickets match these filters')).toBeVisible();
 });
 
-test('ticket queue fits a narrow viewport and keeps the table scrollable', async ({ page }) => {
+test('ticket queue fits a narrow viewport and keeps loading and error states usable', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, agentEmails[3]);
 
@@ -236,10 +244,7 @@ test('ticket queue fits a narrow viewport and keeps the table scrollable', async
     viewportWidth: element.parentElement!.clientWidth,
   }));
   expect(table.contentWidth).toBeGreaterThan(table.viewportWidth);
-});
 
-test('queue request errors show retry and loading feedback while a response is pending', async ({ page }) => {
-  await signIn(page, agentEmails[4]);
   await page.route('**/api/tickets?*', (route) => route.fulfill({
     status: 503,
     contentType: 'application/json',
