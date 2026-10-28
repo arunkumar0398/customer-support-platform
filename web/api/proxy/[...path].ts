@@ -36,6 +36,10 @@ async function requestBody(request: VercelRequest): Promise<Buffer | undefined> 
   return chunks.length ? Buffer.concat(chunks) : undefined;
 }
 
+export function toFetchBody(body: Buffer | undefined): Uint8Array<ArrayBuffer> | undefined {
+  return body === undefined ? undefined : Uint8Array.from(body);
+}
+
 export default async function handler(
   incoming: VercelRequest,
   outgoing: ServerResponse,
@@ -46,7 +50,7 @@ export default async function handler(
     const request = new Request(url, {
       method: incoming.method ?? 'GET',
       headers: requestHeaders(incoming),
-      body,
+      body: toFetchBody(body),
     });
     const response = await proxyApiRequest(request);
 
