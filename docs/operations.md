@@ -54,3 +54,63 @@ Do not run test migrations or destructive fixtures against `support_dev`. Verify
 - If the login cookie is not retained, use the configured `http://localhost:<WEB_PORT>` origin and open the UI through the web proxy, not the API container.
 
 The named PostgreSQL volume persists across `docker compose down`. Removing it destroys local databases and is outside the normal restart path.
+
+## Vercel + Neon Preview setup
+
+This is a manual Preview setup guide. It does not authorize or perform a production release. The application uses two Vercel projects from this npm-workspaces repository and a Neon PostgreSQL Preview database. Both Vercel Function projects are pinned to Singapore (`sin1`) to stay close to the Neon Singapore region; static web files still use Vercel's CDN.
+
+### Create the Neon Preview database
+
+1. In Neon, create a project named `customer-support-platform-preview`.
+2. Select **AWS Asia Pacific 1 (Singapore)**. Neon fixes the region when the project is created; the repository's Vercel Function configuration uses `sin1`.
+3. Enable **Postgres database** only. The app has no Neon Object Storage, Functions, AI Gateway, Realtime, or Neon Better Auth dependency.
+4. Use this project only for Preview and synthetic assessment data. Production must use a separately reviewed database/project after production approval.
+5. Use the new project's default branch and database as Preview. From the Neon Connect panel, select that branch/database and copy the pooled and direct connection strings. Treat both as secrets. The pooled host contains `-pooler`.
+
+### Create two Vercel Preview projects
+
+Import the same GitHub repository twice using **Import single project**. Do not import the Docker `app` container as a Vercel project.
+
+| Vercel project | Root Directory | Framework | Required config |
+|---|---|---|---|
+| `customer-support-platform-api` | `api` | Express | Node.js 24; Function region Singapore (`sin1`) |
+| `customer-support-platform-web` | `web` | Vite | Node.js 24; Function region Singapore (`sin1`) |
+
+For each project, keep automatic framework build/install detection initially and keep the existing npm workspace lockfile. In Root Directory settings, enable **Include source files outside of the Root Directory** so Vercel can read the root npm workspace manifest and lockfile. Confirm the settings show the expected root before the first deploy. Keep `main` as the Production Branch; use `codex/assessment-mvp` deployments as Preview only. `api/vercel.json` and `web/vercel.json` set the Functions region, and `web/vercel.json` also defines the same-origin API proxy and SPA fallback.
+
+### Set environment variables
+
+Add variables in each Vercel project's **Preview** scope. Recreate the settings for Production only during the later, separately approved production release.
+
+| Project | Variable | Value |
+|---|---|---|
+| API | `DATABASE_URL` | Neon pooled connection string for the Preview database (`-pooler` host) |
+| API | `APP_ORIGIN` | Exact HTTPS origin of the web Preview, with no path or trailing slash |
+| API | `SESSION_SECRET` | New secret generated from at least 32 random bytes; do not reuse a local or production secret |
+| Web | `API_ORIGIN` | Exact HTTPS origin of the API Preview, with no path or trailing slash |
+
+Do **not** add `DATABASE_URL_UNPOOLED` to the long-running API environment. Supply the Neon direct connection string only to a trusted, one-off migration command after confirming it targets the Preview branch. From a PowerShell window at the repository root:
+
+```powershell
+try {
+  $env:DATABASE_URL_UNPOOLED = "<Neon direct Preview connection string>"
+  npm run db:migrate
+} finally {
+  Remove-Item Env:DATABASE_URL_UNPOOLED -ErrorAction SilentlyContinue
+}
+```
+
+Never run the migration command against production during this Preview setup. Do not paste database URLs, passwords, or `SESSION_SECRET` into chat, screenshots, GitHub issues, or committed files. The local `.env.example` remains for Docker development and is not a template for hosted credentials.
+
+Vercel Preview hostnames include the branch/deployment. After the first Preview deployments exist, set `APP_ORIGIN` to the actual web Preview origin and `API_ORIGIN` to the API Preview origin; redeploy so both projects receive the updated values. Keep the same-origin `/api/*` proxy: the browser should use the web host, which forwards session cookies, Origin, CSRF token, and request body to the API.
+
+### Preview verification and stop conditions
+
+1. Wait for both project builds to complete on `codex/assessment-mvp`. The `app` Docker container is not part of this topology.
+2. Confirm `https://<api-preview>/api/health` and `/api/health/ready` return healthy responses.
+3. Open the web Preview and verify login, logout, role journeys, cookie persistence, a ticket mutation, comments/history, dashboard refresh, and a stale edit returning `409`.
+4. Use synthetic records to verify cross-organization access is denied. Do not run destructive, replay, or race probes on a production database.
+5. If preview API calls fail, stop and inspect Vercel function logs and the Preview origin settings. Do not relax the session, Origin, or CSRF checks to make deployment pass.
+6. Record the deployment URLs, source SHA, sanitized smoke results, and migration result in `evidence/releases/preview.md` after actual verification. Until that evidence exists, deployment acceptance remains `NOT_RUN`.
+
+Production database creation, production variables, production migrations, and promotion require separate explicit approval after Preview verification.
