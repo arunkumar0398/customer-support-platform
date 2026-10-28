@@ -2,9 +2,21 @@
 
 Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
-OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
+OS/shell: Windows 11 Home build 22000; Docker Desktop 4.97.0 using the Docker VMM engine. The older inbox WSL check still fails, but the non-WSL Docker engine is running.
 Branch: `codex/assessment-mvp`
-Last implementation source SHA: d79a4ef9addd793e74643a2b8a7e6fab1840619a (TK-33 Docker runtime scaffold); final reviewed documentation HEAD: 5b1a1fab0f334656ff9f542b8377b45593567cbf. TK-33 remains IN_PROGRESS because Docker Desktop could not start its Linux engine.
+Current source SHA: `4d01e3c4f88b7c26ab8cb07caa2ac0d888cebed5` (TK-33 Windows shell line-ending fix). `TK-33` is COMPLETE; A24 is PASS. G5 remains NOT_RUN because hosted exact-SHA CI and the final release/security gate are outstanding.
+Working tree: the only primary-worktree modifications are the ten pre-existing TK-29 screenshot PNGs; all remain unstaged and untouched.
+
+## Current snapshot (supersedes earlier Docker recovery notes below)
+
+- Docker VMM successfully built and ran the local application without using WSL. A fresh detached Windows worktree at the current SHA completed `npm ci`, database creation, three migrations, seed, API/web image builds, and Compose startup with all three services healthy.
+- Clean-checkout validation passed `npm run check` (API 386/386, web 3/3, lint, typecheck, Playwright discovery 23, builds) and `npm run test:e2e` (23/23). Root, `/tickets`, `/api/health`, and `/api/health/ready` all returned HTTP 200. API and web container UIDs were 1000 and 101.
+- The clean checkout initially exposed the CRLF `bash\r` shebang issue under `core.autocrlf=true`; `.gitattributes` now forces LF for `docker/postgres/*.sh`. A brand-new worktree reports index/worktree LF, and startup passes.
+- Parent reviewer-kit static review at `4d01e3c4f88b7c26ab8cb07caa2ac0d888cebed5`: no P0–P3 findings. Independent runtime review at parent commit `4e28dbbd0838993637a4e0f12d26c885dfec1abe`: no P0–P3 findings; it verified live service health and local suites, but did not run a clean checkout.
+- No deployment, push, merge, hosted resource creation, or production migration. C6/TK-34 requires the separate explicit approval required by the master prompt.
+- Next local planning action: continue G5 evidence only if its remaining hosted CI/release-gate dependencies can be run without pushing or deployment; otherwise pause at the C6 approval boundary.
+
+The detailed TK-01–TK-32 summaries and earlier Docker recovery attempts below are historical notes. Their older TK-33/A24 status is superseded by the current snapshot and `TK-33.md`.
 
 ## Current task state
 
