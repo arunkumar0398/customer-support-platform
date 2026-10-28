@@ -127,3 +127,12 @@ Retried after user request. Host remains Windows 11 build 22000 and system32 WSL
 The Codex-launched Windows environment had empty ProgramData, APPDATA, HOMEDRIVE, and HOMEPATH. A fresh Docker Desktop GUI launch with process-local standard paths fixed its data/settings initialization. The backend then stayed up, but the Linux engine _ping returned HTTP 500/503 and current logs still show the inbox C:\Windows\System32\wsl.exe --version rejection. Do not claim Docker ready; A24/G5 remain NOT_RUN pending Windows/WSL compatibility repair. No machine environment variables were changed and no container build/start succeeded.
 
 Reran Docker-independent checks: API listener 1/1, lint, typecheck, web 3/3, browser discovery 23 tests, production build, documentation contract, and diff check all passed. Browser tests were discovered but not executed. Preserve the ten modified TK-29 screenshot PNGs.
+
+
+## Docker VMM alternative attempt — 2026-10-28
+
+The WSL-independent Docker route was attempted. Docker Desktop 4.97.0 was installed per-user with engineTypeWindows=docker-vmm after SHA-256 and Authenticode verification. Docker Desktop now reports running; docker info responds with Engine 29.9.2 and Linux kernel 7.0.14-linuxkit. No WSL distro or Docker data reset was performed.
+
+Compose configuration validates, but image pulls remain blocked. A Docker Compose build and an Alpine pull both fail inside Docker Desktop because registry-1.docker.io cannot be resolved; Docker logs say Docker Desktop has no HTTPS proxy. Windows nslookup succeeds and curl to the registry returns HTTP 401, showing host DNS/HTTPS works. A temp Docker config bypassed the child-process credential-helper PATH issue without changing the user's credential store. No images/containers/volumes were created. Docker VMM reports 2 GiB memory while its documentation requires 4 GiB minimum. Windows build 22000 is below Docker's current 22631 minimum.
+
+TK-33 remains IN_PROGRESS; A24 and G5 remain NOT_RUN. Restart from the current running Docker VMM, diagnose/resolve VMM DNS or proxy on a supported Windows build, set VMM memory to at least 4 GiB, then rerun the build and fresh Compose startup. Latest exact repo HEAD remains 6f8bc4715ca6420213066ed3a0caf769abf8b42a before these evidence edits. Preserve the ten user-modified TK-29 screenshots; they were not touched.
