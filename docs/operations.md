@@ -5,7 +5,8 @@ This runbook builds and runs the production API and React frontend in local Dock
 ## Prerequisites and local environment
 
 - Node.js 24, npm 11, Git, and Docker Desktop with Compose v2.
-- Copy `.env.example` to `.env` and replace every `LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE` and `REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE` placeholder with unique random local values. Keep `.env` out of Git.
+- Copy `.env.example` to `.env`. Generate independent random values for `POSTGRES_SUPERUSER_PASSWORD`, `APP_DB_PASSWORD`, `TEST_DB_PASSWORD`, and `SESSION_SECRET`; keep `.env` out of Git.
+- Reuse the exact `APP_DB_PASSWORD` value in both `DATABASE_URL` and `DATABASE_URL_UNPOOLED` (the `support_dev` role). Reuse the exact `TEST_DB_PASSWORD` value in `TEST_DATABASE_URL` (the `support_test` role). The template repeats placeholder text intentionally; do not generate a different password for each occurrence.
 - The host migration and seed commands use `DATABASE_URL_UNPOOLED` / `DATABASE_URL` at loopback `localhost:5433`. The API container gets its own runtime URL to Compose DNS `database:5432`.
 - Use `http://localhost:8080` in the browser. The web port is bound to loopback; set `WEB_PORT` in `.env` if port 8080 is occupied, then use that same port in the browser.
 
