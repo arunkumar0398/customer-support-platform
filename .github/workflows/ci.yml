@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Configure disposable local database
+        shell: bash
+        run: |
+          set -euo pipefail
+          superuser_password="$(openssl rand -hex 24)"
+          app_password="$(openssl rand -hex 24)"
+          test_password="$(openssl rand -hex 24)"
+          session_secret="$(openssl rand -hex 32)"
+          dev_url="postgresql://support_dev:${app_password}@127.0.0.1:5433/support_dev?schema=public"
+          test_url="postgresql://support_test:${test_password}@127.0.0.1:5433/support_test?schema=public"
+          for value in "$superuser_password" "$app_password" "$test_password" "$session_secret" "$dev_url" "$test_url"; do
+            echo "::add-mask::$value"
+          done
+          {
+            printf 'NODE_ENV=development\nPGPORT=5433\n'
+            printf 'POSTGRES_SUPERUSER_PASSWORD=%s\n' "$superuser_password"
+            printf 'APP_DB_PASSWORD=%s\n' "$app_password"
+            printf 'TEST_DB_PASSWORD=%s\n' "$test_password"
+            printf 'DATABASE_URL=%s\nDATABASE_URL_UNPOOLED=%s\n' "$dev_url" "$dev_url"
+            printf 'TEST_DATABASE_URL=%s\n' "$test_url"
+            printf 'SESSION_SECRET=%s\nAPP_ORIGIN=http://127.0.0.1:5173\n' "$session_secret"
+          } > .env
+          {
+            printf 'POSTGRES_SUPERUSER_PASSWORD=%s\n' "$superuser_password"
+            printf 'APP_DB_PASSWORD=%s\n' "$app_password"
+            printf 'TEST_DB_PASSWORD=%s\n' "$test_password"
+            printf 'DATABASE_URL=%s\nDATABASE_URL_UNPOOLED=%s\n' "$dev_url" "$dev_url"
+            printf 'TEST_DATABASE_URL=%s\nSESSION_SECRET=%s\n' "$test_url" "$session_secret"
+            printf 'APP_ORIGIN=http://127.0.0.1:5173\n'
+          } >> "$GITHUB_ENV"
+      - name: Install, migrate, seed, and run required gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-logs
+          run_gate() {
+            local label="$1"
+            shift
+            local raw="$RUNNER_TEMP/${label}.raw"
+            local status=0
+            if "$@" > "$raw" 2>&1; then
+              status=0
+            else
+              status=$?
+            fi
+            node - "$raw" "ci-logs/${label}.log" <<'NODE'
+          const fs = require('node:fs');
+          const [rawPath, logPath] = process.argv.slice(2);
+          let output = fs.readFileSync(rawPath, 'utf8');
+          const sensitive = [
+            'POSTGRES_SUPERUSER_PASSWORD', 'APP_DB_PASSWORD', 'TEST_DB_PASSWORD',
+            'SESSION_SECRET', 'DATABASE_URL', 'DATABASE_URL_UNPOOLED', 'TEST_DATABASE_URL',
+          ];
+          for (const name of sensitive) {
+            const value = process.env[name];
+            if (value) output = output.replaceAll(value, '[REDACTED]');
+          }
+          output = output
+            .replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '')
+            .replace(/postgres(?:ql)?:\/\/[^\s"'<>]+/gi, '[REDACTED_DATABASE_URL]')
+            .replace(/^(set-cookie|cookie|authorization):[^\r\n]*/gim, '$1: [REDACTED]');
+          fs.writeFileSync(logPath, output);
+          fs.rmSync(rawPath);
+          NODE
+            cat "ci-logs/${label}.log"
+            if [ "$status" -ne 0 ]; then
+              echo "Required gate ${label} failed with exit ${status}."
+              return "$status"
+            fi
+          }
+          run_gate database docker compose up -d --wait database
+          run_gate install npm ci
+          run_gate verify-test-database npm run db:verify-test
+          run_gate migrate-dev npm run db:migrate
+          run_gate seed-dev npm run db:seed
+          run_gate migrate-test npm run db:migrate:test
+          run_gate lint npm run lint
+          run_gate typecheck npm run typecheck
+          run_gate api-tests npm run test:api
+          run_gate web-tests npm run test:web
+          run_gate browser-install npm exec -- playwright install --with-deps chromium
+          run_gate browser-tests npm run test:e2e
+          run_gate build npm run build
+      - name: Upload sanitized gate logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-gate-logs
+          path: ci-logs/*.log
+          if-no-files-found: warn
+          retention-days: 7
