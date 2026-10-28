@@ -12,8 +12,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: '24'
           cache: npm
@@ -62,25 +62,8 @@ jobs:
             else
               status=$?
             fi
-            node - "$raw" "ci-logs/${label}.log" <<'NODE'
-          const fs = require('node:fs');
-          const [rawPath, logPath] = process.argv.slice(2);
-          let output = fs.readFileSync(rawPath, 'utf8');
-          const sensitive = [
-            'POSTGRES_SUPERUSER_PASSWORD', 'APP_DB_PASSWORD', 'TEST_DB_PASSWORD',
-            'SESSION_SECRET', 'DATABASE_URL', 'DATABASE_URL_UNPOOLED', 'TEST_DATABASE_URL',
-          ];
-          for (const name of sensitive) {
-            const value = process.env[name];
-            if (value) output = output.replaceAll(value, '[REDACTED]');
-          }
-          output = output
-            .replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '')
-            .replace(/postgres(?:ql)?:\/\/[^\s"'<>]+/gi, '[REDACTED_DATABASE_URL]')
-            .replace(/^(set-cookie|cookie|authorization):[^\r\n]*/gim, '$1: [REDACTED]');
-          fs.writeFileSync(logPath, output);
-          fs.rmSync(rawPath);
-          NODE
+            node scripts/sanitize-ci-log.mjs "$raw" > "ci-logs/${label}.log"
+            rm -f "$raw"
             cat "ci-logs/${label}.log"
             if [ "$status" -ne 0 ]; then
               echo "Required gate ${label} failed with exit ${status}."
@@ -89,6 +72,7 @@ jobs:
           }
           run_gate database docker compose up -d --wait database
           run_gate install npm ci
+          run_gate log-redaction node --test scripts/sanitize-ci-log.test.mjs
           run_gate verify-test-database npm run db:verify-test
           run_gate migrate-dev npm run db:migrate
           run_gate seed-dev npm run db:seed
@@ -102,7 +86,7 @@ jobs:
           run_gate build npm run build
       - name: Upload sanitized gate logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ci-gate-logs
           path: ci-logs/*.log
