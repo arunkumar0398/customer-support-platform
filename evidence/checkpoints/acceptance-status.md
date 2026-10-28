@@ -1,7 +1,7 @@
 # Acceptance Status
 
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, health/readiness, and scoped frontend journeys have supporting local evidence. A03–A04, A08–A10, A12–A15, A17–A21 and A29 have passed their documented scoped criteria; other complete checks remain NOT_RUN. Full acceptance of responsive/state/accessibility behavior, Docker application startup, CI, and deployment remains pending.
-**Latest implementation source SHA:** a74ee31f3198425f9afed8dda58b63cdb3eddb9c (TK-31 tenant ticket-list query-plan assessment utility; exact-SHA parent-folder static and runtime reviews completed). TK-31 changes assessment tooling and evidence, not application behavior. Each checkpoint binds its executed commands to its own exact source SHA and environment.
+**Latest implementation source SHA:** d79a4ef9addd793e74643a2b8a7e6fab1840619a (TK-33 production Docker scaffold; exact-SHA runtime review and parent-kit static review completed; static reviewer feedback was corrected in follow-up docs commits through 5b1a1fab0f334656ff9f542b8377b45593567cbf). Docker build/startup remains unverified because Docker Desktop was unavailable. Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 
 | ID | Result | Evidence |
@@ -29,7 +29,7 @@
 | A21 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Tests match overdue boundary/exclusions and assigned OPEN/IN_PROGRESS workload formulas for active agents, including zero-workload agent. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
 | A22 | NOT_RUN | [TK-29](TK-29.md): 12 narrow/desktop screenshots and 375px layout checks cover the main views; exact-SHA reviewers note interactive narrow coverage is concentrated in sign-in, queue, and memberships, so complete route-by-route narrow/desktop usability remains unverified. |
 | A23 | NOT_RUN | [TK-29](TK-29.md): loading, empty, validation, denial, conflict, and failure examples pass across several flows; not every state is verified on every route. |
-| A24 | NOT_RUN | [TK-02](TK-02.md): Compose database only; full fresh Docker app startup pending. |
+| A24 | NOT_RUN | [TK-33](TK-33.md): Compose configuration validates, but Docker image build and fresh app startup are blocked by unavailable Docker Desktop/Linux engine; no containers started. |
 | A25 | NOT_RUN | [TK-06](TK-06.md): deterministic seed and hashes verified; complete setup/sign-in journey pending. |
 | A26 | NOT_RUN | [TK-03](TK-03.md), [TK-07](TK-07.md), [TK-08](TK-08.md): partial documentation/API contracts; full submission audit pending. |
 | A27 | NOT_RUN | [TK-03](TK-03.md): architecture/operational design documents; final delivery audit pending. |

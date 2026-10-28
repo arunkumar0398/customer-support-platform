@@ -4,7 +4,7 @@ Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last implementation source SHA: 5a3582d41a05cf3a9d1a097f7c94bd135cce9118 (TK-32 CI gate log-redaction hardening; exact-SHA static/runtime review complete).
+Last implementation source SHA: d79a4ef9addd793e74643a2b8a7e6fab1840619a (TK-33 Docker runtime scaffold); final reviewed documentation HEAD: 5b1a1fab0f334656ff9f542b8377b45593567cbf. TK-33 remains IN_PROGRESS because Docker Desktop could not start its Linux engine.
 
 ## Current task state
 
@@ -101,3 +101,12 @@ A38 is PASS for the representative tenant/status index plan; A30 is N/A because 
 Next: TK-33 Docker-local production build and runbook. Review `evidence/checkpoints/TK-32.md` and the TK-32 review report. Preserve the ten modified TK-29 screenshots. Read the Docker/local-run requirements and current Compose configuration, then implement local API startup and production containers with RED/GREEN proof. Use the sibling parent-folder reviewer kit for exact-SHA static/runtime review. A24 and G5 remain NOT_RUN until a fresh documented Docker app startup and all release criteria are proven.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing DB identities remain support_dev and guarded disposable support_test; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
+
+
+## TK-33 status — 2026-10-28
+
+- Added Docker production API/web targets, local Compose run path, non-root containers, Nginx same-origin API proxy, local API listener, and operations runbook. Source commit: d79a4ef9addd793e74643a2b8a7e6fab1840619a.
+- Parent reviewer-kit runtime checks passed focused listener 1/1, lint, typecheck, build, and Compose config validation. Docker build and app startup could not run: Docker Desktop Linux engine pipe was missing. Full npm check attempt had DB connection failures/timeouts; do not mark as passed.
+- Static review found credential instructions ambiguity and URL character risk. Corrected and exact-SHA re-reviewed at final docs SHA 5b1a1fab0f334656ff9f542b8377b45593567cbf; no setup findings remain. Review at evidence/reviews/tk33-2026-10-28.md.
+- A24 and G5 remain NOT_RUN; Docker app build/start, fresh startup and runtime smoke are outstanding. No Vercel/Neon deployment authorized or performed.
+- Preserve ten modified TK-29 screenshot artifacts.
