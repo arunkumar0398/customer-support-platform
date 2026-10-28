@@ -120,3 +120,10 @@ Root cause is now narrowed to host compatibility: Docker Desktop 4.95 on Windows
 ## Docker retry — 2026-10-28
 
 Retried after user request. Host remains Windows 11 build 22000 and system32 WSL CLI rejects --version; Docker CLI start timed out and fresh logs repeated the same WSL check error. Docker Desktop is now stopped. No container run/build proof; A24 and G5 remain NOT_RUN. Required next: Windows 11 23H2/build 22631+ or newer feature update, reboot, then rerun TK-33 operations checklist. Deployment config TK-34 remains gated by explicit C6 approval.
+
+
+## Docker retry with complete child-process paths — 2026-10-28
+
+The Codex-launched Windows environment had empty ProgramData, APPDATA, HOMEDRIVE, and HOMEPATH. A fresh Docker Desktop GUI launch with process-local standard paths fixed its data/settings initialization. The backend then stayed up, but the Linux engine _ping returned HTTP 500/503 and current logs still show the inbox C:\Windows\System32\wsl.exe --version rejection. Do not claim Docker ready; A24/G5 remain NOT_RUN pending Windows/WSL compatibility repair. No machine environment variables were changed and no container build/start succeeded.
+
+Reran Docker-independent checks: API listener 1/1, lint, typecheck, web 3/3, browser discovery 23 tests, production build, documentation contract, and diff check all passed. Browser tests were discovered but not executed. Preserve the ten modified TK-29 screenshot PNGs.
