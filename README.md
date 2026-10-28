@@ -1,6 +1,6 @@
 # Multi-Tenant Customer Support Platform
 
-**Status (2026-10-27):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, a Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, tenant-scoped membership administration, ticket creation/list/detail/update/assignment/comment/history APIs, and tenant-scoped dashboard metrics. The React sign-in and authenticated shell are implemented. The ticket queue now supports tenant-scoped search, status/priority/assignee/customer filters, customer-owned ticket visibility, URL-backed pagination, and loading/empty/error states; these journeys are browser-tested against the real API and disposable PostgreSQL fixtures. Ticket creation/detail/dashboard/admin screens and full Docker app launch remain pending. No hosted deployment is configured or claimed.
+**Status (2026-10-28):** implementation is in progress. The repository has TypeScript workspaces, local PostgreSQL, a Prisma domain schema, a synthetic two-organization seed, safe API errors, password/session authentication, tenant-scoped membership administration, ticket creation/list/detail/update/assignment/comment/history APIs, and tenant-scoped dashboard metrics. The React sign-in, ticket queue/search/filter/pagination, ticket create/detail, dashboard, and admin membership screens are implemented with browser journeys. Full acceptance coverage remains in progress. TK-33 adds production Docker targets and a local runbook; container build/startup evidence is pending Docker Desktop recovery and exact-SHA review. No hosted deployment is configured or claimed.
 
 The employer assessment PDF is the product contract in [`reference/assessment.pdf`](reference/assessment.pdf). The approved design, task plan, acceptance matrix, security contract, and assumptions are under `docs/` and `harness/`.
 
@@ -18,13 +18,16 @@ Use Node 24, npm 11, Git, and Docker Desktop with Compose. On PowerShell, copy `
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm ci
-docker compose up -d database
-npm run db:wait
+docker compose up -d --wait database
 npm run db:migrate
 npm run db:seed
 ```
 
 The seed command verifies a loopback `support_dev` connection before writing. It creates synthetic records only. Database integration tests use the separate disposable `support_test` identity; run `npm run db:migrate:test` and `npm run db:verify-test` to check that target.
+
+## Docker-local app run
+
+For the production-built local API and web containers, follow [`docs/operations.md`](docs/operations.md). The flow starts the database, runs the guarded host migration and synthetic seed, then builds and launches API and web containers. The frontend is available at `http://localhost:8080` by default.
 
 ## Demo accounts
 
