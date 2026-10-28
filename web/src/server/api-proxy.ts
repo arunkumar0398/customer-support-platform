@@ -1,3 +1,5 @@
+import { getVercelOidcToken } from '@vercel/oidc';
+
 const REQUEST_HEADERS = [
   'accept',
   'content-type',
@@ -22,9 +24,11 @@ const RESPONSE_HEADERS = [
 
 export type ProxyEnvironment = {
   API_ORIGIN?: string;
+  VERCEL_ENV?: string;
 };
 
 type Fetcher = typeof fetch;
+type OidcTokenProvider = typeof getVercelOidcToken;
 
 function getApiOrigin(environment: ProxyEnvironment): URL {
   if (!environment.API_ORIGIN) {
@@ -57,6 +61,7 @@ export async function proxyApiRequest(
   request: Request,
   environment: ProxyEnvironment = process.env,
   fetcher: Fetcher = fetch,
+  oidcTokenProvider: OidcTokenProvider = getVercelOidcToken,
 ): Promise<Response> {
   const apiOrigin = getApiOrigin(environment);
   const requestUrl = new URL(request.url);
@@ -73,6 +78,14 @@ export async function proxyApiRequest(
   for (const name of REQUEST_HEADERS) {
     const value = request.headers.get(name);
     if (value !== null) headers.set(name, value);
+  }
+
+  if (environment.VERCEL_ENV === 'preview') {
+    const oidcToken = await oidcTokenProvider();
+    if (!oidcToken) {
+      throw new Error('Vercel OIDC token is required for Preview-to-Preview API requests.');
+    }
+    headers.set('x-vercel-trusted-oidc-idp-token', oidcToken);
   }
 
   const method = request.method.toUpperCase();

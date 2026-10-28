@@ -11,6 +11,9 @@
     "api",
     "web"
   ],
+  "overrides": {
+    "zod": "4.6.7"
+  },
   "scripts": {
     "lint": "npm run lint --workspace api && npm run lint --workspace web",
     "typecheck": "npm run typecheck --workspace api && npm run typecheck --workspace web",

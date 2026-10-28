@@ -68,6 +68,59 @@ describe('Vercel deployment wiring', () => {
     expect(await result.json()).toEqual({ ok: true });
   });
 
+  it('forwards the Vercel OIDC token as a trusted-source token only from Preview', async () => {
+    const fetcher = vi.fn<typeof fetch>(async () => new Response('{"ok":true}', {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    }));
+    const oidcTokenProvider = vi.fn(async () => 'short-lived-oidc-token');
+
+    const result = await proxyApiRequest(
+      new Request('https://web.example/api/health'),
+      { API_ORIGIN: 'https://api-preview.vercel.app', VERCEL_ENV: 'preview' },
+      fetcher,
+      oidcTokenProvider,
+    );
+
+    const [, options] = fetcher.mock.calls[0]!;
+    expect(new Headers(options?.headers).get('x-vercel-trusted-oidc-idp-token')).toBe('short-lived-oidc-token');
+    expect(result.headers.has('x-vercel-trusted-oidc-idp-token')).toBe(false);
+    expect(result.headers.has('x-vercel-oidc-token')).toBe(false);
+  });
+
+  it('fails closed when a Preview request has no Vercel OIDC token', async () => {
+    const fetcher = vi.fn<typeof fetch>();
+
+    const oidcTokenProvider = vi.fn(async () => {
+      throw new Error('Vercel OIDC token is unavailable.');
+    });
+    await expect(proxyApiRequest(
+      new Request('https://web.example/api/health'),
+      { API_ORIGIN: 'https://api-preview.vercel.app', VERCEL_ENV: 'preview' },
+      fetcher,
+      oidcTokenProvider,
+    )).rejects.toThrow('Vercel OIDC token');
+
+    expect(oidcTokenProvider).toHaveBeenCalledOnce();
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('does not forward Vercel OIDC tokens outside Preview', async () => {
+    const fetcher = vi.fn<typeof fetch>(async () => new Response('{"ok":true}', { status: 200 }));
+
+    const oidcTokenProvider = vi.fn(async () => 'token-must-not-be-forwarded');
+    await proxyApiRequest(
+      new Request('https://web.example/api/health'),
+      { API_ORIGIN: 'https://api.vercel.app', VERCEL_ENV: 'production' },
+      fetcher,
+      oidcTokenProvider,
+    );
+
+    const [, options] = fetcher.mock.calls[0]!;
+    expect(new Headers(options?.headers).has('x-vercel-trusted-oidc-idp-token')).toBe(false);
+    expect(oidcTokenProvider).not.toHaveBeenCalled();
+  });
+
   it('fails closed if the API origin is missing or unsafe', async () => {
     const fetcher = vi.fn<typeof fetch>();
 
