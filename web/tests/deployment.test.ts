@@ -52,6 +52,7 @@ describe('Vercel deployment wiring', () => {
           cookie: 'support_session=opaque',
           origin: 'https://web.example',
           'content-type': 'application/json',
+          'x-csrf-protection': '1',
           'x-csrf-token': 'csrf-value',
           'x-forwarded-host': 'attacker.example',
         },
@@ -67,6 +68,7 @@ describe('Vercel deployment wiring', () => {
     expect(options?.method).toBe('POST');
     expect(new Headers(options?.headers).get('cookie')).toBe('support_session=opaque');
     expect(new Headers(options?.headers).get('origin')).toBe('https://web.example');
+    expect(new Headers(options?.headers).get('x-csrf-protection')).toBe('1');
     expect(new Headers(options?.headers).get('x-csrf-token')).toBe('csrf-value');
     expect(new Headers(options?.headers).has('x-forwarded-host')).toBe(false);
     expect(result.status).toBe(201);

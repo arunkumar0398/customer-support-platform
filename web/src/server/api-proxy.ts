@@ -8,6 +8,7 @@ const REQUEST_HEADERS = [
   'origin',
   'referer',
   'user-agent',
+  'x-csrf-protection',
   'x-csrf-token',
   'x-organization-id',
   'x-request-id',
