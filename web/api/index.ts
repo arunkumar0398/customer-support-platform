@@ -40,12 +40,22 @@ export function toFetchBody(body: Buffer | undefined): Uint8Array<ArrayBuffer> |
   return body === undefined ? undefined : Uint8Array.from(body);
 }
 
+export function originalApiUrl(incomingUrl: string, baseUrl = 'https://web.invalid'): URL {
+  const url = new URL(incomingUrl, baseUrl);
+  const apiPath = url.searchParams.get('__api_path');
+  if (apiPath !== null) {
+    url.searchParams.delete('__api_path');
+    url.pathname = apiPath ? `/api/${apiPath}` : '/api';
+  }
+  return url;
+}
+
 export default async function handler(
   incoming: VercelRequest,
   outgoing: ServerResponse,
 ): Promise<void> {
   try {
-    const url = new URL(incoming.url ?? '/api', 'https://web.invalid');
+    const url = originalApiUrl(incoming.url ?? '/api');
     const body = await requestBody(incoming);
     const request = new Request(url, {
       method: incoming.method ?? 'GET',

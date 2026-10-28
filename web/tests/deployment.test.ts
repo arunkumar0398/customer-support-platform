@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { proxyApiRequest } from '../src/server/api-proxy';
-import { toFetchBody } from '../api/[...path]';
+import { originalApiUrl, toFetchBody } from '../api';
 
 describe('Vercel deployment wiring', () => {
   it('converts buffered request bytes to a Fetch-compatible body without changing them', () => {
@@ -10,6 +10,11 @@ describe('Vercel deployment wiring', () => {
 
     expect(toFetchBody(bytes)).toEqual(new Uint8Array([0, 1, 127, 128, 255]));
     expect(toFetchBody(undefined)).toBeUndefined();
+  });
+
+  it('restores a rewritten nested API path while preserving application query parameters', () => {
+    expect(originalApiUrl('https://web.example/api?__api_path=health%2Fready&probe=a%2Fb&probe=two').toString())
+      .toBe('https://web.example/api/health/ready?probe=a%2Fb&probe=two');
   });
 
   it('routes same-origin API paths to the Vercel function before SPA fallback', async () => {
@@ -24,9 +29,10 @@ describe('Vercel deployment wiring', () => {
     expect(config.regions).toEqual(['sin1']);
     expect(apiConfig.regions).toEqual(['sin1']);
     expect(config.rewrites).toEqual([
+      { source: '/api/:path*', destination: '/api?__api_path=:path*' },
       { source: '/((?!api/).*)', destination: '/index.html' },
     ]);
-    await expect(readFile(resolve(process.cwd(), 'api/[...path].ts'), 'utf8')).resolves.toContain('proxyApiRequest');
+    await expect(readFile(resolve(process.cwd(), 'api/index.ts'), 'utf8')).resolves.toContain('proxyApiRequest');
   });
 
   it('forwards API calls and cookies to the configured HTTPS API origin', async () => {
