@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { proxyApiRequest } from '../src/server/api-proxy';
-import { toFetchBody } from '../api/proxy/[...path]';
+import { toFetchBody } from '../api/[...path]';
 
 describe('Vercel deployment wiring', () => {
   it('converts buffered request bytes to a Fetch-compatible body without changing them', () => {
@@ -12,7 +12,7 @@ describe('Vercel deployment wiring', () => {
     expect(toFetchBody(undefined)).toBeUndefined();
   });
 
-  it('rewrites same-origin API paths to the proxy before SPA fallback', async () => {
+  it('routes same-origin API paths to the Vercel function before SPA fallback', async () => {
     const config = JSON.parse(await readFile(resolve(process.cwd(), 'vercel.json'), 'utf8')) as {
       regions: string[];
       rewrites: Array<{ source: string; destination: string }>;
@@ -24,9 +24,9 @@ describe('Vercel deployment wiring', () => {
     expect(config.regions).toEqual(['sin1']);
     expect(apiConfig.regions).toEqual(['sin1']);
     expect(config.rewrites).toEqual([
-      { source: '/api/:path*', destination: '/api/proxy/:path*' },
       { source: '/(.*)', destination: '/index.html' },
     ]);
+    await expect(readFile(resolve(process.cwd(), 'api/[...path].ts'), 'utf8')).resolves.toContain('proxyApiRequest');
   });
 
   it('forwards API calls and cookies to the configured HTTPS API origin', async () => {
@@ -39,7 +39,7 @@ describe('Vercel deployment wiring', () => {
     }));
 
     const result = await proxyApiRequest(
-      new Request('https://web.example/api/proxy/tickets?status=open', {
+      new Request('https://web.example/api/tickets?status=open', {
         method: 'POST',
         headers: {
           accept: 'application/json',
@@ -72,13 +72,13 @@ describe('Vercel deployment wiring', () => {
     const fetcher = vi.fn<typeof fetch>();
 
     await expect(proxyApiRequest(
-      new Request('https://web.example/api/proxy/tickets'),
+      new Request('https://web.example/api/tickets'),
       {},
       fetcher,
     )).rejects.toThrow('API_ORIGIN');
 
     await expect(proxyApiRequest(
-      new Request('https://web.example/api/proxy/tickets'),
+      new Request('https://web.example/api/tickets'),
       { API_ORIGIN: 'http://127.0.0.1:3000' },
       fetcher,
     )).rejects.toThrow('HTTPS');

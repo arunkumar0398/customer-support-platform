@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { proxyApiRequest } from '../../src/server/api-proxy.js';
+import { proxyApiRequest } from '../src/server/api-proxy.js';
 
 type VercelRequest = IncomingMessage & {
   body?: unknown;
@@ -45,7 +45,7 @@ export default async function handler(
   outgoing: ServerResponse,
 ): Promise<void> {
   try {
-    const url = new URL(incoming.url ?? '/api/proxy', 'https://web.invalid');
+    const url = new URL(incoming.url ?? '/api', 'https://web.invalid');
     const body = await requestBody(incoming);
     const request = new Request(url, {
       method: incoming.method ?? 'GET',

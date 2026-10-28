@@ -60,14 +60,13 @@ export async function proxyApiRequest(
 ): Promise<Response> {
   const apiOrigin = getApiOrigin(environment);
   const requestUrl = new URL(request.url);
-  const proxyPrefix = '/api/proxy';
 
-  if (!requestUrl.pathname.startsWith(`${proxyPrefix}/`)) {
-    throw new Error('The API proxy only accepts paths below /api/proxy/.');
+  if (!requestUrl.pathname.startsWith('/api/')) {
+    throw new Error('The API proxy only accepts paths below /api/.');
   }
 
   const target = new URL(apiOrigin);
-  target.pathname = `/api${requestUrl.pathname.slice(proxyPrefix.length)}`;
+  target.pathname = requestUrl.pathname;
   target.search = requestUrl.search;
 
   const headers = new Headers();
