@@ -115,3 +115,8 @@ Only local implementation/testing/feature-branch commits are authorized. Do not 
 ## Docker recovery follow-up — 2026-10-28
 
 Root cause is now narrowed to host compatibility: Docker Desktop 4.95 on Windows 11 Home build 22000 calls the old C:\Windows\System32\wsl.exe, which does not support --version. Docker logs report WSLUpdateRequired. C:\Program Files\WSL\wsl.exe is WSL 3.0.3.0, but this does not change the system32 inbox executable used by Docker. Current Docker Windows requirements specify Windows 11 23H2/build 22631+. wsl --update reported no updates. Docker Desktop was force-stopped and left stopped after restart failed. No destructive cleanup was done; A24/G5 remain NOT_RUN. Next: Windows feature update/reboot via local Windows Update/admin, then verify Docker, run docs/operations.md, and finish TK-33.
+
+
+## Docker retry — 2026-10-28
+
+Retried after user request. Host remains Windows 11 build 22000 and system32 WSL CLI rejects --version; Docker CLI start timed out and fresh logs repeated the same WSL check error. Docker Desktop is now stopped. No container run/build proof; A24 and G5 remain NOT_RUN. Required next: Windows 11 23H2/build 22631+ or newer feature update, reboot, then rerun TK-33 operations checklist. Deployment config TK-34 remains gated by explicit C6 approval.
