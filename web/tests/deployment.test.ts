@@ -24,7 +24,7 @@ describe('Vercel deployment wiring', () => {
     expect(config.regions).toEqual(['sin1']);
     expect(apiConfig.regions).toEqual(['sin1']);
     expect(config.rewrites).toEqual([
-      { source: '/(.*)', destination: '/index.html' },
+      { source: '/((?!api/).*)', destination: '/index.html' },
     ]);
     await expect(readFile(resolve(process.cwd(), 'api/[...path].ts'), 'utf8')).resolves.toContain('proxyApiRequest');
   });
