@@ -29,7 +29,7 @@
 | A21 | PASS | Source `93485ad0c10d4247a2ed6d7c1852bcc282488da7`; `npm run test:api -- tests/dashboard/dashboard.test.ts` exit 0, 6/6 real PostgreSQL/API cases, independently replayed. Tests match overdue boundary/exclusions and assigned OPEN/IN_PROGRESS workload formulas for active agents, including zero-workload agent. See [TK-21](TK-21.md) and [review](../reviews/tk21-2026-10-27-93485ad.md). |
 | A22 | NOT_RUN | [TK-29](TK-29.md): 12 narrow/desktop screenshots and 375px layout checks cover the main views; exact-SHA reviewers note interactive narrow coverage is concentrated in sign-in, queue, and memberships, so complete route-by-route narrow/desktop usability remains unverified. |
 | A23 | NOT_RUN | [TK-29](TK-29.md): loading, empty, validation, denial, conflict, and failure examples pass across several flows; not every state is verified on every route. |
-| A24 | NOT_RUN | [TK-33](TK-33.md): Compose configuration validates, but Docker image build and fresh app startup are blocked by unavailable Docker Desktop/Linux engine; no containers started. |
+| A24 | NOT_RUN | [TK-33](TK-33.md): Compose configuration validates, but host Windows 11 build 22000 is below Docker Desktop current minimum and its system32 inbox WSL CLI rejects --version; Docker engine unavailable, no containers started. |
 | A25 | NOT_RUN | [TK-06](TK-06.md): deterministic seed and hashes verified; complete setup/sign-in journey pending. |
 | A26 | NOT_RUN | [TK-03](TK-03.md), [TK-07](TK-07.md), [TK-08](TK-08.md): partial documentation/API contracts; full submission audit pending. |
 | A27 | NOT_RUN | [TK-03](TK-03.md): architecture/operational design documents; final delivery audit pending. |
