@@ -7,7 +7,7 @@ const SAFE_DATABASE_ERROR_CODES = new Set([
   '28000', '28P01', '3D000', '42501', '42601', '42703', '42P01',
   '53300', '53400', '57P01', '57P02', '57P03', '58000', '58030', 'XX000',
   'ECONNREFUSED', 'ECONNRESET', 'EHOSTUNREACH', 'ENOTFOUND', 'ETIMEDOUT',
-  'P1000', 'P1001', 'P1002', 'P1003', 'P1010', 'P1011', 'P1013', 'P1017', 'P2010',
+  'P1000', 'P1001', 'P1002', 'P1003', 'P1010', 'P1011', 'P1013', 'P1017',
 ]);
 
 function safeDatabaseErrorCode(error: unknown): string {

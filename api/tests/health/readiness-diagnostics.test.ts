@@ -80,4 +80,26 @@ describe('readiness failure diagnostics', () => {
     }
   });
 
+  it('does not expose Prisma P2010 when its underlying SQLSTATE is unavailable', async () => {
+    const databaseError = Object.assign(
+      new Error('Raw query failed'),
+      { code: 'P2010', meta: { message: 'connection string contains a password' } },
+    );
+    const getClient = () => ({ $queryRaw: vi.fn().mockRejectedValue(databaseError) });
+    const logError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const app = express();
+    app.use('/api/health', createHealthRouter({ getClient: getClient as never }));
+
+    try {
+      const response = await request(app).get('/api/health/ready');
+      expect(response.status).toBe(503);
+      expect(logError.mock.calls[0]?.[0]).toEqual({
+        event: 'database_readiness_failed',
+        errorCode: 'UNKNOWN',
+      });
+    } finally {
+      logError.mockRestore();
+    }
+  });
+
 });
