@@ -39,7 +39,7 @@
 | A31 | NOT_RUN | [TK-30](TK-30.md): comment actor/tenant/prototype payload and non-admin role escalation denied without mutation; existing strict ticket/membership allowlist tests also ran. Consolidated all-route acceptance remains pending. |
 | A32 | NOT_RUN | [TK-30](TK-30.md): guarded API matrix covers missing CSRF and hostile Origin on seven cookie-authenticated write routes; cookie evidence exists in [TK-08](TK-08.md), but full production/proxy/browser acceptance remains pending. |
 | A33 | NOT_RUN | [TK-30](TK-30.md): guarded replay includes throttling, safe error/request ID, and secret-redaction suites; [OPEN P2 capacity concern](../reviews/security-foundation-2026-10-26-2f95a1a.md) still needs exhaustion/recovery evidence and disposition. |
-| A34 | NOT_RUN | [TK-01](TK-01.md), [TK-08](TK-08.md): local checks only; actual browser and CI gate pending. |
+| A34 | NOT_RUN | [TK-01](TK-01.md), [TK-08](TK-08.md), [TK-32](TK-32.md): local workflow and gate checks pass; hosted exact-SHA run/artifact pending. |
 | A35 | NOT_RUN | |
 | A36 | NOT_RUN | |
 | A37 | NOT_RUN | [TK-29](TK-29.md): native labels, accessible names, and a keyboard Tab/focus-treatment path have scoped evidence; a dedicated broader keyboard/focus accessibility pass remains pending. |

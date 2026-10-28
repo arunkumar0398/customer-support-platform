@@ -1,10 +1,10 @@
 # Current session handoff
 
-Date: 2026-10-27; timezone Asia/Calcutta (UTC+05:30).
+Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
 OS/shell: Windows; commands currently use `cmd.exe` because PowerShell startup reported a Windows CET compatibility error.
 Branch: `codex/assessment-mvp`
-Last implementation source SHA: a74ee31f3198425f9afed8dda58b63cdb3eddb9c (TK-31 guarded ticket-list plan assessment). TK-31 checkpoint/review evidence is being committed separately.
+Last implementation source SHA: 5a3582d41a05cf3a9d1a097f7c94bd135cce9118 (TK-32 CI gate log-redaction hardening; exact-SHA static/runtime review complete).
 
 ## Current task state
 
@@ -28,6 +28,10 @@ Last implementation source SHA: a74ee31f3198425f9afed8dda58b63cdb3eddb9c (TK-31 
 - TK-22 source `49f0a2c5c94cf24efe980d6862cda34e8d99985c` adds database-independent `/api/health`, real-query `/api/health/ready` with sanitized 503, accurate API route documentation, and contract-content checks. Health suite 3/3, documentation regression suite 6/6, full check API369/369 and web1/1 plus lint/typecheck/build passed. Parent reviewer independently replayed health 3/3 against guarded `support_test`; static review found no issue. Playwright was listed only. A22/A23 and G3 remain NOT_RUN; see `TK-22.md` and its review report.
 - A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
 - Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
+
+## TK-32 completion — CI gates and sanitizer hardening
+
+TK-32 final exact source SHA is `5a3582d41a05cf3a9d1a097f7c94bd135cce9118`. Static and runtime parent-kit reviews closed both initial P2 findings (structured/indented auth-cookie redaction and mutable Actions refs) with no remaining findings. Focused sanitizer tests passed 2/2; `npm run check` passed (API385, web3, 23 Playwright tests discovered, lint/typecheck/build); YAML parsed. No hosted GitHub CI was run, so A34 and G5 remain NOT_RUN; A24 Docker application startup and A26 final document audit remain NOT_RUN. Details: [TK-32 checkpoint](TK-32.md), [review report](../reviews/tk32-2026-10-28-5a3582d.md).
 
 ## Gate status
 
@@ -94,6 +98,6 @@ TK-31 implementation source `a74ee31f3198425f9afed8dda58b63cdb3eddb9c` adds a gu
 
 A38 is PASS for the representative tenant/status index plan; A30 is N/A because idempotency is not implemented and duplicate create/retry behavior is explicit. A29 remains PASS. These scoped results do not complete G5; overall release is NOT_READY. The login limiter capacity/recovery P2 remains open.
 
-Next: TK-32 CI and clean-checkout gates. Read the existing root scripts, package lock/workspaces, Compose/test DB lifecycle, README and CI conventions before changing them. Preserve or extend truthful gates: locked install, isolated PostgreSQL, migration/seed, lint/typecheck, API, web, E2E, build, sanitized artifacts. Add a failing-gate validation only in a disposable local fixture; do not weaken or fake CI success. Verify on a clean checkout/worktree if safely possible. Use the sibling parent-folder reviewer kit for exact-SHA static/runtime review, and do not overlap its DB runs. Record exact evidence, but leave G5 NOT_RUN until Docker clean-checkout, CI and remaining release criteria pass.
+Next: TK-33 Docker-local production build and runbook. Review `evidence/checkpoints/TK-32.md` and the TK-32 review report. Preserve the ten modified TK-29 screenshots. Read the Docker/local-run requirements and current Compose configuration, then implement local API startup and production containers with RED/GREEN proof. Use the sibling parent-folder reviewer kit for exact-SHA static/runtime review. A24 and G5 remain NOT_RUN until a fresh documented Docker app startup and all release criteria are proven.
 
 Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing DB identities remain support_dev and guarded disposable support_test; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
