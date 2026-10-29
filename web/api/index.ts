@@ -42,9 +42,10 @@ export function toFetchBody(body: Buffer | undefined): Uint8Array<ArrayBuffer> |
 
 export function originalApiUrl(incomingUrl: string, baseUrl = 'https://web.invalid'): URL {
   const url = new URL(incomingUrl, baseUrl);
-  const apiPath = url.searchParams.get('__api_path');
+  const apiPath = url.searchParams.get('__api_path') ?? url.searchParams.get('path');
   if (apiPath !== null) {
     url.searchParams.delete('__api_path');
+    url.searchParams.delete('path');
     url.pathname = apiPath ? `/api/${apiPath}` : '/api';
   }
   return url;

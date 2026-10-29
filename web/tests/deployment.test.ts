@@ -17,6 +17,11 @@ describe('Vercel deployment wiring', () => {
       .toBe('https://web.example/api/health/ready?probe=a%2Fb&probe=two');
   });
 
+  it('removes Vercel’s implicit path query parameter when restoring a rewritten API path', () => {
+    expect(originalApiUrl('https://web.example/api?path=dashboard').toString())
+      .toBe('https://web.example/api/dashboard');
+  });
+
   it('routes same-origin API paths to the Vercel function before SPA fallback', async () => {
     const config = JSON.parse(await readFile(resolve(process.cwd(), 'vercel.json'), 'utf8')) as {
       regions: string[];
