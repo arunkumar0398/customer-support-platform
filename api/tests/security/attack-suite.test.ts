@@ -53,15 +53,15 @@ type Mutation = {
   path: string;
   account: Account;
   organizationId?: string;
-  ifMatch?: string;
+  ticketVersion?: string;
   body?: object;
 };
 
 const mutations: Mutation[] = [
   { name: 'logout', method: 'post', path: '/api/auth/logout', account: 'admin' },
   { name: 'ticket creation', method: 'post', path: '/api/tickets', account: 'customer', organizationId: alphaId, body: { title: 'CSRF attempt', description: 'Must not be created.' } },
-  { name: 'ticket update', method: 'patch', path: `/api/tickets/${alphaTicketId}`, account: 'agent', organizationId: alphaId, ifMatch: '"1"', body: { title: 'Forged ticket title' } },
-  { name: 'ticket assignment', method: 'patch', path: `/api/tickets/${alphaTicketId}/assignment`, account: 'agent', organizationId: alphaId, ifMatch: '"1"', body: { assigneeUserId: ids.agent } },
+  { name: 'ticket update', method: 'patch', path: `/api/tickets/${alphaTicketId}`, account: 'agent', organizationId: alphaId, ticketVersion: '1', body: { title: 'Forged ticket title' } },
+  { name: 'ticket assignment', method: 'patch', path: `/api/tickets/${alphaTicketId}/assignment`, account: 'agent', organizationId: alphaId, ticketVersion: '1', body: { assigneeUserId: ids.agent } },
   { name: 'ticket comment', method: 'post', path: `/api/tickets/${alphaTicketId}/comments`, account: 'customer', organizationId: alphaId, body: { body: 'Must not be added.' } },
   { name: 'membership creation', method: 'post', path: '/api/memberships', account: 'admin', organizationId: alphaId, body: { email: email('foreign'), role: 'AGENT' } },
   { name: 'membership update', method: 'patch', path: `/api/memberships/${ids.agent}`, account: 'admin', organizationId: alphaId, body: { role: 'CUSTOMER' } },
@@ -76,7 +76,7 @@ function mutationRequest(mutation: Mutation, attack: 'missing-csrf' | 'hostile-o
     .set('Origin', attack === 'hostile-origin' ? 'https://attacker.example.test' : origin);
   if (attack === 'hostile-origin') attempt = attempt.set('X-CSRF-Token', identity.csrf);
   if (mutation.organizationId) attempt = attempt.set('X-Organization-ID', mutation.organizationId);
-  if (mutation.ifMatch) attempt = attempt.set('If-Match', mutation.ifMatch);
+  if (mutation.ticketVersion) attempt = attempt.set('X-Ticket-Version', mutation.ticketVersion);
   if (mutation.body) attempt = attempt.send(mutation.body);
   return attempt;
 }

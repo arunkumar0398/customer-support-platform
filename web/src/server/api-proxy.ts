@@ -4,7 +4,6 @@ const REQUEST_HEADERS = [
   'accept',
   'content-type',
   'cookie',
-  'if-match',
   'origin',
   'referer',
   'user-agent',
@@ -12,6 +11,7 @@ const REQUEST_HEADERS = [
   'x-csrf-token',
   'x-organization-id',
   'x-request-id',
+  'x-ticket-version',
 ] as const;
 
 const RESPONSE_HEADERS = [

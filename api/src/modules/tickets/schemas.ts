@@ -82,14 +82,14 @@ export function parseTicketId(input: unknown): string {
   return result.data;
 }
 
-const expectedVersion = z.string()
-  .regex(/^"[1-9]\d*"$/)
-  .transform((value) => Number(value.slice(1, -1)))
+const ticketVersion = z.string()
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
   .pipe(z.number().int().min(1).max(2147483647));
 
-export function parseExpectedVersion(input: unknown): number {
-  const result = expectedVersion.safeParse(input);
-  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'If-Match version is invalid.');
+export function parseTicketVersion(input: unknown): number {
+  const result = ticketVersion.safeParse(input);
+  if (!result.success) throw new ApiError(422, 'VALIDATION_ERROR', 'X-Ticket-Version is invalid.');
   return result.data;
 }
 

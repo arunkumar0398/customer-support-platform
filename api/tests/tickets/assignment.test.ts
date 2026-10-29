@@ -48,7 +48,7 @@ async function signIn(account: Account): Promise<Identity> {
 function assign(account: Account, ticketId: string, assigneeUserId: string | null, organizationId = alphaId) {
   const identity = identities.get(account)!;
   return request(app).patch(`/api/tickets/${ticketId}/assignment`).set('Cookie', identity.cookie)
-    .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId).set('If-Match', '"1"')
+    .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId).set('X-Ticket-Version', '1')
     .send({ assigneeUserId });
 }
 
@@ -142,7 +142,7 @@ describe('tenant-safe ticket assignment', () => {
     for (const body of [{ assigneeUserId: 'not-a-uuid' }, { assigneeUserId: ids.agent, organizationId: betaId }, { assigneeUserId: undefined }]) {
       const identity = identities.get('admin')!;
       const response = await request(app).patch(`/api/tickets/${ticket.id}/assignment`).set('Cookie', identity.cookie)
-        .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('If-Match', '"1"').send(body);
+        .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('X-Ticket-Version', '1').send(body);
       expect(response.status).toBe(422);
     }
     expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({ version: 1, assigneeUserId: null });
@@ -151,7 +151,7 @@ describe('tenant-safe ticket assignment', () => {
   it('requires a valid ticket UUID', async () => {
     const identity = identities.get('admin')!;
     const response = await request(app).patch('/api/tickets/not-a-uuid/assignment').set('Cookie', identity.cookie)
-      .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('If-Match', '"1"').send({ assigneeUserId: ids.agent });
+      .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('X-Ticket-Version', '1').send({ assigneeUserId: ids.agent });
     expect(response.status).toBe(422);
   });
 });

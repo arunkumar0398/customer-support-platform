@@ -128,7 +128,7 @@ test('customer opens an owned ticket, reads history, and adds a chronological co
         'Content-Type': 'application/json',
         'X-CSRF-Token': identity.csrfToken,
         'X-Organization-ID': organizationId,
-        'If-Match': '"1"',
+        'X-Ticket-Version': '1',
       },
       body: JSON.stringify({ assigneeUserId }),
     });
