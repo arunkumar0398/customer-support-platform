@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-30",
+  "branch": "codex/preview-mobile-roster-ux",
+  "commit": "51a8d08fff1e86d5fe75d0392cd95f91904bca01",
+  "database": {
+    "command": "npm run db:verify-test",
+    "result": "PASS: verified disposable support_test/support_test identity; only local loopback DB was used",
+    "note": "The initial attempt targeted stale ignored worktree .env port 15544 and failed with ECONNREFUSED; corrected only ignored .env DATABASE_URL, TEST_DATABASE_URL, DATABASE_URL_UNPOOLED entries to the existing guarded local Compose database on 5433."
+  },
+  "e2e": [
+    {
+      "round": 1,
+      "result": "PASS",
+      "tests": "23/23",
+      "durationSeconds": 38.9
+    },
+    {
+      "round": 2,
+      "result": "PASS",
+      "tests": "23/23",
+      "durationSeconds": 28.5
+    },
+    {
+      "round": 3,
+      "result": "PASS",
+      "tests": "23/23",
+      "durationSeconds": 29.7
+    }
+  ],
+  "quality": {
+    "command": "npm run check",
+    "result": "PASS: exit 0; lint, typecheck, API/Web unit tests, Playwright discovery, API/Web builds"
+  },
+  "docs": {
+    "command": "py -3 scripts/check-doc-contract.py",
+    "result": "PASS: exit 0; required sections and unique A01-A40 statuses/evidence"
+  },
+  "notes": [
+    "The three Playwright runs were separate npm invocations with fresh configured app servers.",
+    "The previous rounds.json contains per-round desktop/mobile membership screenshots and responsive viewport coverage.",
+    "Live Preview health/readiness passed three times for Web proxy and direct API. One synthetic Preview sign-in reproduced CSRF_REJECTED; no repeated login attempts.",
+    "Production was not modified."
+  ]
+}

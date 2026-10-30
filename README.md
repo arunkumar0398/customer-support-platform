@@ -33,6 +33,15 @@ For the production-built local API and web containers, follow [`docs/operations.
 
 The eight Alpha/Beta synthetic accounts cover admin, agent, and customer roles. Their shared demo password and fixtures are documented in [`docs/demo-accounts.md`](docs/demo-accounts.md). Browser authentication tests create and clean up an isolated fixture in the verified disposable `support_test` database; they do not use the seeded demo accounts or developer database. A25 remains `NOT_RUN` until the documented local setup and seeded-account sign-in journey is verified.
 
+### Vercel Preview test account
+
+This synthetic administrator exists only in the Neon Preview database; the local seed does not create it. Use it only with the Vercel Preview application. Do not reuse it for Production or any real account.
+
+- Email: `preview-admin-20261030-9693f9@example.test`
+- Password: `PreviewOnly-E2E-2026-10-30!`
+
+The Preview login currently fails its origin/CSRF check before credential validation. Fix API Preview `APP_ORIGIN` to the Web Preview origin and redeploy the API before using this account.
+
 ## Checks
 
 ```powershell
