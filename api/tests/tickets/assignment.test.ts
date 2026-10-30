@@ -137,6 +137,32 @@ describe('tenant-safe ticket assignment', () => {
     expect(await db.activityEvent.count({ where: { ticketId: ticket.id } })).toBe(0);
   });
 
+  it('rolls back the assignment and version if PostgreSQL rejects its activity event', async () => {
+    const ticket = await createTicket();
+    const name = `tk17_${randomUUID().replaceAll('-', '')}`;
+    try {
+      await verifier.query(`CREATE FUNCTION "${name}"() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic assignment event rejection'; END $$`);
+      await verifier.query(`CREATE TRIGGER "${name}" BEFORE INSERT ON "ActivityEvent" FOR EACH ROW WHEN (NEW."organizationId" = '${alphaId}'::uuid) EXECUTE FUNCTION "${name}"()`);
+
+      const rejected = await assign('admin', ticket.id, ids.agent);
+      expect(rejected.status).toBe(500);
+      expect(rejected.body.error.code).toBe('INTERNAL_ERROR');
+      expect(rejected.text).not.toContain('synthetic assignment event rejection');
+      expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({
+        version: 1, assigneeOrganizationId: null, assigneeUserId: null,
+      });
+      expect(await db.activityEvent.count({ where: { ticketId: ticket.id } })).toBe(0);
+    } finally {
+      await verifier.query(`DROP TRIGGER IF EXISTS "${name}" ON "ActivityEvent"`);
+      await verifier.query(`DROP FUNCTION IF EXISTS "${name}"()`);
+    }
+
+    const recovered = await assign('admin', ticket.id, ids.agent);
+    expect(recovered.status).toBe(200);
+    expect(recovered.body).toMatchObject({ version: 2, assigneeUserId: ids.agent });
+    expect(await db.activityEvent.count({ where: { ticketId: ticket.id, type: 'ASSIGNMENT_CHANGED' } })).toBe(1);
+  });
+
   it('rejects malformed target IDs and forbidden fields', async () => {
     const ticket = await createTicket();
     for (const body of [{ assigneeUserId: 'not-a-uuid' }, { assigneeUserId: ids.agent, organizationId: betaId }, { assigneeUserId: undefined }]) {

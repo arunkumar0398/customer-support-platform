@@ -1,4 +1,33 @@
-# Current session handoff
+# Current session handoff — refreshed 2026-10-30
+
+## Latest replay — 2026-10-30 20:52 Asia/Calcutta
+
+- Branch distance verified: `codex/preview-mobile-roster-ux` is 14 commits ahead of `origin/codex/assessment-mvp`; GitHub PR search returned no open PR. Local `main` is an older unrelated baseline for this reported comparison.
+- Both current Vercel Preview deployments are Ready at exact SHA `ffe7a2a8ab72a92561daded62ca25d8774eaf4d3`: Web `4f7oDdsW5tgiHNDWathUBfi2RvbP`, API `5w5uvudahGv8HZnNo9YhysRgXj7B`. GitHub Actions run #18 (ID `41052408691`) was inspected this replay: checkout and `git log -1` match this full SHA; its `verify` job succeeded, including disposable DB setup/migration/seed, lint/typecheck/API+web tests, 23 Playwright tests, and builds.
+- On Web branch alias `git-f28eab`, the existing synthetic admin session remains authenticated. Readiness returned `{"status":"ready"}`. A new reversible ticket #3 priority High→Medium→High check succeeded; final status Resolved, priority High, original title/description/assignment are restored. Two priority audit events remain. Prior assignment/comment/stale-write checks remain recorded in the evidence file.
+- A reopen attempt on a resolved ticket was rejected because a reason is required; the UI has no reason field. Ticket create remains unverified because the UI requires a customer user ID not exposed in the roster. The roster does confirm two synthetic customer accounts and one agent account, but their passwords were not found in repository files; do not guess them. No actual foreign-organization object denial was verified. Immutable Web deployment sign-in failed the APP_ORIGIN/CSRF check; the configured branch alias works.
+- Local security replay succeeded: `db:verify-test` plus the five focused suites, 73/73. Direct attempt at `.env` port 5433 failed; after validating the URL target was loopback `support_test` and applying process-only port override to Compose port 15544, the identity check and tests passed. No `.env` edit or hosted DB write.
+- Current Compose snapshot: database healthy on host port 15544, API unhealthy, and web container still `Created`; therefore fresh exact-checkout Docker startup is not verified.
+- A34 is PASS from exact-head GitHub Actions run #18. A35 remains BLOCKED; A05/A06 and A16 remain scoped local passes. The assignment rollback regression is uncommitted and absent from CI. Role-specific Preview, create, true foreign-object denial, exact-candidate Docker, rollback rehearsal, and independent exact-candidate review remain incomplete. See `../reviews/preview-mobile-roster-2026-10-30/live-recheck.md` and `security-acceptance-2026-10-30.md`.
+
+## Current snapshot (supersedes historical notes below)
+
+- Repository root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
+- OS/shell: Windows 11, PowerShell via Codex Node runner.
+- Branch: `codex/preview-mobile-roster-ux`.
+- Pushed HEAD: `ffe7a2a8ab72a92561daded62ca25d8774eaf4d3`; Vercel lists Ready Web/API Preview deployments from this SHA. Production was not promoted or modified.
+- Working tree: one new test-only edit in `api/tests/tickets/assignment.test.ts`, plus ten pre-existing generated/modified TK-29 screenshots. None are staged. Do not discard or stage screenshot changes without inspection.
+- Reconciled acceptance evidence: A05/A06 PASS for local PostgreSQL/API scope, 72/72 on pushed source. A16 PASS for local PostgreSQL/API scope after adding a test-only assignment-event fault-injection case; five suites passed 73/73. The test diff is still uncommitted and is not hosted CI evidence. See `security-acceptance-2026-10-30.md`.
+- Preview evidence: synthetic admin signed in and queue/dashboard/member roster loaded on the prior Preview deployment; repeated health/readiness rounds were recorded separately. Three-role Preview and deployed cross-tenant denial are not done. A35 remains BLOCKED.
+- Evidence distinction: exact-SHA GitHub Actions was verified for `ffe7a2a` (A34 PASS); its 23 Playwright tests ran in CI on the exact candidate. Local Playwright evidence on `51a8d08` remains historical and separate. Vercel Ready is deployment/build status only. The documented synthetic Preview admin credential is intentional and is not a blocker.
+- Gate matrix: G0/G1/A34 have exact-candidate CI evidence; G2/G3/G4 remain blocked on complete authorization/atomicity/role and accessibility coverage; G5 remains incomplete because exact-candidate Docker startup and release review are pending; G6 Preview is partial (no production promotion requested); G7 final independent review NOT_RUN.
+- Current verified database identity is local disposable `support_test` / role `support_test`. No database URL, environment secret, session cookie, or password belongs in this handoff.
+- Next: inspect/complete Preview synthetic role credentials, then run admin/agent/customer Preview journeys on the latest Ready deployment with ticket create/update/comment/stale-version and cross-tenant denials. Never use Production for these tests. After Preview, run exact-candidate Docker, migration/rollback, accessibility, query-plan, and independent review gates.
+- Parent reviewer kit: `..\100xdevs_assessment_review_agent_skill`; its current verdict remains NOT_READY until the required gates above are verified.
+
+---
+
+# Historical session handoff (older snapshots follow)
 
 Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
@@ -156,3 +185,27 @@ TK-33 remains IN_PROGRESS; A24 and G5 remain NOT_RUN. Restart from the current r
 - Candidate 58ca5df340e4de1d089f3753acd4aea2c3568765 passed hosted GitHub Actions run [#1](https://github.com/arunkumar0398/customer-support-platform/actions/runs/40644651623), including disposable PostgreSQL, migrations/seed, API/web tests, Playwright, lint/typecheck, and production build. Sanitized logs uploaded. A34 PASS.
 - G5 PASS for that candidate based on hosted CI, fresh Windows Docker checkout/runtime proof in TK-33, and exact-SHA reviews with no P0/P1. Keep the known login limiter capacity/recovery P2 disclosed; A33 and broad unverified acceptance checks remain NOT_RUN.
 - TK-34 is now unblocked by G5 and is the next task. Only local configuration/build/dry-run validation is in scope until provider resource provisioning or actual deployment is explicitly authorized. Production publish and production migrations remain separate approvals.
+# Handoff refresh — 2026-10-30, after candidate checks
+
+Candidate HEAD remains `ffe7a2a8ab72a92561daded62ca25d8774eaf4d3` on `codex/preview-mobile-roster-ux`. Worktree has evidence updates and an assignment atomicity regression test not committed; TK-29 screenshots are also modified and were left untouched.
+
+## Newly verified locally
+
+- Disposable DB identity check passed for `support_test / support_test`.
+- Lint, typecheck and API/web build passed.
+- Local Playwright: 23/23 passed against local application/test services. This is not Preview or hosted CI proof.
+- `scripts/explain-ticket-list.mjs`: ran 50,000 synthetic rows over 10 tenants within a transaction; query plans recorded; rollback verified and no synthetic organizations remained.
+- `db:migrate:test`: passed with no pending migrations. No old-version rollback compatibility test was run.
+- Security API suites: A05/A06 scoped cases passed locally; A16 assignment event-failure atomicity covered by a new uncommitted regression test; see `security-acceptance-2026-10-30.md`.
+
+## Still open / blocked
+
+- Fresh Docker build for this checkout: `docker compose build api web` exceeded five minutes; subsequent Docker CLI calls hung. Docker had been healthy before the attempt, but exact-checkout rebuild/start is unverified.
+- Preview: latest branch deployment showed admin queue/roster. Admin/agent/customer full journeys, mutations, stale-version conflict and cross-tenant denial have not all been run against exact deployed candidate. Agent/customer credentials and customer membership ID are unavailable; do not guess credentials.
+- Hosted CI evidence for exact candidate is absent. Local E2E does not imply CI pass.
+- Migration rollback compatibility, accessibility audit beyond the existing browser suite, and independent review remain open.
+- Do not open PR or promote until the specified gates have evidence and blockers are resolved.
+
+## Next action
+
+Recover Docker engine and rebuild the exact checkout; then obtain safe Preview synthetic-account access/membership IDs and run role journeys against the exact deployment. Separately perform rollback compatibility on a disposable isolated DB and complete a parent-kit independent review. Keep CI, local browser, Preview, and not-run evidence clearly separated in the ledger.
