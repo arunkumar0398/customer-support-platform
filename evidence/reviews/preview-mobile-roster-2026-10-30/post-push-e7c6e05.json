@@ -1,0 +1,76 @@
+{
+  "checkedAt": "2026-10-30",
+  "sourceCommit": "e7c6e052e85cfbae94f7701c85e7c34d065f6259",
+  "production": "Untouched",
+  "previewOriginCorrection": {
+    "apiAppOrigin": "https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app",
+    "webApiOrigin": "https://customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app",
+    "redeployed": true
+  },
+  "webDeployment": {
+    "id": "GXvRrb8ZtZTbqV4SDkYrKozGiBQF",
+    "state": "Ready",
+    "environment": "Preview",
+    "uniqueUrl": "https://customer-support-platform-phpc45cdb.vercel.app",
+    "alias": "customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app"
+  },
+  "apiDeployment": {
+    "id": "APND8WXfRBM3pjX4qbBdCpqhZEHG",
+    "state": "Ready",
+    "environment": "Preview",
+    "uniqueUrl": "https://customer-support-platform-rdpjmn5h1.vercel.app",
+    "alias": "customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app"
+  },
+  "healthRounds": [
+    {
+      "round": 1,
+      "webProxy": {
+        "health": "ok",
+        "ready": "ready"
+      },
+      "api": {
+        "health": "ok",
+        "ready": "ready"
+      }
+    },
+    {
+      "round": 2,
+      "webProxy": {
+        "health": "ok",
+        "ready": "ready"
+      },
+      "api": {
+        "health": "ok",
+        "ready": "ready"
+      }
+    },
+    {
+      "round": 3,
+      "webProxy": {
+        "health": "ok",
+        "ready": "ready"
+      },
+      "api": {
+        "health": "ok",
+        "ready": "ready"
+      }
+    }
+  ],
+  "authenticatedUi": {
+    "signIn": "passed",
+    "pages": {
+      "ticketQueue": {
+        "result": "3 synthetic tickets rendered; all Resolved/High"
+      },
+      "dashboard": {
+        "result": "3 total; 0 overdue; 0 active assigned"
+      },
+      "membershipRoster": {
+        "result": "4 active memberships: 2 customer, 1 admin, 1 agent"
+      }
+    },
+    "mutations": "not run; ticket requester membership IDs are not exposed by roster UI"
+  },
+  "parentReview": "NOT_READY",
+  "googleAgentReview": "not run; CLI/auth unavailable in preceding check"
+}

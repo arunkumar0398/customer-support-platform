@@ -1,43 +1,52 @@
 # Preview deployment recheck — 2026-10-30
 
-## Candidate
+## Candidate and deployments
 
 - Branch: `codex/preview-mobile-roster-ux`
-- Commit: `51a8d08fff1e86d5fe75d0392cd95f91904bca01` (`fix(web): make member roster responsive`)
-- Web Preview: [deployment](https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app/)
-- API Preview: [deployment](https://customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app/)
-- Web Vercel deployment ID: `7AMK1rBdkbPM2C9EbMccFMMiPKVm` — Ready, Preview, source SHA `51a8d08`.
-- API Vercel deployment ID: `cr5Lm6d1KZS1CNa22KAvZKnNw6oU` — Ready, Preview, source SHA `51a8d08`.
-- Scope: Preview only. No Production database or deployment was changed.
+- Source commit: `e7c6e052e85cfbae94f7701c85e7c34d065f6259` (documentation refresh; includes UI commit `51a8d08`).
+- Web Preview branch alias: [customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app](https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app/)
+- API Preview branch alias: [customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app](https://customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app/)
+- Web redeployment of `e7c6e05`: ID `GXvRrb8ZtZTbqV4SDkYrKozGiBQF`, Ready, Preview; unique URL `https://customer-support-platform-phpc45cdb.vercel.app`.
+- API redeployment of `e7c6e05`: ID `APND8WXfRBM3pjX4qbBdCpqhZEHG`, Ready, Preview; unique URL `https://customer-support-platform-rdpjmn5h1.vercel.app`.
+- Both deployments source `e7c6e05`; Production was not changed.
 
-## Repeated verification
+## Configuration correction
 
-The local verification manifest `rounds.json` records three independent Playwright invocations, each with a fresh app server and browser suite: 23/23 tests passed in each round. The focused membership browser test passed 1/1 in every round. Responsive widths covered 320, 375, 768, 900, 901, 1024, and 1440 CSS px. Desktop and mobile membership screenshots are saved under `round-1`, `round-2`, and `round-3`.
+The earlier sign-in failure was caused by stale Preview origins. API Preview general `APP_ORIGIN` was updated to the exact Web Preview alias above. Web Preview general `API_ORIGIN` was updated to the API Preview branch alias above. Production values were left unchanged. Both projects were redeployed to consume the corrected Preview values.
 
-Live Preview health was checked three times by navigating in a separate browser tab to the direct API and Web-proxy endpoints. All twelve observations returned the expected JSON:
+## Repeated health verification
 
-| Round | Web proxy `/api/health` | Web proxy `/api/health/ready` | API `/api/health` | API `/api/health/ready` |
+Three rounds were run after redeploy, with four checks per round. Every result matched the expected JSON status (12/12):
+
+| Round | Web proxy health | Web proxy readiness | API health | API readiness |
 |---|---|---|---|---|
 | 1 | `ok` | `ready` | `ok` | `ready` |
 | 2 | `ok` | `ready` | `ok` | `ready` |
 | 3 | `ok` | `ready` | `ok` | `ready` |
 
-The clean Preview sign-in page rendered with labeled Email and Password controls and the ticket lifecycle introduction. One sign-in attempt using the pre-existing synthetic Preview administrator reproduced `Request origin or CSRF proof is invalid.` No further attempts were made. This is an authenticated flow failure; health/readiness alone does not clear it.
+## Authenticated Preview UI check
 
-## Parent reviewer finding and disposition
+Signed in with the synthetic Preview administrator documented in the root README; credentials are not duplicated in this evidence file. After the configuration fix, authentication succeeded and the following pages loaded in the same signed-in browser session:
 
-The parent `100xdevs-assessment-reviewer` deployment review identifies exact `Origin === APP_ORIGIN` enforcement as the relevant security contract and recommends aligning API Preview `APP_ORIGIN` with the Web Preview origin, then redeploying API Preview. Keep the CSRF/origin guard enabled. In Vercel, API Environment Variables contains a branch-specific Preview `APP_ORIGIN` for the older `codex/vercel-api-route-preview` branch and a general Preview `APP_ORIGIN`; Production `APP_ORIGIN` is separate. Reveal is blocked by Vercel's authenticator-code challenge, so the effective value was not inspected or changed. The mismatch is the leading diagnosis, not confirmed configuration evidence.
+- Ticket queue: three labeled synthetic tickets rendered. All three show status Resolved and priority High.
+- Dashboard: three tickets total; zero overdue; all three Resolved; zero active assigned tickets. Agent roster metric rendered.
+- Admin member roster: four active memberships rendered (two synthetic customers, one synthetic administrator, one synthetic agent).
 
-### Remaining blockers
+The initial `Request origin or CSRF proof is invalid.` result was observed before correcting both Preview origin variables. It did not recur after the redeploy. No ticket or membership mutation was performed in this recheck. The browser-visible roster does not expose membership IDs required by the ticket creation form, so this run does not claim a create/update/comment lifecycle or cross-role negative proof.
 
-- **P1 Preview auth:** CSRF/origin mismatch still blocks login and live role/ticket flows. Correct API Preview `APP_ORIGIN` for the deployed Web origin and redeploy API Preview, then repeat sign-in and the synthetic ticket lifecycle.
-- **Google Gemini CLI review:** not completed. CLI exited with missing authentication configuration (`GEMINI_API_KEY`, Vertex AI, or Google account auth). No Google-agent findings are claimed.
-- **Release readiness:** still `NOT_READY` per the parent review until exact-candidate authenticated role/cross-tenant proof, compatible rollback, exact-SHA hosted CI/clean Compose replay, route-wide responsive/accessibility checks, and independent final review are complete. Docker Compose build remains blocked by container-to-npm-registry `ECONNRESET`; host registry access works.
+## Existing repeat test evidence
 
-## Existing screenshots
+The preceding local Playwright evidence in `rounds.json` records three fresh invocations, each with 23/23 tests passing; the focused responsive membership test passed 1/1 per round at widths 320, 375, 768, 900, 901, 1024, and 1440 CSS px. Responsive screenshots are stored in `round-1`, `round-2`, and `round-3`. These are local tests, not live-production tests.
 
-- `round-1/desktop-memberships.png`, `round-1/mobile-memberships.png`
-- `round-2/desktop-memberships.png`, `round-2/mobile-memberships.png`
-- `round-3/desktop-memberships.png`, `round-3/mobile-memberships.png`
-- `../../checkpoints/screenshots/TK-29/11-memberships-desktop.png`
-- `../../checkpoints/screenshots/TK-29/12-memberships-mobile.png`
+## Parent reviewer disposition and remaining gates
+
+The parent assessment reviewer remains `NOT_READY`; these Preview checks do not satisfy the complete assessment or production release gate. Still pending:
+
+- Full authenticated Preview ticket lifecycle using test fixture identities (create, assign/update, comment, status transition) and customer/agent/admin role-specific flows.
+- Cross-tenant and object-level authorization negative checks against the exact deployed candidate.
+- Exact-SHA hosted CI proof and clean Docker Compose build/start replay; earlier container-to-npm registry access failed with `ECONNRESET`.
+- Compatible rollback rehearsal and route-wide accessibility/responsive review.
+- Independent final review on the exact candidate SHA.
+- Google agent CLI review was not run; the installed Google CLI/auth configuration was unavailable in the prior check. Do not represent Google review as completed.
+
+Use `evidence/reviews` and the parent reviewer kit for remaining gates. Production database, Vercel Production variables, and Production deployments were untouched by this recheck.

@@ -40,7 +40,7 @@ This synthetic administrator exists only in the Neon Preview database; the local
 - Email: `preview-admin-20261030-9693f9@example.test`
 - Password: `PreviewOnly-E2E-2026-10-30!`
 
-The Preview login currently fails its origin/CSRF check before credential validation. Fix API Preview `APP_ORIGIN` to the Web Preview origin and redeploy the API before using this account.
+The Preview origin/CSRF configuration was corrected on 2026-10-30: API Preview `APP_ORIGIN` matches the Web Preview origin, and Web Preview `API_ORIGIN` points to the matching API Preview branch deployment. Both Preview projects were redeployed from commit `e7c6e05`; sign-in was verified, and the authenticated ticket queue, dashboard, and member roster loaded. These are synthetic Preview-only credentials; no Production settings or data were changed. Full authenticated ticket mutation and role/tenant-negative flows remain pending.
 
 ## Checks
 
