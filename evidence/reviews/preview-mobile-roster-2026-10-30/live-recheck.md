@@ -73,3 +73,11 @@ Use `evidence/reviews` and the parent reviewer kit for remaining gates. Producti
 - Agent/customer accounts are active membership rows, but no passwords are available in repository files; no guessing. Customer user IDs are not exposed in the roster/create form. No new ticket, agent/customer login, or true foreign-ticket denial was performed.
 - Local security replay initially failed because `.env` targets localhost:5433 while the running Compose database publishes 15544. After verifying the configured URL points to loopback `support_test`/role `support_test`, a process-local port-only override was applied; `db:verify-test` passed and the five real-PostgreSQL API suites passed 73/73. No `.env` edit or hosted DB write occurred. The 73rd test remains an uncommitted test-only assignment rollback regression.
 - Current release remains `NOT_READY`: exact-candidate Docker is API-unhealthy/web-container-created, full Preview roles/object denial/create flow and migration rollback are incomplete, and final independent review is pending.
+
+
+## Latest candidate after verification commit — `eb4f285`
+
+- Exact head `eb4f2855207b9b743227a52e7e569d9e9a4737d4` passed GitHub Actions run [#19](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41080629706), job `verify`: checkout SHA and `git log -1` match; 392 API tests, 12 web tests, 23 Playwright tests, lint/typecheck and builds passed.
+- Vercel deployment pages show Web `D5JbsLzUsjZS1HXN2RwjX363111c` and API `12d6P7FjjJ4aJ31rSAdpUTN3S3Gp` Ready on this SHA. The branch alias readiness endpoint returned `{"status":"ready"}`; the synthetic admin signed in and queue showed three tickets.
+- The assignment rollback test and reconciled ledger are committed. Existing high-to-medium-to-high Preview ticket mutation evidence is from prior `ffe7a2a`, same application code; the test/evidence commit changed no production application code.
+- A35 remains blocked on agent/customer sign-in, ticket creation, real foreign-ticket denial, and valid reopen UX; A36 rollback compatibility, exact-candidate Docker, accessibility audit, and independent final review remain outstanding.
