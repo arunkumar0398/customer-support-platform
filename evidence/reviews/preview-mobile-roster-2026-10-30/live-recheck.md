@@ -3,12 +3,12 @@
 ## Candidate and deployments
 
 - Branch: `codex/preview-mobile-roster-ux`
-- Source commit: `e7c6e052e85cfbae94f7701c85e7c34d065f6259` (documentation refresh; includes UI commit `51a8d08`).
+- Latest branch commit: `14fcbd5aadaec1c4238a4c64e4a3dee679c1eb98` (documentation and evidence refresh; includes UI commit `51a8d08`).
 - Web Preview branch alias: [customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app](https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app/)
 - API Preview branch alias: [customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app](https://customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app/)
-- Web redeployment of `e7c6e05`: ID `GXvRrb8ZtZTbqV4SDkYrKozGiBQF`, Ready, Preview; unique URL `https://customer-support-platform-phpc45cdb.vercel.app`.
-- API redeployment of `e7c6e05`: ID `APND8WXfRBM3pjX4qbBdCpqhZEHG`, Ready, Preview; unique URL `https://customer-support-platform-rdpjmn5h1.vercel.app`.
-- Both deployments source `e7c6e05`; Production was not changed.
+- Latest Web Preview deployment: ID `4rKZLSG8rM1uu2a1NutHde9hExQ8`, Ready; commit `14fcbd5`; unique URL `https://customer-support-platform-3fovm0znm.vercel.app`.
+- Latest API Preview deployment: ID `4T4Uuh6ACqDWMwBxtat4Z1GZDjUP`, Ready; commit `14fcbd5`; unique URL `https://customer-support-platform-5wu0clpla.vercel.app`.
+- Both deployment details show Preview and Ready. The unique URLs are Vercel-protected; unauthenticated fetch returned an HTML auth page. Browser verification used the branch aliases above. Production was not changed.
 
 ## Configuration correction
 
@@ -16,7 +16,7 @@ The earlier sign-in failure was caused by stale Preview origins. API Preview gen
 
 ## Repeated health verification
 
-Three rounds were run after redeploy, with four checks per round. Every result matched the expected JSON status (12/12):
+Three browser rounds were run after the origin-fix redeploy (commit `e7c6e05`), four endpoint checks each, with all 12 checks returning the expected JSON. After the later documentation-only deploy (`14fcbd5`), direct health and readiness were rechecked through both branch aliases and returned `ok` / `ready`. The latest unique Vercel deployment URLs are access-protected, so unauthenticated Node fetches returned HTML and are not counted as endpoint failures.
 
 | Round | Web proxy health | Web proxy readiness | API health | API readiness |
 |---|---|---|---|---|
@@ -36,7 +36,7 @@ The initial `Request origin or CSRF proof is invalid.` result was observed befor
 
 ## Existing repeat test evidence
 
-The preceding local Playwright evidence in `rounds.json` records three fresh invocations, each with 23/23 tests passing; the focused responsive membership test passed 1/1 per round at widths 320, 375, 768, 900, 901, 1024, and 1440 CSS px. Responsive screenshots are stored in `round-1`, `round-2`, and `round-3`. These are local tests, not live-production tests.
+The local Playwright evidence in `rounds.json` records three fresh invocations, each with 23/23 tests passing; the focused responsive membership test passed 1/1 per round at widths 320, 375, 768, 900, 901, 1024, and 1440 CSS px. Responsive screenshots are stored in `round-1`, `round-2`, and `round-3`. These are local tests, not live-production tests.
 
 ## Parent reviewer disposition and remaining gates
 

@@ -8,17 +8,19 @@
     "redeployed": true
   },
   "webDeployment": {
-    "id": "GXvRrb8ZtZTbqV4SDkYrKozGiBQF",
+    "id": "4rKZLSG8rM1uu2a1NutHde9hExQ8",
     "state": "Ready",
     "environment": "Preview",
-    "uniqueUrl": "https://customer-support-platform-phpc45cdb.vercel.app",
+    "commit": "14fcbd5",
+    "uniqueUrl": "https://customer-support-platform-3fovm0znm.vercel.app",
     "alias": "customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app"
   },
   "apiDeployment": {
-    "id": "APND8WXfRBM3pjX4qbBdCpqhZEHG",
+    "id": "4T4Uuh6ACqDWMwBxtat4Z1GZDjUP",
     "state": "Ready",
     "environment": "Preview",
-    "uniqueUrl": "https://customer-support-platform-rdpjmn5h1.vercel.app",
+    "commit": "14fcbd5",
+    "uniqueUrl": "https://customer-support-platform-5wu0clpla.vercel.app",
     "alias": "customer-support-platfo-git-e22907-arunkumars-projects-67bc2fdd.vercel.app"
   },
   "healthRounds": [
@@ -31,7 +33,8 @@
       "api": {
         "health": "ok",
         "ready": "ready"
-      }
+      },
+      "checkedAfterOriginFixRedeploy": "e7c6e05"
     },
     {
       "round": 2,
@@ -42,7 +45,8 @@
       "api": {
         "health": "ok",
         "ready": "ready"
-      }
+      },
+      "checkedAfterOriginFixRedeploy": "e7c6e05"
     },
     {
       "round": 3,
@@ -53,7 +57,8 @@
       "api": {
         "health": "ok",
         "ready": "ready"
-      }
+      },
+      "checkedAfterOriginFixRedeploy": "e7c6e05"
     }
   ],
   "authenticatedUi": {
@@ -72,5 +77,17 @@
     "mutations": "not run; ticket requester membership IDs are not exposed by roster UI"
   },
   "parentReview": "NOT_READY",
-  "googleAgentReview": "not run; CLI/auth unavailable in preceding check"
+  "googleAgentReview": "not run; CLI/auth unavailable in preceding check",
+  "latestDocumentationCommit": "14fcbd5aadaec1c4238a4c64e4a3dee679c1eb98",
+  "latestCommitRecheck": {
+    "web": {
+      "health": "ok",
+      "ready": "ready"
+    },
+    "api": {
+      "health": "ok",
+      "ready": "ready"
+    },
+    "method": "browser through Preview branch aliases; unique deployment URLs require Vercel authentication"
+  }
 }
