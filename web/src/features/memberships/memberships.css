@@ -30,7 +30,7 @@
 .members-panel { overflow: hidden; padding: 0; }
 .members-panel-heading { padding: 22px 24px 18px; border-bottom: 1px solid var(--line); }
 .members-table-wrap { overflow-x: auto; }
-.members-scroll-hint { display: none; }
+.members-mobile-roster { display: none; }
 .members-table { width: 100%; min-width: 850px; border-collapse: collapse; text-align: left; }
 .members-table th,
 .members-table td { padding: 13px 16px; border-bottom: 1px solid #e7ece6; color: #56675f; font-size: 11px; }
@@ -59,12 +59,24 @@
 .membership-state > .button-quiet { text-decoration: none; }
 .visually-hidden { position: absolute; top: 0; left: 0; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
+  .members-table-wrap { display: none; }
+  .members-mobile-roster { display: block; }
+  .members-mobile-list { display: grid; gap: 10px; margin: 0; padding: 14px; list-style: none; }
+  .member-card { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+  .member-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .member-card-heading strong { min-width: 0; overflow-wrap: anywhere; color: var(--ink); font-size: 12px; line-height: 1.5; }
+  .member-card-current-role { margin: 10px 0 14px; color: var(--muted); font-size: 11px; }
+  .member-card-role-control { display: grid; gap: 7px; color: #43554f; font-size: 11px; font-weight: 700; }
+  .member-card-role-control select { width: 100%; min-height: 42px; padding: 0 10px; border: 1px solid #cbd7cd; border-radius: 5px; background: #fff; color: var(--ink); }
+  .member-card-role-control select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
+  .member-card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .member-card-actions .button { min-height: 38px; }
   .members-page,
   .membership-state { width: min(100% - 32px, 1120px); padding-top: 36px; }
   .members-add-form { grid-template-columns: 1fr 1fr; }
   .members-add-form .button { justify-self: start; }
-  .members-scroll-hint { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; padding: 10px 16px; background: #f5f7f2; color: #52645b; font-size: 11px; }
+
 }
 
 @media (max-width: 520px) {

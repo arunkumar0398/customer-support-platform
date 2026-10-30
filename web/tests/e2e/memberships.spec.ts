@@ -90,14 +90,42 @@ test('admin can add an existing account and update its organization role and act
   await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   await captureCheckpointScreenshot(page, '11-memberships-desktop.png');
   await page.setViewportSize({ width: 375, height: 812 });
-  await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeVisible();
+  await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
-  const membersTable = await page.locator('.members-table').evaluate((element) => ({
-    tableWidth: element.scrollWidth,
-    viewportWidth: element.parentElement!.clientWidth,
-  }));
-  expect(membersTable.tableWidth).toBeGreaterThan(membersTable.viewportWidth);
+  await expect(page.locator('.members-table-wrap')).toBeHidden();
+  const mobileRoster = page.getByRole('region', { name: 'Mobile member roster' });
+  await expect(mobileRoster).toBeVisible();
+  await expect(mobileRoster.getByRole('listitem')).toHaveCount(2);
+  await expect(mobileRoster.getByText(emails.admin, { exact: true })).toBeVisible();
+  await expect(mobileRoster.getByText(emails.agent, { exact: true })).toBeVisible();
+  await expect(mobileRoster.getByRole('button', { name: `Save ${emails.admin}` })).toBeDisabled();
+  for (const width of [320, 375, 768, 900, 901, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), `document width at ${width}px`).toBeLessThanOrEqual(width);
+    if (width <= 900) {
+      await expect(page.getByRole('region', { name: 'Mobile member roster' })).toBeVisible();
+      await expect(page.locator('.members-table-wrap')).toBeHidden();
+    } else {
+      await expect(page.getByRole('region', { name: 'Mobile member roster' })).toBeHidden();
+      await expect(page.locator('.members-table-wrap')).toBeVisible();
+    }
+  }
+  await page.setViewportSize({ width: 375, height: 812 });
   await captureCheckpointScreenshot(page, '12-memberships-mobile.png');
+  const agentCard = mobileRoster.getByRole('listitem').filter({ hasText: emails.agent });
+  await agentCard.getByLabel(`Role for ${emails.agent}`).selectOption('CUSTOMER');
+  await agentCard.getByRole('button', { name: `Save ${emails.agent}` }).click();
+  await expect(agentCard).toContainText('Current role: Customer');
+  await expect.poll(() => db.membership.findUniqueOrThrow({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+  })).toMatchObject({ role: 'CUSTOMER', isActive: true });
+  await agentCard.getByRole('button', { name: `Deactivate ${emails.agent}` }).click();
+  await expect(agentCard).toContainText('Inactive');
+  await agentCard.getByRole('button', { name: `Reactivate ${emails.agent}` }).click();
+  await expect(agentCard).toContainText('Active');
+  await agentCard.getByLabel(`Role for ${emails.agent}`).selectOption('AGENT');
+  await agentCard.getByRole('button', { name: `Save ${emails.agent}` }).click();
+  await expect(agentCard).toContainText('Current role: Agent');
   await page.setViewportSize({ width: 1280, height: 720 });
 
   await page.getByLabel('Existing account email').fill(emails.otherOrgUser);

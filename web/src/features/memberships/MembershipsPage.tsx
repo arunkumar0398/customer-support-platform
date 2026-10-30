@@ -62,6 +62,48 @@ function MembershipRow({
   );
 }
 
+function MembershipCard({
+  member,
+  busy,
+  saveRole,
+  toggleActive,
+}: {
+  member: OrganizationMember;
+  busy: boolean;
+  saveRole: (member: OrganizationMember, role: MembershipRole) => void;
+  toggleActive: (member: OrganizationMember) => void;
+}) {
+  const [role, setRole] = useState(member.role);
+  const lastSavedRole = useRef(member.role);
+
+  useEffect(() => {
+    const previousSavedRole = lastSavedRole.current;
+    setRole((draftRole) => draftRole === previousSavedRole ? member.role : draftRole);
+    lastSavedRole.current = member.role;
+  }, [member.role]);
+
+  return (
+    <li className="member-card">
+      <div className="member-card-heading">
+        <strong>{member.email}</strong>
+        <span className={`member-status ${member.isActive ? 'member-status-active' : 'member-status-inactive'}`}>
+          {member.isActive ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+      <p className="member-card-current-role">Current role: <span className="member-role">{roleLabel(member.role)}</span></p>
+      <label className="member-card-role-control">Change role <span className="visually-hidden">for {member.email}</span>
+        <select aria-label={`Role for ${member.email}`} value={role} disabled={busy} onChange={(event) => setRole(event.target.value as MembershipRole)}>
+          {roles.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
+      </label>
+      <div className="member-card-actions">
+        <button className="button button-quiet member-save" type="button" aria-label={`Save ${member.email}`} disabled={busy || role === member.role} onClick={() => saveRole(member, role)}>Save</button>
+        <button className="button button-quiet member-toggle" type="button" aria-label={`${member.isActive ? 'Deactivate' : 'Reactivate'} ${member.email}`} disabled={busy} onClick={() => toggleActive(member)}>{member.isActive ? 'Deactivate' : 'Reactivate'}</button>
+      </div>
+    </li>
+  );
+}
+
 export function MembershipsPage({
   identity,
   organizationId,
@@ -168,7 +210,6 @@ export function MembershipsPage({
 
       <section className="members-panel" aria-labelledby="members-roster-title">
         <div className="members-panel-heading"><div><p className="eyebrow">ACCESS ROSTER</p><h2 id="members-roster-title">Members and roles</h2></div></div>
-        <p className="members-scroll-hint">Scroll horizontally to see roles, access, and actions <span aria-hidden="true">→</span></p>
         <div className="members-table-wrap">
           <table className="members-table">
             <thead><tr><th scope="col">Account</th><th scope="col">Current role</th><th scope="col">Access</th><th scope="col">Change role</th><th scope="col">Actions</th></tr></thead>
@@ -183,6 +224,17 @@ export function MembershipsPage({
             ))}</tbody>
           </table>
         </div>
+        <section className="members-mobile-roster" role="region" aria-label="Mobile member roster">
+          <ul className="members-mobile-list">{roster.data.items.map((member) => (
+            <MembershipCard
+              key={member.userId}
+              member={member}
+              busy={busy}
+              saveRole={(current, role) => { setMessage(''); update.mutate({ member: current, role }); }}
+              toggleActive={(current) => { setMessage(''); update.mutate({ member: current, isActive: !current.isActive }); }}
+            />
+          ))}</ul>
+        </section>
         {roster.data.items.length === 0 && <p className="members-empty" role="status">No members are on this page yet.</p>}
         <div className="members-pagination">
           <span>Page {roster.data.page} of {lastPage}</span>

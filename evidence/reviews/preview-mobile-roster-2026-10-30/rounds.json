@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-30",
+  "baseCommit": "b2fd3691fe01f81a1652f29ab7ef67d615c0051f",
+  "environment": "Local app + guarded support_test PostgreSQL database",
+  "responsiveWidths": [
+    320,
+    375,
+    768,
+    900,
+    901,
+    1024,
+    1440
+  ],
+  "runs": [
+    {
+      "round": 1,
+      "membershipBrowserTest": "PASS: 1/1",
+      "fullBrowserSuite": "PASS: 23/23",
+      "browser": "Playwright Chromium; separate invocation and fresh app server",
+      "screenshots": [
+        "round-1/desktop-memberships.png",
+        "round-1/mobile-memberships.png"
+      ]
+    },
+    {
+      "round": 2,
+      "membershipBrowserTest": "PASS: 1/1",
+      "fullBrowserSuite": "PASS: 23/23",
+      "browser": "Playwright Chromium; separate invocation and fresh app server",
+      "screenshots": [
+        "round-2/desktop-memberships.png",
+        "round-2/mobile-memberships.png"
+      ]
+    },
+    {
+      "round": 3,
+      "membershipBrowserTest": "PASS: 1/1",
+      "fullBrowserSuite": "PASS: 23/23",
+      "browser": "Playwright Chromium; separate invocation and fresh app server",
+      "screenshots": [
+        "round-3/desktop-memberships.png",
+        "round-3/mobile-memberships.png"
+      ]
+    }
+  ]
+}
