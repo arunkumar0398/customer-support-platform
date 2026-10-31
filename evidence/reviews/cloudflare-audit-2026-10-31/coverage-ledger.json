@@ -98,7 +98,7 @@
       "auth.login-account-throttle-lockout"
     ],
     "unresolved": [
-      "Required sandbox unavailable; local reproduction not run.",
+      "No compatible preinstalled test runner (Vitest/Supertest) was available; target test execution was not run, and dependency installation/fetching is prohibited.",
       "Vercel instance topology is not source-verifiable; deployed probes are prohibited."
     ]
   },
@@ -134,7 +134,7 @@
     "local_checks": [],
     "result_fingerprints": [],
     "unresolved": [
-      "quick_profile_final_critic: no dedicated hunter coverage; target execution blocked by missing OS sandbox."
+      "quick_profile_final_critic: no dedicated hunter coverage; target execution remains blocked by missing preinstalled Vitest/Supertest, and dependency installation/fetching is prohibited."
     ]
   },
   {
