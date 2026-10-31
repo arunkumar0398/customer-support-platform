@@ -2,13 +2,12 @@
 
 ## Current snapshot — 2026-10-31
 
-- Candidate base: `b2fd3691fe01f81a1652f29ab7ef67d615c0051f`; candidate worktree: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-clean-b2fd369` on `codex/clean-candidate-b2fd369`.
-- The original worktree remains dirty and unchanged, including ten TK-29 screenshot edits and pre-existing documentation/evidence changes. This candidate intentionally excludes those screenshots and unrelated dirty files.
-- GitHub Actions runs [#72](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202224549) and [#73](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202475531) completed `verify` successfully on exact source SHAs `c316e1c` and `de7b8d1`; disposable DB setup, migrations, seed, required gates, and teardown succeeded. Vercel API and Web checks report `success` on both candidate commits; retain the separate historical statuses for base `b2fd369`.
-- Preview remains BLOCKED/NOT_RUN: the browser was signed out and safe synthetic agent/customer credentials plus a verified second-tenant ticket fixture were unavailable. No authentication attempt, live probe, or hosted data mutation was made.
-- Audit target execution remains BLOCKED/NOT_RUN: constrained offline Docker images lack the required preinstalled test runners. No packages were installed/fetched and no target tests ran.
-- Five deferred areas have source-only review; see `../reviews/security-preview-followup-2026-10-31-b2fd369.md`. Source inspection is not target execution or deployment verification.
-- Focused G7 follow-up remains **BLOCKED** on open Preview and audit gates. Keep merge/submission on hold until compliant offline audit tests, authenticated Preview role and foreign-ticket denial checks with no-write evidence, and G7 clearance.
+- Validated candidate SHA: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` on branch `codex/clean-candidate-b2fd369`; Actions run [#74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) passed `verify` on that exact SHA. Vercel Web and API checks also succeeded on the same SHA (deployment links are in the acceptance ledger).
+- This candidate worktree is separate from the original dirty worktree. The original `b2fd369` worktree and ten TK-29 screenshot edits remain preserved and excluded.
+- Older audit/review artifacts remain tied to their historical source SHAs. The security/Preview follow-up report reviews `b2fd369`; it is not current-candidate target-test evidence.
+- Preview role journeys and foreign-ticket read/write denials with before/after no-side-effect proof are **BLOCKED / NOT_RUN**: safe synthetic role credentials and a verified second-tenant ticket are unavailable. No Preview authentication/request or hosted-data mutation was performed.
+- Compliant offline security audit execution is **BLOCKED / NOT_RUN**: no compatible preinstalled test runner is available in the required isolated environment. No dependencies were installed/fetched and no target tests ran.
+- Focused G7 review remains **BLOCKED** until Preview and audit gates are completed and reviewed. Keep merge/submission on hold.
 
 Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
@@ -17,7 +16,7 @@ Branch: `codex/assessment-mvp`
 Current source SHA: `4d01e3c4f88b7c26ab8cb07caa2ac0d888cebed5` (TK-33 Windows shell line-ending fix). `TK-33` is COMPLETE; A24 is PASS. G5 remains NOT_RUN because hosted exact-SHA CI and the final release/security gate are outstanding.
 Working tree: the only primary-worktree modifications are the ten pre-existing TK-29 screenshot PNGs; all remain unstaged and untouched.
 
-## Current snapshot (supersedes earlier Docker recovery notes below)
+## Historical implementation snapshot (superseded by the release-validation snapshot above)
 
 - Docker VMM successfully built and ran the local application without using WSL. A fresh detached Windows worktree at the current SHA completed `npm ci`, database creation, three migrations, seed, API/web image builds, and Compose startup with all three services healthy.
 - Clean-checkout validation passed `npm run check` (API 386/386, web 3/3, lint, typecheck, Playwright discovery 23, builds) and `npm run test:e2e` (23/23). Root, `/tickets`, `/api/health`, and `/api/health/ready` all returned HTTP 200. API and web container UIDs were 1000 and 101.
@@ -28,7 +27,7 @@ Working tree: the only primary-worktree modifications are the ten pre-existing T
 
 The detailed TK-01–TK-32 summaries and earlier Docker recovery attempts below are historical notes. Their older TK-33/A24 status is superseded by the current snapshot and `TK-33.md`.
 
-## Current task state
+## Historical task state notes
 
 - TK-01–TK-07 are closed with checkpoint evidence and independent review. TK-07 source `eab45653346fd4c7ea46494aa6cc6d707b2e4b0f` passed 53 API tests, one web test, lint/type/build; review closed with no P0–P2 findings.
 - TK-08 implements password login, hashed opaque persisted sessions, current identity/membership response, cookie flags, logout/expiry/revocation, origin/CSRF defense, and bounded local throttling. Source checks pass; independent read-only review at `ed479132a49e949d8328ac5d05260113fb5dfd29` closed it with no P0–P2 findings and confirmed G1's local gate PASS. See `TK-08.md` for exact RED/GREEN evidence.
