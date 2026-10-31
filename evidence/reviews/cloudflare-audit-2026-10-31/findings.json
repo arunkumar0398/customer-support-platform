@@ -80,7 +80,7 @@
       }
     ],
     "blockers": [
-      "Required OS-enforced sandbox unavailable, so the bounded dummy-account reproduction was not run.",
+      "Target-controlled reproduction was not run: available preinstalled Linux API images lacked Vitest and Supertest, and the audit prohibits installing or fetching dependencies.",
       "Source cannot establish Vercel function instance reuse or routing; practical deployment scope is unknown.",
       "The selected skill prohibits deployed endpoint probes."
     ],
