@@ -17,7 +17,7 @@ The checked documentation candidate is `baa72999f558c6b2f97f4990c8bacc21e4d0bf83
 
 ### Immediate handoff
 
-- Latest verified docs snapshot is `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`; Actions #91 passed on that exact SHA. Web Vercel succeeded and API Vercel was provider-rate-limited. Application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`, whose run #74 and Web/API checks passed.
+- Latest fully checked docs candidate is `baa72999f558c6b2f97f4990c8bacc21e4d0bf83`; Actions #92 `verify` passed on that exact SHA. Its Web Vercel check succeeded and API Vercel was provider-rate-limited. The parent docs snapshot `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` / #91 is historical. Application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`, whose run #74 and Web/API checks passed.
 - Keep the dirty local `b2fd3691fe01f81a1652f29ab7ef67d615c0051f` worktree and its ten TK-29 screenshot edits untouched; remote CI does not validate it.
 - Preview role/foreign-object acceptance and full offline audit remain blocked/not run. Do not probe Production or deployed endpoints for the audit.
 - Evaluator access to the private GitHub repo is unverified; the owner must grant access or provide an approved private handoff. Do not change visibility.
