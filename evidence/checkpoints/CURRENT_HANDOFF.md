@@ -1,16 +1,27 @@
-## Latest handoff — 2026-10-31 remediation based on 770bfaac
+## Latest handoff — 2026-10-31 evidence reconciliation at `b32989f`
 
 - Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`; branch `codex/preview-mobile-roster-ux`; base branch head `770bfaac575b9d4b3aaf2abdabec294d7273e1b6` (docs/evidence-only after app source candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84`). Accessibility remediation source commit `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a` has been pushed; the ten TK-29 screenshot modifications remain uncommitted owner changes.
-- GitHub Actions [run #29](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41183458143) succeeded on the earlier 770bfaac evidence head; it predates this UI source remediation. Local `npm run check` and full Playwright passed 25/25 on the pushed remediation source. Exact-source GitHub Actions is pending; Vercel Web is success and API is pending on this SHA.
+- GitHub Actions [run #29](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41183458143) succeeded on the earlier 770bfaac evidence head; it predates this UI source remediation. Local `npm run check` and full Playwright passed 25/25 on the pushed remediation source. Exact-source GitHub Actions status is NOT_CAPTURED; Vercel Web and API checks are both success on source commit `2bcf65f` on this SHA.
 - Preview retry on the authenticated branch alias: ticket #6 moved Resolved→In Progress with a reason; UI showed success and a matching activity event. It was restored to Resolved. Raw request/response and HTTP status were inaccessible from the in-app browser surface. See [reopen evidence](../reviews/preview-reopen-770bfaac-2026-10-31.md).
-- Agent/customer Preview journeys and true foreign-ticket denial remain blocked by missing known role credentials and verified foreign-tenant fixture. A36 code rollback compatibility PASS: previous-code API suite 395/395 against all current migrations on an isolated DB. A37 PASS for its stated baseline scope: final axe matrix 32/32, zero violations (28 distinct points plus four marked repeats), and combined Playwright keyboard-scroll assertions pass. Fourteen axe checks remain incomplete/manual. See [migration evidence](../reviews/migration-rollback-compatibility-2026-10-31.md) and [accessibility remediation](../reviews/route-wide-a11y-remediation-2026-10-31.md). Cloudflare audit awaits its required isolated OS-enforced sandbox; see [blocker record](../reviews/cloudflare-audit-sandbox-blocker-2026-10-31.md). Final whole-project review is requested now; its verdict must retain A35 and Cloudflare blockers.
+- Agent/customer Preview journeys and true foreign-ticket denial remain blocked by missing known role credentials and verified foreign-tenant fixture. A36 code rollback compatibility PASS: previous-code API suite 395/395 against all current migrations on an isolated DB. A37 PASS for its stated baseline scope: final axe matrix 32/32, zero violations (28 distinct points plus four marked repeats), and combined Playwright keyboard-scroll assertions pass. Fourteen axe checks remain incomplete/manual. See [migration evidence](../reviews/migration-rollback-compatibility-2026-10-31.md) and [accessibility remediation](../reviews/route-wide-a11y-remediation-2026-10-31.md). Cloudflare audit awaits its required isolated OS-enforced sandbox; see [blocker record](../reviews/cloudflare-audit-sandbox-blocker-2026-10-31.md). Final whole-project review completed on detached HEAD `b32989fff78f53527b734182f0937606981ba5a3`; verdict: NOT_READY. It was read-only source/evidence review; no tests or hosted probes were run.
 - Ten modified TK-29 screenshot PNGs remain user-owned, unstaged, untouched. No Production data/settings changed. Hold merge/submission.
 
-### Current gate snapshot (run #29 head)
+### Independent whole-project review — 2026-10-31
+
+- Reviewer scope: detached clean worktree at `b32989fff78f53527b734182f0937606981ba5a3`; source/evidence-only, no test execution and no Preview/Production probing. Verdict: **NOT_READY**.
+- P1 A35/G6: Preview agent/customer role journeys and true foreign-ticket denial lack safe credentials and a verified second-tenant fixture. Reopen proves visible UI state/activity only; raw transport and HTTP status remain `NOT_CAPTURED`.
+- P1 G5/G7: Cloudflare audit remains NOT_RUN; required OS-enforced isolated sandbox was unavailable.
+- P1 A34/G5/G7: exact-source GitHub Actions result is NOT_CAPTURED. Run #29 passed only on earlier `770bfaac`. Current Vercel Web and API checks are both `success` on source `2bcf65f`.
+- P2 A37: reported 32 axe scans, zero violations, 14 incomplete/manual checks, and 25/25 Playwright including keyboard scrolling support the stated baseline only, not full WCAG conformance.
+- G1 and local checks are builder-reported, not independently rerun. A36 is code compatibility against current migrated schema, not reverse SQL migration. No new PASS was assigned to A01–A34/A38.
+- Reviewer noted the review prompt was absent at its expected kit path and the assessment PDF text was not extracted; scope limitation recorded, no unsupported PDF compliance claim.
+- Smallest next action: capture exact-`b32989f` Actions status, then obtain safe Preview role/tenant fixtures and run the missing denial checks; complete the Cloudflare audit only in the required isolated environment.
+
+### Gate snapshot after whole-project review (source `2bcf65f`; docs HEAD `b32989f`)
 
 | Gate | Result | Current evidence / remaining work |
 |---|---|---|
-| G0 | PARTIAL | Local full checks pass on `2bcf65f`; hosted Actions exact-source CI is pending. Vercel Web is success, API pending. |
+| G0 | PARTIAL | Local full checks pass on `2bcf65f`; exact-source Actions status is NOT_CAPTURED. Vercel Web and API are success on `2bcf65f`. |
 | G1 | PASS (local); earlier CI PASS | Fresh disposable PostgreSQL migrations and the 395-test API integration suite passed locally; #29 evidence predates this source change. |
 | G2 | PARTIAL | Local auth/isolation tests exist; Preview agent/customer and true foreign-object checks remain unavailable. |
 | G3 | PARTIAL | API assignment rollback tests are in CI; authenticated Preview reopen UI is confirmed, raw response status unavailable. |
