@@ -142,7 +142,11 @@ test('customer can create a ticket and reaches its submission confirmation', asy
 test('staff can create a ticket for an active same-organization customer with selected priority', async ({ page }) => {
   await signIn(page, agentId);
   await openCreateForm(page);
-  await page.getByLabel('Customer membership ID').fill(customerIds[2]);
+  const requester = page.getByLabel('Customer');
+  await expect(requester.locator('option')).toHaveCount(4);
+  await expect(requester).toHaveValue('');
+  await requester.selectOption(customerIds[2]);
+  await expect(page.getByLabel('Customer membership ID')).toHaveCount(0);
   await page.getByLabel('Priority').selectOption('URGENT');
   await page.getByLabel('Subject').fill('Agent-created follow-up');
   await page.getByLabel('Description').fill('The customer called and requested an urgent follow-up.');

@@ -23,7 +23,7 @@ const customerIds = [randomUUID(), randomUUID()];
 const userIds = [...agentIds, ...customerIds];
 const emailByUserId = new Map(userIds.map((id, index) => [id, `detail-${index}-${id}@example.test`]));
 const password = 'synthetic-ticket-detail-fixture-password';
-const ticketIds = [randomUUID(), randomUUID(), randomUUID()];
+const ticketIds = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
 let verified = false;
 
 test.beforeAll(async () => {
@@ -54,7 +54,7 @@ test.beforeAll(async () => {
       requesterUserId: customerIds[index === 2 ? 1 : 0],
       title: `Detail fixture ${index + 1}`,
       description: `Synthetic detail description ${index + 1}`,
-      status: 'OPEN', priority: 'MEDIUM',
+      status: index === 3 ? 'RESOLVED' : 'OPEN', priority: 'MEDIUM',
     })),
   });
   await db.activityEvent.create({
@@ -183,6 +183,32 @@ test('invalid staff transition is shown as a server denial without hiding the cu
   await expect(page.getByLabel('Ticket status')).toHaveValue('OPEN');
   await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[1] }, select: { status: true, version: true } }))
     .toMatchObject({ status: 'OPEN', version: 1 });
+});
+
+test('staff must provide a reason to reopen a resolved ticket and records it in history', async ({ page }) => {
+  await signIn(page, agentIds[0]);
+  await page.goto(`/tickets/${ticketIds[3]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 4' })).toBeVisible();
+  await page.getByLabel('Ticket status').selectOption('IN_PROGRESS');
+  const reason = page.getByLabel('Reason for reopening');
+  await expect(reason).toBeVisible();
+  await expect(reason).toHaveAttribute('required', '');
+  await reason.fill('   ');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('alert')).toContainText('Enter a reason');
+  await expect(reason).toHaveAttribute('aria-invalid', 'true');
+  await expect(reason).toHaveAttribute('aria-describedby', /ticket-reopen-reason-error/);
+  await expect(page.locator('#ticket-reopen-reason-error')).toHaveText('Enter a reason for reopening this ticket.');
+  await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[3] }, select: { status: true, version: true } }))
+    .toMatchObject({ status: 'RESOLVED', version: 1 });
+
+  await reason.fill('Customer supplied the missing diagnostic details.');
+  await expect(reason).toHaveAttribute('aria-invalid', 'false');
+  await expect(page.locator('#ticket-reopen-reason-error')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('status')).toContainText('Ticket updated');
+  const event = await db.activityEvent.findFirst({ where: { ticketId: ticketIds[3], type: 'STATUS_CHANGED' } });
+  expect(event).toMatchObject({ previousValue: 'RESOLVED', newValue: 'IN_PROGRESS', reason: 'Customer supplied the missing diagnostic details.' });
 });
 
 test('role downgrade clears cached ticket detail, comments, and activity', async ({ page }) => {

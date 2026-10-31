@@ -41,3 +41,9 @@ Added one test to `api/tests/tickets/assignment.test.ts` (test-only working-tree
 - Initial check found `.env` `TEST_DATABASE_URL` still on localhost port 5433 while this checkout's Compose database is published on port 15544. No connection succeeded against 5433.
 - Re-ran with a process-local port override to the Compose-published port; `npm run db:verify-test` again verified `support_test / support_test` and the five security suites passed 73/73, exit 0. No `.env` edit was made; no database rows outside the tests' disposable fixture transactions were retained.
 - This remains local PostgreSQL/API evidence at HEAD `ffe7a2a` plus the uncommitted test-only diff; it is not hosted CI or Preview evidence.
+
+## Reconciliation — 2026-10-31
+
+The preceding notes are historical snapshots and the statement that the assignment regression was still uncommitted is superseded. The assignment event-rejection regression is present in the committed line by SHA `981697f0dce286116e035c3c3a9d0f6850bfea94`. GitHub Actions run [#20](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41084322903) checked out that exact SHA and its `verify` job succeeded, including the disposable PostgreSQL suite (392 API tests). The run provides hosted exact-head evidence for A05, A06, and A16 at `981697f`.
+
+The 2026-10-31 working tree adds ticket requester lookup and UI regression coverage beyond that committed base. Those local changes do not alter the tenant enforcement paths covered by A05/A06/A16; they have not yet been included in hosted CI. See [TK-25 follow-up](TK-25-2026-10-31.md) for local changed-worktree evidence. Hosted Preview authorization evidence remains a separate A35 gate.

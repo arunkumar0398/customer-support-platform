@@ -52,9 +52,11 @@ export function TicketDetailPage({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TicketListItem['status']>('OPEN');
+  const [reopenReason, setReopenReason] = useState('');
   const [priority, setPriority] = useState<TicketListItem['priority']>('MEDIUM');
   const [assigneeUserId, setAssigneeUserId] = useState('');
   const [comment, setComment] = useState('');
+  const [reopenReasonError, setReopenReasonError] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [conflict, setConflict] = useState(false);
@@ -85,6 +87,7 @@ export function TicketDetailPage({
     setTitle(ticketQuery.data.title);
     setDescription(ticketQuery.data.description);
     setStatus(ticketQuery.data.status);
+    setReopenReason('');
     setPriority(ticketQuery.data.priority);
     setAssigneeUserId(ticketQuery.data.assigneeUserId ?? '');
   }, [ticketQuery.data]);
@@ -112,10 +115,16 @@ export function TicketDetailPage({
     setError('');
     setNotice('');
     setConflict(false);
+    const isReopening = ticketQuery.data.status === 'RESOLVED' && status === 'IN_PROGRESS';
+    if (isReopening && !reopenReason.trim()) {
+      setReopenReasonError('Enter a reason for reopening this ticket.');
+      return;
+    }
+    setReopenReasonError('');
     setSaving(true);
     try {
       const payload = isStaff
-        ? { title: title.trim(), description: description.trim(), status, priority }
+        ? { title: title.trim(), description: description.trim(), status, priority, ...(isReopening ? { reopenReason: reopenReason.trim() } : {}) }
         : { title: title.trim(), description: description.trim() };
       await updateTicket(organizationId, identity.csrfToken, ticketQuery.data, payload);
       setNotice('Ticket updated.');
@@ -232,10 +241,28 @@ export function TicketDetailPage({
               <label htmlFor="ticket-description">Description</label>
               <textarea id="ticket-description" value={description} maxLength={10000} rows={7} required onChange={(event) => setDescription(event.target.value)} />
               {isStaff && <>
-                <label htmlFor="ticket-status">Ticket status</label>
+          <label htmlFor="ticket-status">Ticket status</label>
                 <select id="ticket-status" value={status} onChange={(event) => setStatus(event.target.value as TicketListItem['status'])}>
                   {statuses.map((value) => <option key={value} value={value}>{titleCase(value)}</option>)}
                 </select>
+                {ticket.status === 'RESOLVED' && status === 'IN_PROGRESS' && <>
+                  <label htmlFor="ticket-reopen-reason">Reason for reopening</label>
+                  <textarea
+                    id="ticket-reopen-reason"
+                    value={reopenReason}
+                    maxLength={500}
+                    rows={3}
+                    required
+                    aria-invalid={Boolean(reopenReasonError)}
+                    aria-describedby={`ticket-reopen-reason-hint${reopenReasonError ? ' ticket-reopen-reason-error' : ''}`}
+                    onChange={(event) => {
+                      setReopenReason(event.target.value);
+                      setReopenReasonError('');
+                    }}
+                  />
+                  <small id="ticket-reopen-reason-hint">Explain what changed or what follow-up is needed. Up to 500 characters.</small>
+                  {reopenReasonError && <small id="ticket-reopen-reason-error" role="alert">{reopenReasonError}</small>}
+                </>}
                 <label htmlFor="ticket-priority-detail">Priority</label>
                 <select id="ticket-priority-detail" value={priority} onChange={(event) => setPriority(event.target.value as TicketListItem['priority'])}>
                   {priorities.map((value) => <option key={value} value={value}>{titleCase(value)}</option>)}

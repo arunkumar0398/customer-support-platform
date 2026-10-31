@@ -64,6 +64,16 @@ export async function getTicketDetail(client: PrismaClient, actor: ActiveMembers
   return ticket;
 }
 
+export async function listTicketRequesters(client: PrismaClient, actor: ActiveMembershipContext) {
+  requireStaff(actor);
+  const memberships = await client.membership.findMany({
+    where: { organizationId: actor.organizationId, isActive: true, role: 'CUSTOMER' },
+    orderBy: { user: { email: 'asc' } },
+    select: { user: { select: { id: true, email: true } } },
+  });
+  return memberships.map(({ user }) => ({ userId: user.id, email: user.email }));
+}
+
 const allowedStatusTransitions: Record<string, readonly string[]> = {
   OPEN: ['IN_PROGRESS', 'RESOLVED'],
   IN_PROGRESS: ['RESOLVED'],

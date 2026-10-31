@@ -1,4 +1,15 @@
-# Current session handoff — refreshed 2026-10-30
+## Current snapshot — 2026-10-31 (supersedes the 2026-10-30 snapshot immediately below)
+
+- Repository root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
+- Branch `codex/preview-mobile-roster-ux`, committed HEAD `981697f0dce286116e035c3c3a9d0f6850bfea94`. The 2026-10-31 application/UI changes and planning documents are currently uncommitted. Ten modified TK-29 screenshots are pre-existing user changes and remain byte-identical; do not stage them.
+- Exact committed-head CI is GitHub Actions run [#20](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41084322903) on `981697f`, success. It provides 392 API, 12 web, 23 Playwright CI tests, migrations/seed, lint/typecheck/build proof for the committed base only.
+- Current worktree `npm run check` exited 0: 393 API tests, 12 web tests, 24 Playwright tests discovered, lint/typecheck/build. The complete 24-test browser suite executed successfully in two fresh API-server batches: create/detail 10/10 and auth/bootstrap/dashboard/memberships/list 14/14. A single combined 24-test run passed 23 and hit the 20-login-per-IP limiter on the final test; this is recorded, not hidden. `.env` values were changed temporarily for the local Compose port/role and restored byte-for-byte.
+- Exact worktree Docker images rebuilt successfully with `docker compose up -d --build --wait api web`; DB/API/web were healthy. Smoke from the API container through Nginx returned 200 for `/` (HTML), `/api/health` (JSON `ok`), and `/api/health/ready` (JSON `ready`). It used the existing local DB volume, not a clean isolated clone/volume.
+- UI changes: `GET /api/tickets/requesters` is staff-only, current-org scoped and returns active customer `{userId,email}` only; create page uses a customer selector; reopening a resolved ticket shows a required reason field and sends the reason to the existing authoritative API. Guarded API create suite passed 52/52. Browser cases cover staff selected-customer create, customer self-create, reason-required reopen, recorded event, and existing customer comment/stale-write/denial flows.
+- No Preview or Production data was changed. Preview deployment and authenticated agent/customer/foreign-object checks remain pending; the user-authorized synthetic Preview account is not guessed or accessed without a browser session. A35 remains BLOCKED. A36 migration/rollback compatibility and dedicated accessibility audit remain NOT_RUN. Final parent-kit independent review is pending.
+- Parent kit reviewer path: `..\\100xdevs_assessment_review_agent_skill`. Do not merge, promote Production, or claim Preview validation until exact deployment and role-denial evidence exist.
+
+## Prior snapshot — 2026-10-30 (historical; superseded above)
 
 ## Latest replay — 2026-10-30 21:17 Asia/Calcutta
 

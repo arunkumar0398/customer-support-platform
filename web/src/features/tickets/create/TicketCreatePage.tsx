@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApiError, createTicket } from '../../../lib/api';
+import { ApiError, createTicket, getTicketRequesters } from '../../../lib/api';
 import type { Identity } from '../../../lib/api';
 import './ticket-create.css';
 
@@ -12,6 +12,12 @@ export function TicketCreatePage({ identity, organizationId }: { identity: Ident
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isStaff = ['ADMIN', 'AGENT'].includes(identity.memberships[0]?.role ?? '');
+  const requestersQuery = useQuery({
+    queryKey: ['ticket-requesters', identity.user.id, organizationId],
+    queryFn: () => getTicketRequesters(organizationId!),
+    enabled: Boolean(isStaff && organizationId),
+    retry: false,
+  });
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [requesterUserId, setRequesterUserId] = useState('');
@@ -77,19 +83,28 @@ export function TicketCreatePage({ identity, organizationId }: { identity: Ident
         <form className="ticket-create-form" onSubmit={submit}>
           {isStaff && (
             <div className="ticket-create-field">
-              <label htmlFor="ticket-requester">Customer membership ID</label>
-              <input
+              <label htmlFor="ticket-requester">Customer</label>
+              <select
                 id="ticket-requester"
-                autoComplete="off"
-                inputMode="text"
-                maxLength={36}
-                pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
                 value={requesterUserId}
                 onChange={(event) => setRequesterUserId(event.target.value)}
                 required
+                disabled={requestersQuery.isLoading || requestersQuery.isError || !requestersQuery.data?.length}
                 aria-describedby="requester-hint"
-              />
-              <small id="requester-hint">Enter the ID of an active customer in your organization.</small>
+              >
+                <option value="">Select a customer</option>
+                {(requestersQuery.data ?? []).map((requester) => (
+                  <option key={requester.userId} value={requester.userId}>{requester.email}</option>
+                ))}
+              </select>
+              {requestersQuery.isLoading && <small role="status">Loading customers…</small>}
+              {requestersQuery.isError && <p id="requester-hint" role="alert">Customer list could not be loaded. Refresh the page and try again.</p>}
+              {!requestersQuery.isLoading && !requestersQuery.isError && !requestersQuery.data?.length && (
+                <p id="requester-hint" role="status">No active customers are available in this organization.</p>
+              )}
+              {requestersQuery.data?.length ? (
+                <small id="requester-hint">Choose an active customer in this organization.</small>
+              ) : null}
             </div>
           )}
 
@@ -138,7 +153,7 @@ export function TicketCreatePage({ identity, organizationId }: { identity: Ident
 
           <div className="ticket-create-actions">
             <Link className="button button-quiet" to="/">Cancel</Link>
-            <button className="button button-primary" type="submit" disabled={submitting || !organizationId}>
+            <button className="button button-primary" type="submit" disabled={submitting || !organizationId || (isStaff && (!requesterUserId || requestersQuery.isLoading || requestersQuery.isError || !requestersQuery.data?.length))}>
               {submitting ? 'Creating ticket…' : 'Submit ticket'}
             </button>
           </div>

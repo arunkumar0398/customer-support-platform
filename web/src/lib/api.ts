@@ -113,6 +113,11 @@ export interface CreateTicketPayload {
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 }
 
+export interface TicketRequesterOption {
+  userId: string;
+  email: string;
+}
+
 interface ErrorEnvelope {
   error?: { code?: unknown; message?: unknown };
 }
@@ -190,6 +195,12 @@ export function createTicket(
       'X-CSRF-Token': csrfToken,
     },
     body: JSON.stringify(payload),
+  });
+}
+
+export function getTicketRequesters(organizationId: string): Promise<TicketRequesterOption[]> {
+  return request<TicketRequesterOption[]>('/api/tickets/requesters', {
+    headers: { 'X-Organization-ID': organizationId },
   });
 }
 

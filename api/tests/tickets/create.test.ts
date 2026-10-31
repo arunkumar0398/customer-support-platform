@@ -76,6 +76,20 @@ describe('ticket creation transaction and tenant authority', () => {
       .toMatchObject([{ actorUserId: ids[account], type: 'TICKET_CREATED', newValue: { priority: 'HIGH', requesterUserId: ids.other } }]);
   });
 
+  it.each(['admin', 'agent'] as const)('lists only active current-org customers for %s and denies customers', async (staff) => {
+    const staffIdentity = await signIn(staff);
+    await db.membership.update({ where: { organizationId_userId: { organizationId: alphaId, userId: ids.other } }, data: { isActive: false } });
+    const headers = { Cookie: staffIdentity.cookie, Origin: origin, 'X-CSRF-Token': staffIdentity.csrf, 'X-Organization-ID': alphaId };
+    const response = await request(app).get('/api/tickets/requesters').set(headers);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([{ userId: ids.customer, email: email('customer') }]);
+    expect(JSON.stringify(response.body)).not.toMatch(/organizationId|role|isActive|passwordHash/i);
+    const denied = await request(app).get('/api/tickets/requesters')
+      .set({ Cookie: customer.cookie, Origin: origin, 'X-Organization-ID': alphaId });
+    expect(denied.status).toBe(403);
+    expect(denied.body.error.code).toBe('FORBIDDEN');
+  });
+
   it('allows a Beta customer to create only its own Beta ticket', async () => {
     const identity = await signIn('foreign');
     const response = await create(identity, betaId).send(body);

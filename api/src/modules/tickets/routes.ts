@@ -6,7 +6,7 @@ import { createAuthenticate } from '../../middleware/authenticate.js';
 import type { AuthOptions } from '../auth/session.js';
 import { createActivityRouter } from '../activity/routes.js';
 import { createCommentsRouter } from '../comments/routes.js';
-import { assignTicket, createTicket, getTicketDetail, listTickets, updateTicket } from './service.js';
+import { assignTicket, createTicket, getTicketDetail, listTicketRequesters, listTickets, updateTicket } from './service.js';
 import { parseTicketVersion, parseTicketId, parseTicketListQuery } from './schemas.js';
 import { ApiError } from '../../middleware/errors.js';
 
@@ -18,6 +18,10 @@ export function createTicketRouter(options: AuthOptions): Router {
   router.get('/', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
     response.json(await listTickets((options.getClient ?? getPrismaClient)(), actor, parseTicketListQuery(request.query)));
+  });
+  router.get('/requesters', async (_request, response) => {
+    const actor = response.locals.membership as ActiveMembershipContext;
+    response.json(await listTicketRequesters((options.getClient ?? getPrismaClient)(), actor));
   });
   router.get('/:ticketId', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
