@@ -27,3 +27,7 @@ The reviewer confirmed by source inspection that the requester lookup is behind 
 - A37 broad route-wide accessibility/responsive audit: **NOT_RUN**; targeted reopen-field accessibility test passes but does not close the gate.
 - G7 exact deployed-candidate final review: **BLOCKED** while changes remain uncommitted/undeployed and release gates remain open.
 - Docker fresh-volume check is now recorded separately in TK-25; it used a newly created isolated local Compose project and was cleaned up after healthy startup checks.
+
+## Later Preview follow-up
+
+After this read-only review, the change was committed/pushed as `a44a96d50cda832b824716484b5c7a8cffd9b7df` and deployed Ready to both Vercel Preview projects. An authenticated Preview smoke then verified health/readiness, the staff customer picker, ticket #4 creation, blank-reason denial, a reasoned reopen, and restoration of ticket #3. Agent/customer login and foreign-tenant object denial remain open, so the **NOT_READY** release verdict still applies. See [Preview validation](preview-validation-2026-10-31.md) and [TK-25 evidence](../checkpoints/TK-25-2026-10-31.md) for post-review results.
