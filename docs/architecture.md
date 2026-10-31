@@ -27,7 +27,9 @@ The browser talks to the same-origin `/api` path. In local development Vite prox
 
 The request path is: request ID and JSON-size middleware → health/auth/membership/ticket/dashboard router → session and current-membership authorization → role/tenant-scoped service → Prisma/PostgreSQL. Ticket writes use expected versions and transactions that update the ticket and add an immutable activity event together. See [API contract](api.md) and [data model](data-model.md).
 
-## Data and tenant boundaries
+## Security boundaries
+
+### Data and tenant boundaries
 
 PostgreSQL stores organizations, global user identities, organization memberships, tickets, comments, immutable activity events, and hashed sessions. Organization identity and role are derived server-side from the authenticated session and current membership. Composite tenant foreign keys constrain ticket requesters/assignees, comment authors, and event actors to the ticket’s organization. They complement request-level authorization; they do not replace it.
 
@@ -42,17 +44,38 @@ The seed creates synthetic Alpha and Beta organizations and local demo accounts.
 - Login throttling is an in-process map with per-account and per-IP windows. It is not shared across function instances; forwarding headers are not trusted because Express proxy trust is disabled. This limitation and required validation are in [limitations](limitations.md).
 - The local test database guard checks database identity before mutation. Never point test setup at Preview or Production.
 
+## Local runtime and data flow
+
+The local development and Docker paths use the same browser-facing `/api` contract:
+
+```mermaid
+flowchart LR
+  Browser[Browser] --> Nginx[Nginx static web]
+  Nginx --> API[Express API container]
+  API --> DB[(PostgreSQL Compose)]
+  Browser --> Dev[Vite dev server]
+  Dev -->|/api proxy| API
+```
+
 ## Docker-local runtime
 
 `docker-compose.yml` runs three services: a loopback-bound PostgreSQL service, an API container, and an Nginx web container. The API waits for database readiness; the web container waits for API readiness. The root `Dockerfile` builds API and web runtime targets from the pinned Node base image. App containers run non-root. The Compose volume persists local databases unless explicitly removed; destructive volume removal is not part of the routine workflow.
 
 For commands and recovery details, see [operations](operations.md).
 
-## Hosted topology and evidence
+## Hosted topology (after approval)
+
+```mermaid
+flowchart LR
+  Browser[Browser] --> Web[Vercel static React/Vite]
+  Web -->|same-origin /api rewrite| Proxy[Vercel web proxy function]
+  Proxy -->|allowlisted request| API[Vercel Express Node Function]
+  API --> DB[(Neon PostgreSQL)]
+```
 
 The hosted architecture uses separate Vercel projects for the web and API, plus Neon PostgreSQL. In the Web project, `web/vercel.json` rewrites `/api/*` to `web/api/index.ts`; that handler reconstructs the original API path and `web/src/server/api-proxy.ts` forwards only an allowlist of request/response headers, body, and cookies to validated `API_ORIGIN`. Preview requests add a Vercel OIDC trusted-source token. The API project exports the Express app at `api/index.ts`. Runtime database access uses the pooled Neon URL; migrations use a direct/unpooled URL, with Preview and Production kept separate.
 
-The application source SHA with verified successful Web/API deployments is `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` (Actions #74). Documentation-only SHA `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` passed Actions #91; its Web check succeeded and API check was blocked by Vercel's 24-hour build quota. The later docs candidate `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` passed Actions #92; exact-SHA Vercel Web succeeded and API remained provider-quota-limited. That quota result does not demonstrate an application build failure or a healthy deployment of the API at `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`. Deployment is optional in the assessment. No provider upgrade is required.
+The application source SHA with verified successful Web/API deployments is `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` (Actions #74). Documentation candidate reviewed before this update `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` passed Actions #94. Both exact-SHA Vercel statuses on that docs candidate report provider build-rate-limit failures; these are not application build results and do not establish a healthy deployment at this SHA. Docs-only runs #90–#93 are historical and remain SHA-specific. Deployment is optional in the assessment. No provider upgrade is required.
 
 ## Operations and reliability
 
@@ -65,6 +88,6 @@ The application source SHA with verified successful Web/API deployments is `3e61
 | Observability | Request IDs and sanitized errors exist; a full monitoring/alerting system is not implemented. |
 | Release | Use exact-SHA CI evidence; keep Preview and Production authorization/data separate. |
 
-## Tradeoffs
+## Tradeoffs and growth path
 
 A shared PostgreSQL schema and modular monolith keep the assessment system simple to run and inspect. Tenant isolation depends on both authorization scoping and composite database constraints. Capped offset pagination is simpler for the small assessment dataset; deep pages cost more and may need keyset pagination as volume grows. Notifications, attachments, realtime, rich analytics, and observability dashboards are out of scope. Deployment is optional by the assessment. See [limitations and next steps](limitations.md).

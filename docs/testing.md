@@ -27,8 +27,21 @@ The CI workflow `.github/workflows/ci.yml` creates fresh synthetic credentials, 
 | [Actions #90](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41220472826) | `85ae41ebf76fea8e1a919f309de8c1a6a1195518` docs-only | `verify` passed. Vercel Web/API statuses on that SHA were both provider quota failures. |
 | [Actions #91](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41222046884) | `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
 | [Actions #92](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223260270) | `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
+| [Actions #93](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223604705) | `73182951dcc15b22096e6c52088c392626b6c9c8` docs-only | `verify` passed. Both Vercel Web/API statuses were provider build-rate-limit failures. |
+| [Actions #94](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223707522) | `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` docs-only | `verify` passed. Both exact-SHA Vercel Web/API statuses were provider build-rate-limit failures. |
 
-Run #91 tests the repository tree at `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`; app source files remain at `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. Its CI success does not turn the API quota status into an app build result or close Preview/security gates.
+The reviewed application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; #90–#94 are later documentation snapshots and their results do not change that source lineage. #94 succeeded on the exact docs candidate. The two Vercel quota contexts on #93 and #94 are provider statuses, not application build failures.
+
+## Local acceptance evidence (2026-10-31)
+
+Source implementation SHA: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; the candidate adds a test-only assignment rollback regression case. Environment: Windows, Node 24.22.1/npm 11.19.1, Vitest 5.0.5, Playwright 1.64.1, disposable PostgreSQL 18.6 bound to loopback port 5544. `npm run db:verify-test` exit 0 confirmed identity `support_test / support_test`.
+
+- Focused auth/tenant/ticket/dashboard API suites: `npm run test:api -- tests/auth/auth.test.ts tests/auth/policy.test.ts tests/tickets/detail.test.ts tests/tickets/assignment.test.ts tests/tickets/comments.test.ts tests/tickets/update.test.ts tests/tickets/create.test.ts tests/tickets/list.test.ts tests/dashboard/dashboard.test.ts` — exit 0; 9 files, 221/221 tests.
+- Full local browser suite: `npm run test:e2e` — exit 0; 23/23 tests.
+- Full source worktree check: `npm run check` — exit 0; API 391/391, Web 12/12, Playwright discovery 23, lint/typecheck/build passed.
+- Candidate assignment rollback test: `npm run test:api -- tests/tickets/assignment.test.ts` — exit 0; 14/14. A disposable PostgreSQL trigger rejected the fixture `ASSIGNMENT_CHANGED` insert; the API response was sanitized, ticket assignee/version and event count did not change, and after trigger removal an assignment succeeded. Full check with the regression test passed: API 392/392, Web 12/12, Playwright discovery 23, lint/typecheck/build passed.
+
+These are local disposable-DB/browser results, not GitHub Actions results; no Preview or Production database was used. They do not complete the full responsive/state matrix or seeded demo-account login flow.
 
 ## Security and acceptance work not run
 
@@ -36,6 +49,6 @@ Run #91 tests the repository tree at `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`;
 - No new full security audit ran here. The compliant sandbox has a local Docker engine and Node 24 image, but the available Linux audit image has no preinstalled Vitest, Supertest, Playwright, or Prisma runner. The WSL Ubuntu/Kali environments also have no Node/npm test toolchain. Host `node_modules` is Windows-built and not a compatible preinstalled Linux test toolchain. Per the audit skill, no dependency was installed/fetched and target tests were not run in an unsuitable environment.
 - Preview agent/customer journeys, cross-tenant and same-tenant-other-customer denials, and before/after ticket/comment/activity checks remain **BLOCKED / NOT_RUN**. They require Neon owner-confirmed compute readiness, safe synthetic role credentials, and a verified second-tenant fixture.
 - SQL migration reversal is **NOT_RUN**. Existing code rollback/schema-compatibility evidence must not be described as an actual down-migration test.
-- The latest checked documentation candidate is `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` with Actions #92 success, Vercel Web success, and API quota failure. Any later documentation-only descendant has separate exact-SHA status checks; do not inherit outcomes.
+- At task start, the latest checked docs candidate was `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` with Actions #94 success and both Vercel projects provider-rate-limited. Any later descendant needs separate exact-SHA statuses; do not inherit #94.
 
-No Production request, Preview request, database write, or deployed throttle probe is part of the evidence above.
+No Production or Preview requests/writes, or deployed throttle probes, are part of the evidence above. Database writes occurred only in the verified disposable loopback test database.

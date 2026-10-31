@@ -26,13 +26,13 @@ erDiagram
 - **ActivityEvent**: UUID, organization and ticket IDs, actor membership, event type, optional JSON before/after values, optional reason, creation time. Ticket mutation and its activity insert are performed in one transaction. API behavior is append-only; no database trigger claims immutability.
 - **Session**: UUID, user ID, unique hash of opaque session token, expiry, optional revocation/last-seen timestamps and created timestamp. Raw session tokens are not stored in this table.
 
-## Tenant integrity and constraints
+## Tenant integrity
 
 Foreign keys use the composite `(organizationId, userId)` membership key for ticket requester/assignee, comment author, and activity actor. Comment and activity ticket relationships use `(organizationId, ticketId)` to a ticket's unique `(organizationId, id)`. The migration has explicit checks that `ticketNumber > 0`, `version > 0`, and assignee columns are either both null or both present with assignee organization equal to ticket organization. The user email check requires a normalized, non-empty value. Enum types constrain roles, ticket statuses/priorities, and activity types.
 
 These constraints prevent cross-organization references in the relational graph. The API still must check caller authorization, ownership, active membership, and operation-specific permission; database constraints do not prove those policies.
 
-## Key indexes in Prisma/migrations
+## Constraints and indexes
 
 | Table | Index / key | Purpose |
 |---|---|---|
@@ -53,6 +53,6 @@ These constraints prevent cross-organization references in the relational graph.
 
 Additional unique indexes `Ticket_organizationId_id_key`, `Comment_organizationId_id_key`, and `ActivityEvent_organizationId_id_key` support tenant-composite child references. The Prisma schema names all indexes; confirm exact deployed state with migration status rather than assuming documentation proves a database was migrated.
 
-## Query and pagination tradeoffs
+## Query and scale behavior
 
 Ticket lists filter by validated organization, role/owner, status, priority, assignment, and bounded text search. The API uses capped offset pagination: at most 1,000 pages and 100 rows per page, so no page returns beyond the first 100,000 matching rows. This is simple and deterministic for the assessment but deep offsets can become expensive. Keyset pagination on `(createdAt, id)` is the growth path. Dashboard and list query plan evidence is scoped to the recorded local PostgreSQL dataset in [performance](performance.md); it is not a large-scale load test.

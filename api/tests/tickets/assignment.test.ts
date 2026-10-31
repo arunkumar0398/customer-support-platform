@@ -87,6 +87,31 @@ describe('tenant-safe ticket assignment', () => {
     expect(event.newValue).toBeNull();
   });
 
+  it('rolls back an assignment and version when PostgreSQL rejects its activity event', async () => {
+    const ticket = await createTicket();
+    const name = `tk16_${randomUUID().replaceAll('-', '')}`;
+    const eventsBefore = await db.activityEvent.count({ where: { ticketId: ticket.id } });
+    try {
+      await verifier.query(`CREATE FUNCTION "${name}"() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic assignment event rejection'; END $$`);
+      await verifier.query(`CREATE TRIGGER "${name}" BEFORE INSERT ON "ActivityEvent" FOR EACH ROW WHEN (NEW."organizationId" = '${alphaId}'::uuid AND NEW."ticketId" = '${ticket.id}'::uuid AND NEW."type" = 'ASSIGNMENT_CHANGED') EXECUTE FUNCTION "${name}"()`);
+      const response = await assign('admin', ticket.id, ids.agent);
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('INTERNAL_ERROR');
+      expect(response.text).not.toContain('synthetic assignment event rejection');
+      expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({
+        version: 1, assigneeOrganizationId: null, assigneeUserId: null,
+      });
+      expect(await db.activityEvent.count({ where: { ticketId: ticket.id } })).toBe(eventsBefore);
+    } finally {
+      await verifier.query(`DROP TRIGGER IF EXISTS "${name}" ON "ActivityEvent"`);
+      await verifier.query(`DROP FUNCTION IF EXISTS "${name}"()`);
+    }
+    const recovered = await assign('admin', ticket.id, ids.agent);
+    expect(recovered.status).toBe(200);
+    expect(recovered.body).toMatchObject({ assigneeUserId: ids.agent, version: 2 });
+    expect(await db.activityEvent.count({ where: { ticketId: ticket.id, type: 'ASSIGNMENT_CHANGED' } })).toBe(1);
+  });
+
   it.each(['admin', 'agent'] as const)('rejects a cross-org agent target for %s without writes', async (account) => {
     const ticket = await createTicket();
     const response = await assign(account, ticket.id, ids.foreignAgent);
