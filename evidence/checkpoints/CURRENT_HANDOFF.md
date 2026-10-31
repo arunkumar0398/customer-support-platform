@@ -304,3 +304,13 @@ Candidate HEAD remains `ffe7a2a8ab72a92561daded62ca25d8774eaf4d3` on `codex/prev
 ## Next action
 
 Recover Docker engine and rebuild the exact checkout; then obtain safe Preview synthetic-account access/membership IDs and run role journeys against the exact deployment. Separately perform rollback compatibility on a disposable isolated DB and complete a parent-kit independent review. Keep CI, local browser, Preview, and not-run evidence clearly separated in the ledger.
+
+
+## Latest handoff — 2026-10-31 security audit skill application
+
+- Branch: `codex/preview-mobile-roster-ux`; audited head before this evidence update: `00731039fd1830c4acd7faa2132b3afe27062314`; application source SHA: `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a`.
+- Official Cloudflare `security-audit` skill was located, read, and applied. Run `run-2026-10-31-02` is a quick scoped source-only audit, **INCOMPLETE**. Source-only reconnaissance mapped auth/session, active membership, ticket ownership, tenant relations, transactional mutation paths, deployment boundaries, and login throttling. No confirmed vulnerability was established; no clean bill of health is implied.
+- The skill mandates an OS-enforced sandbox and safe artifact handling. The host lacks Windows Sandbox and the official validators refuse file reads because no-follow/nonblocking input protection is unavailable. Therefore target-controlled tests/build/browser execution and official ledger/findings validation were not completed.
+- The skill expressly prohibits deployed endpoint/external-service probing. No Preview/Production login-throttle request was sent. The process-local throttle's behavior across Vercel instances and proxy address topology remains unvalidated.
+- Audit output is outside the target at `C:/Users/sivaa/security-audit-skill/customer-support-platform/run-2/`. CI run #37 succeeded on audited head `00731039fd1830c4acd7faa2132b3afe27062314` ([run](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41192800488)); that is CI evidence only.
+- Preview agent/customer journeys and verified foreign-ticket denial remain blocked by missing safe credentials/second-tenant fixture. G7 remains BLOCKED; hold merge/submission. Preserve all ten modified TK-29 screenshots.
