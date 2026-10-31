@@ -124,3 +124,8 @@ The official Cloudflare security-audit skill repository was located, cloned to t
 ### Audit review detail — 2026-10-31
 
 The quick hunter identified `auth.login-account-throttle-lockout`; a fresh independent verifier retained it as **needs_validation**, not confirmed. Source shows a process-local account counter increments before password verification and blocks at five attempts for 15 minutes on that process. Vercel routing/instance behavior remains unknown. No severity is assigned and no deployed probe was sent. The final coverage critic deferred five unmapped units per quick-profile procedure: session lifecycle/CSRF, admin membership mutations, comment/activity/dashboard scope, Vercel Web-to-API proxy, and CI/container supply chain. The official Cloudflare coverage/findings validators both refuse reads on this host because no-follow/nonblocking protection is unavailable; outputs are not schema-validated. Audit remains INCOMPLETE. See the external run-2 report listed in the immediately preceding section. No acceptance gate changed to PASS.
+
+
+### Post-audit evidence commit — 2026-10-31
+
+Acceptance/handoff documentation commit `85f3bcea220434bbe3a831bf66fe3925ff96968f` passed GitHub Actions [run #41](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41194109274). This is docs-head CI evidence; it does not change Cloudflare audit status or clear G2/G6/G7 blockers. The audited application source remains `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a`. Hold merge/submission.
