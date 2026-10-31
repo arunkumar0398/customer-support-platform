@@ -4,6 +4,7 @@
 
 - Validated application source candidate: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; Actions run [#74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) passed `verify` on that exact SHA. Vercel Web and API checks succeeded on the same SHA ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/6AuPqU7gLSB1Rp51jjoUDaSHQDie), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/DCA5qzWusqeP2stcicpkdpQ2VL5y)).
 - Documentation-only status follow-up: `7d82dfc035e11adad9577c5812ad6ebdd695c328`; Actions run [#75](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41203862108) and Vercel Web/API checks also succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/4dL8Dd9bp2fyi7Dc6tnLPZsCzZty), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/vJjDKcPk6mRC8oZDD9eaTL1YAZJP)). Application source is unchanged from `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`.
+- Latest documentation-only snapshot: `a2cb3c89c4ca2a71e8af7d319fbb4e6cebd9c2f1`; Actions run [#76](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41204296955) passed `verify`, and Vercel Web/API checks succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/HVFKYjJHwZF5SDrh1MBejgdtY6Uw), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/2Vfe7KcJZgJPK7Se2GQ7YLZpJbmT)). Application source remains unchanged from `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`.
 - The clean candidate worktree is separate from the original dirty worktree. The original `b2fd369` worktree and ten TK-29 screenshot edits remain preserved and excluded.
 - Older audit/review artifacts remain tied to historical source SHAs. The security/Preview follow-up report reviews `b2fd369`; it is not current-candidate target-test evidence.
 - Preview role journeys and foreign-ticket read/write denials with before/after no-side-effect proof are **BLOCKED / NOT_RUN**: safe synthetic role credentials and a verified second-tenant ticket are unavailable. No Preview authentication/request or hosted-data mutation was performed.
@@ -55,7 +56,7 @@ The detailed TK-01–TK-32 summaries and earlier Docker recovery attempts below 
 
 TK-32 final exact source SHA is `5a3582d41a05cf3a9d1a097f7c94bd135cce9118`. Static and runtime parent-kit reviews closed both initial P2 findings (structured/indented auth-cookie redaction and mutable Actions refs) with no remaining findings. Focused sanitizer tests passed 2/2; `npm run check` passed (API385, web3, 23 Playwright tests discovered, lint/typecheck/build); YAML parsed. No hosted GitHub CI was run, so A34 and G5 remain NOT_RUN; A24 Docker application startup and A26 final document audit remain NOT_RUN. Details: [TK-32 checkpoint](TK-32.md), [review report](../reviews/tk32-2026-10-28-5a3582d.md).
 
-## Gate status
+## Historical gate status (2026-10-28; superseded by the current snapshot above)
 
 | Gate | Status / evidence |
 |---|---|
