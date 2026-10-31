@@ -4,6 +4,8 @@ Review date: 2026-10-31 (Asia/Calcutta)
 Repository: `arunkumar0398/customer-support-platform`, private branch `codex/clean-candidate-b2fd369`
 Application implementation source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`
 Documentation candidate reviewed: `5e27f68a7f2c8aa12c502995b26c2b5063e1309b`
+
+Latest exact-CI/Vercel-verified docs/test candidate before this review refresh: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions #95, Web/API success.
 Assessment basis: `reference/assessment.pdf`, implementation scope and deliverables section.
 
 This is a repository-content review. It does not establish that an evaluator can access the private GitHub repository, that cloud controls are configured, or that blocked Preview/audit work ran.

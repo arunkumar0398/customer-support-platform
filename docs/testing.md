@@ -19,6 +19,8 @@ npm run test:e2e
 
 ## Exact recorded CI evidence
 
+Latest validated candidate after the table below: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions [run #95](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41226730675), job `verify` passed. Exact-SHA Vercel Web and API statuses both succeeded ([checks](https://github.com/arunkumar0398/customer-support-platform/commit/acf01641263275507f4b781bc980cf9e810c9e49/checks)). The table rows #90–#94 remain historical SHA-specific records.
+
 The CI workflow `.github/workflows/ci.yml` creates fresh synthetic credentials, starts disposable PostgreSQL, installs the lockfile with `npm ci`, applies migrations and seed, then runs the sanitizer regression test, lint, typecheck, API tests, web tests, installs Chromium in CI, executes Playwright, and builds API/web. The passing runs below are exact-SHA evidence; docs-only runs do not create a new application-source SHA.
 
 | Run | Exact SHA | Result and scope |
@@ -28,9 +30,10 @@ The CI workflow `.github/workflows/ci.yml` creates fresh synthetic credentials, 
 | [Actions #91](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41222046884) | `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
 | [Actions #92](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223260270) | `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
 | [Actions #93](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223604705) | `73182951dcc15b22096e6c52088c392626b6c9c8` docs-only | `verify` passed. Both Vercel Web/API statuses were provider build-rate-limit failures. |
-| [Actions #94](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223707522) | `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` docs-only | `verify` passed. Both exact-SHA Vercel Web/API statuses were provider build-rate-limit failures. |
+| [Actions #94](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223707522) | `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` docs-only baseline | `verify` passed. Both exact-SHA Vercel Web/API statuses were provider build-rate-limit failures. |
+| [Actions #95](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41226730675) | `acf01641263275507f4b781bc980cf9e810c9e49` docs + test-only assignment regression | `verify` passed on the exact candidate. Exact-SHA Vercel Web and API checks both report success. |
 
-The reviewed application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; #90–#94 are later documentation snapshots and their results do not change that source lineage. #94 succeeded on the exact docs candidate. The two Vercel quota contexts on #93 and #94 are provider statuses, not application build failures.
+The reviewed application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; #90–#94 are historical documentation snapshots and their results do not change that source lineage. #95 is the current docs/test candidate and passes exact-SHA CI; its Web/API provider checks both report success. The Vercel quota contexts on #93 and #94 are provider statuses, not application build failures.
 
 ## Local acceptance evidence (2026-10-31)
 
@@ -49,6 +52,6 @@ These are local disposable-DB/browser results, not GitHub Actions results; no Pr
 - No new full security audit ran here. The compliant sandbox has a local Docker engine and Node 24 image, but the available Linux audit image has no preinstalled Vitest, Supertest, Playwright, or Prisma runner. The WSL Ubuntu/Kali environments also have no Node/npm test toolchain. Host `node_modules` is Windows-built and not a compatible preinstalled Linux test toolchain. Per the audit skill, no dependency was installed/fetched and target tests were not run in an unsuitable environment.
 - Preview agent/customer journeys, cross-tenant and same-tenant-other-customer denials, and before/after ticket/comment/activity checks remain **BLOCKED / NOT_RUN**. They require Neon owner-confirmed compute readiness, safe synthetic role credentials, and a verified second-tenant fixture.
 - SQL migration reversal is **NOT_RUN**. Existing code rollback/schema-compatibility evidence must not be described as an actual down-migration test.
-- At task start, the latest checked docs candidate was `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` with Actions #94 success and both Vercel projects provider-rate-limited. Any later descendant needs separate exact-SHA statuses; do not inherit #94.
+- The reconciliation baseline was `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` with Actions #94 success and both Vercel projects provider-rate-limited. Current candidate `acf01641263275507f4b781bc980cf9e810c9e49` has Actions #95 success and Web/API status success; later descendants need their own exact-SHA statuses.
 
 No Production or Preview requests/writes, or deployed throttle probes, are part of the evidence above. Database writes occurred only in the verified disposable loopback test database.
