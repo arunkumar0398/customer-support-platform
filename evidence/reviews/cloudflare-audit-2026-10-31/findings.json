@@ -1,0 +1,91 @@
+[
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "auth.login-account-throttle-lockout",
+    "title": "Unauthenticated login attempts can temporarily block an account on a process",
+    "description": "The login route increments an account-keyed counter before checking credentials. Five attempts for the same normalized email cause later requests for that email to receive 429 responses on that process until the 15-minute window expires, regardless of attempt source IP. An unauthenticated caller able to reach the same process could temporarily prevent the account from logging in. Source supports the per-process behavior, but this audit did not establish practical effect across Vercel instances or independently reproduce it.",
+    "claimed_root_cause": "The process-local login throttle counts attempts by SHA-256 of the normalized account email before password verification and rejects at five for the 15-minute window.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 63,
+        "scope": "Unauthenticated login request",
+        "description": "POST /login checks Origin and a static CSRF header before body validation and throttling."
+      },
+      {
+        "kind": "propagation",
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 15,
+        "scope": "Normalized login account",
+        "description": "Email is trimmed and lowercased before the account key is computed."
+      },
+      {
+        "kind": "propagation",
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 26,
+        "scope": "Account throttle key",
+        "description": "A hash of the normalized email forms an account key independent of the IP key."
+      },
+      {
+        "kind": "propagation",
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 69,
+        "scope": "Login middleware order",
+        "description": "The throttle runs before passwordLogin verifies credentials, so failed attempts increment the counter."
+      },
+      {
+        "kind": "sink",
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 46,
+        "scope": "Account login availability on one process",
+        "description": "At the account limit, later attempts receive 429 until the counter window expires."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 20,
+        "description": "Each router instance stores counters in an in-memory Map."
+      },
+      {
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 21,
+        "description": "Counter window is 15 minutes."
+      },
+      {
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 22,
+        "description": "Default IP attempt cap is 20."
+      },
+      {
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 26,
+        "description": "Account hash key is separate from the IP key."
+      },
+      {
+        "file": "api/src/modules/auth/routes.ts",
+        "line": 46,
+        "description": "Reached limits throw a 429 rate-limit error before credential verification."
+      },
+      {
+        "file": "api/src/modules/auth/session.ts",
+        "line": 53,
+        "description": "Throttle key helper uses SHA-256."
+      },
+      {
+        "file": "api/tests/auth/auth.test.ts",
+        "line": 265,
+        "description": "Test source describes the five-attempt account cap and expiry recovery; not executed in this audit."
+      }
+    ],
+    "blockers": [
+      "Required OS-enforced sandbox unavailable, so the bounded dummy-account reproduction was not run.",
+      "Source cannot establish Vercel function instance reuse or routing; practical deployment scope is unknown.",
+      "The selected skill prohibits deployed endpoint probes."
+    ],
+    "validation_plan": {
+      "local": "When the required sandbox exists, run the focused auth throttle integration test with a verified disposable TEST_DATABASE_URL and dummy account; verify five failed attempts from distinct simulated IPs on one process cause a later valid request to return 429 with Retry-After, then verify expiry recovery using the injected clock. Start a fresh app instance and verify its counters are isolated. Do not use hosted services or real credentials."
+    }
+  }
+]
