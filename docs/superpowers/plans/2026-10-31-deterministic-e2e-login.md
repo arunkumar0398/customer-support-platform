@@ -48,3 +48,13 @@
 - [x] Record historical run #22 failure at `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`: 23/24 browser checks passed; the narrow-viewport queue test's login helper remained on `/sign-in`. The run did not expose an HTTP status and does not prove limiter causality.
 - [x] Record exact-head run #23 separately from local checks. Local run: combined Playwright 24/24 and full `npm run check` exit 0; GitHub Actions is the exact committed-SHA evidence.
 - [x] Preserve the existing A35/A36/A37/Docker/final-review blockers in the current handoff and ledger. The user subsequently directed Preview acceptance testing; those synthetic Preview checks are recorded in [Preview validation](../../evidence/reviews/preview-validation-2026-10-31.md). No Production data or deployment was changed.
+
+
+## Final exact-candidate verification — 2026-10-31
+
+- Final application source candidate: `7c2fdba6efb7c39dbf723f100644a5c53928fd84`. Local source verification recorded in `evidence/reviews/hallmark-2026-10-31/REVIEW.md`: combined Playwright 25/25; `npm run check` exit 0 with 395 API tests, 12 Web tests, 25 E2E cases discovered, lint, typecheck, and both builds. The screenshot-preservation runner reported no changed screenshots and preserved hashes.
+- Exact-SHA GitHub Actions run [#25](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515) checked out this full SHA and its `verify` job concluded `success`; disposable database setup and required gates completed.
+- Rate-limit contract remains unchanged in production: 20 attempts per IP and 5 per account in 15 minutes. Only `api/tests/e2e-server.ts` supplies the fixed 100-attempt IP override; deployed entrypoints omit it. The override test and the default/account-limit cases are in the passing API suite.
+- The test-first RED phase was not re-executed during the latest reconciliation and remains explicitly unclaimed.
+- Task 2 reconciliation now records historical run #22 on `9a5cce3` separately from current run #25 and local evidence. Ten modified TK-29 screenshots remain preserved and unstaged.
+- Remaining release gates: A35 Preview role/foreign-object coverage is blocked; A36 rollback compatibility is not run; A37 is partial; Cloudflare audit cannot run without its required OS-enforced isolated sandbox; and final whole-project independent review remains pending. See the latest acceptance ledger and handoff for the current status.

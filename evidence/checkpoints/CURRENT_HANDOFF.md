@@ -1,14 +1,30 @@
 ## Latest handoff — 2026-10-31 exact candidate 7c2fdba
 
-- Repository: D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes; branch `codex/preview-mobile-roster-ux`; current code HEAD `7c2fdba6efb7c39dbf723f100644a5c53928fd84`, pushed to origin.
-- GitHub Actions [run #25](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515) passed on exact SHA `7c2fdba6efb7c39dbf723f100644a5c53928fd84`; run #24 passed on `15a59b3` and run #23 on `40bcce8`. The #25 workflow completed successfully. Earlier Vercel health/readiness evidence is on `40bcce8`; refresh deployment checks on the current candidate before claiming current Preview status.
-- Preserve provenance: run #22 on 9a5cce3 failed 23/24 Playwright tests; logs did not capture a login status or establish 429 causality. The test-only override preserves deployed defaults of 20 IP attempts and 5/account; only the guarded E2E server sets 100.
-- Local evidence on the current worktree based on 15a59b3: mobile roster RED→GREEN; sign-in input focus RED→GREEN; combined Playwright 25/25; npm run check exit 0 (395 API, 12 Web, 25 E2E discovered, lint/typecheck/build). Routine Playwright run left all ten user-modified TK-29 screenshots unchanged; the runner recorded no checkpoint screenshot changes.
-- Parent reviewer kit review confirmed both P2 code findings from `15a59b3` are resolved. Its `NOT_READY` verdict was solely due to stale candidate text; acceptance status, this handoff, and the Hallmark report now identify `7c2fdba` and exact-SHA run #25. An independent review of the reconciled docs/final candidate is still needed.
-- Ten user-modified TK-29 screenshots remain unstaged. Do not stage, restore, or overwrite them. The fresh admin-membership screenshots are deliberately captured and committed under [Hallmark review evidence](../reviews/hallmark-2026-10-31/).
-- Preview validation: immutable Web/API health probes passed on the earlier candidate; immutable Web sign-in failed origin/CSRF validation. The current branch alias restored the synthetic admin. Admin created synthetic ticket #5 (ef909eb7-d5dc-4869-9ac4-25b4d56e480b), changed priority, added a comment, and verified stale-write denial. Agent/customer logins and true foreign-ticket denial remain unverified because known role passwords and a verified second-tenant fixture are unavailable.
-- Still open: A35 role and tenant-denial Preview cases; A36 Preview migration rollback compatibility; A37 broader route-wide accessibility and screen-reader/contrast coverage; exact-candidate Docker Compose startup; Cloudflare audit in its required OS-enforced sandbox; final independent review of the reconciled candidate. Current-candidate Preview health and lifecycle have not yet been refreshed. Hold merge/submission. Production data and deployment were not touched.
-- Detailed evidence: [Preview validation](../reviews/preview-validation-2026-10-31.md), [Hallmark review](../reviews/hallmark-2026-10-31/REVIEW.md), and [acceptance status](acceptance-status.md). Historical handoff snapshots below are retained for provenance.
+- Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`; branch `codex/preview-mobile-roster-ux`; code candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84` is pushed. Evidence-only commits follow it.
+- Run #25 passed on exact code SHA `7c2fdba6efb7c39dbf723f100644a5c53928fd84`: [GitHub Actions](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515). Local combined Playwright passed 25/25; `npm run check` passed with 395 API, 12 Web, 25 browser cases discovered, lint/typecheck/build. Production throttle defaults remain 20/IP and 5/account; E2E-only IP override is 100.
+- Historical run #22 on `9a5cce3` remains failed 23/24. No login response status was captured; do not attribute it to 429.
+- Ten modified TK-29 screenshots are owner changes, remain unstaged, and must not be staged, restored, or overwritten.
+- Vercel: exact 7c Web and API Preview deployments show Ready. API readiness returned `status=ready`; Web `/api/health` proxy returned `status=ok`.
+- Preview: synthetic admin login, ticket #6 create, status/priority update, and comment passed. Reasoned reopen showed a stale warning despite the reasoned event and refreshed In Progress state; classify as ambiguous pending request/response capture. The ticket was later returned to Resolved. See [Preview record](../reviews/preview-validation-2026-10-31.md).
+- Docker: isolated Compose startup, migration, seed, and API/Web health smoke passed for the 7c2fdba application tree; local ignored .env migration URLs were corrected to port 15544 and match APP_DB_PASSWORD. Details: [Docker smoke](docker-smoke-2026-10-31-7c2fdba.md).
+- Still open: A35 agent/customer journeys and foreign-object denial; A36 Preview migration rollback compatibility; A37 route-wide accessibility/screen-reader/contrast; Cloudflare audit in the required OS-enforced sandbox; whole-project independent release review. The exact-candidate Docker smoke is now complete. Hold merge/submission.
+- Prior scoped parent-kit review returned READY_FOR_REVIEW on an earlier documentation revision and identified one stale status phrase. The phrase is now corrected; a fresh read-only review of this reconciliation is pending. This is not a final whole-project release signoff.
+
+### Current release-gate snapshot
+
+| Gate | Current result | Evidence / remaining work |
+|---|---|---|
+| G0 | PASS | Exact-candidate CI run #25 succeeded on `7c2fdba`; lint, typecheck, tests, and builds are included. |
+| G1 | PASS | CI used a disposable PostgreSQL database, migrations, and seed; exact-candidate Docker smoke also passed. |
+| G2 | PARTIAL | Local auth/isolation suites pass; Preview agent/customer journeys and true foreign-object denial remain unverified. |
+| G3 | PARTIAL | Backend transaction/assignment tests run in CI; complete Preview role lifecycle and ambiguous reopen response still need evidence. |
+| G4 | PARTIAL | Combined browser suite passed 25/25; responsive and keyboard-focus checks are recorded. Route-wide accessibility and screen-reader evidence remain open. |
+| G5 | PARTIAL | Exact-candidate isolated Docker smoke and CI passed; Cloudflare audit needs its compliant OS-enforced sandbox, and final release review remains open. |
+| G6 | PARTIAL | Preview admin health and ticket actions were observed; agent/customer, foreign-tenant, and migration rollback checks remain open. Production was not changed. |
+| G7 | BLOCKED | Final independent whole-project review is pending the remaining acceptance and security evidence. |
+
+> All sections below this snapshot are historical task/session notes. Their older “current” labels and gate states are superseded by this table and the latest acceptance section.
+
 ## Historical handoff — pre-push CI remediation
 
 - Root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
@@ -27,7 +43,7 @@
 - Verified on the uncommitted working tree: `npm run lint`, `npm run typecheck`, `npm run test:e2e -- --list` (24 tests discovered), `npm run build` all exit 0. The auth API test attempt was blocked before test execution: the local `support_test` PostgreSQL endpoint rejected the configured password; no credentials or DB state were altered. Full browser run and CI after fix remain pending.
 - Next: obtain clean exact-head GitHub Actions evidence for the fix, then record the run URL/SHA/test counts here and in `acceptance-status.md`. Preserve A35 Preview role/foreign-object blockers, A36 rollback, A37 broad accessibility, exact-candidate Docker, and final independent review as open. Hold merge/submission. No Production or Preview mutation/deployment was performed.
 
-## Current snapshot — 2026-10-31 post-push
+## Historical snapshot — a44a96d post-push (superseded by latest handoff)
 
 - Repository root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
 - Branch `codex/preview-mobile-roster-ux`, pushed code commit `a44a96d50cda832b824716484b5c7a8cffd9b7df`. Ten modified TK-29 screenshots are user changes and remain unstaged; do not stage or revert them.
@@ -53,7 +69,7 @@
 - Current Compose snapshot from the exact checkout attempt: database healthy on host port 15544, API unhealthy, and web container still `Created`; therefore fresh exact-checkout Docker startup is not verified.
 - A34, A05, A06 and A16 are PASS for exact-head CI run #19 on `eb4f285`; the assignment rollback regression is committed and included. A35 remains BLOCKED. Role-specific Preview, create, true foreign-object denial, exact-candidate Docker, rollback rehearsal, and independent exact-candidate review remain incomplete. See `../reviews/preview-mobile-roster-2026-10-30/live-recheck.md` and `security-acceptance-2026-10-30.md`.
 
-## Current snapshot (supersedes historical notes below)
+## Historical snapshot — prior candidate baseline (superseded by latest handoff)
 
 - Repository root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
 - OS/shell: Windows 11, PowerShell via Codex Node runner.
@@ -79,7 +95,7 @@ Branch: `codex/assessment-mvp`
 Current source SHA: `4d01e3c4f88b7c26ab8cb07caa2ac0d888cebed5` (TK-33 Windows shell line-ending fix). `TK-33` is COMPLETE; A24 is PASS. G5 remains NOT_RUN because hosted exact-SHA CI and the final release/security gate are outstanding.
 Working tree: the only primary-worktree modifications are the ten pre-existing TK-29 screenshot PNGs; all remain unstaged and untouched.
 
-## Current snapshot (supersedes earlier Docker recovery notes below)
+## Historical snapshot — Docker recovery (superseded by latest handoff)
 
 - Docker VMM successfully built and ran the local application without using WSL. A fresh detached Windows worktree at the current SHA completed `npm ci`, database creation, three migrations, seed, API/web image builds, and Compose startup with all three services healthy.
 - Clean-checkout validation passed `npm run check` (API 386/386, web 3/3, lint, typecheck, Playwright discovery 23, builds) and `npm run test:e2e` (23/23). Root, `/tickets`, `/api/health`, and `/api/health/ready` all returned HTTP 200. API and web container UIDs were 1000 and 101.
@@ -90,7 +106,7 @@ Working tree: the only primary-worktree modifications are the ten pre-existing T
 
 The detailed TK-01–TK-32 summaries and earlier Docker recovery attempts below are historical notes. Their older TK-33/A24 status is superseded by the current snapshot and `TK-33.md`.
 
-## Current task state
+## Historical task-state snapshot (superseded by latest handoff)
 
 - TK-01–TK-07 are closed with checkpoint evidence and independent review. TK-07 source `eab45653346fd4c7ea46494aa6cc6d707b2e4b0f` passed 53 API tests, one web test, lint/type/build; review closed with no P0–P2 findings.
 - TK-08 implements password login, hashed opaque persisted sessions, current identity/membership response, cookie flags, logout/expiry/revocation, origin/CSRF defense, and bounded local throttling. Source checks pass; independent read-only review at `ed479132a49e949d8328ac5d05260113fb5dfd29` closed it with no P0–P2 findings and confirmed G1's local gate PASS. See `TK-08.md` for exact RED/GREEN evidence.
@@ -117,7 +133,7 @@ The detailed TK-01–TK-32 summaries and earlier Docker recovery attempts below 
 
 TK-32 final exact source SHA is `5a3582d41a05cf3a9d1a097f7c94bd135cce9118`. Static and runtime parent-kit reviews closed both initial P2 findings (structured/indented auth-cookie redaction and mutable Actions refs) with no remaining findings. Focused sanitizer tests passed 2/2; `npm run check` passed (API385, web3, 23 Playwright tests discovered, lint/typecheck/build); YAML parsed. No hosted GitHub CI was run, so A34 and G5 remain NOT_RUN; A24 Docker application startup and A26 final document audit remain NOT_RUN. Details: [TK-32 checkpoint](TK-32.md), [review report](../reviews/tk32-2026-10-28-5a3582d.md).
 
-## Gate status
+## Historical gate status (superseded by latest handoff)
 
 | Gate | Status / evidence |
 |---|---|
@@ -126,7 +142,7 @@ TK-32 final exact source SHA is `5a3582d41a05cf3a9d1a097f7c94bd135cce9118`. Stat
 | G2 | NOT_RUN as a whole; HTTP auth/current membership and unit policies verified; actual product-route isolation still pending. |
 | G3 | NOT_RUN; ticket/comment/event/dashboard/health APIs exist and have scoped evidence; combined acceptance and remaining backend criteria are pending. |
 | G4 | NOT_RUN; auth, queue, create, and detail browser journeys are implemented, but dashboard/admin UI and complete responsive/state coverage remain pending. |
-| G5 | NOT_RUN; full Docker app launch, clean checkout, CI and security release suite pending. |
+| G5 | PARTIAL; exact-candidate isolated Docker migration/seed and API/Web startup health smoke passed; exact CI run #25 is green. Final whole-project release review, expanded accessibility, and Cloudflare audit in its required isolated sandbox remain open. |
 | G6 | NOT_RUN; deployment has not been authorized. |
 | G7 | NOT_RUN; bounded task reviews exist, final candidate review does not. |
 

@@ -1,6 +1,16 @@
 # Preview validation — create and reopen UX candidate
 
-## Latest exact-candidate verification — 2026-10-31, `40bcce8`
+## Current code-candidate Preview check — 2026-10-31, `7c2fdba`
+
+- Vercel deployment dashboard showed both immutable deployments for code candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84` as Ready: Web `customer-support-platform-ciyhx5zkh.vercel.app` and API `customer-support-platform-kn3fkdpag.vercel.app`. Later docs-only commits `d135849` and `f7584df` also produced Ready deployments; application source remains the `7c2fdba` code.
+- Exact 7c API `/api/health/ready` returned `status=ready`; exact 7c Web `/api/health` proxy returned `status=ok`.
+- Branch alias `https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app` accepted the documented synthetic Preview admin; the application identified the Assessment Preview Alpha organization and admin role. The roster showed the synthetic admin, one agent, and two customers. Agent/customer passwords remain unavailable in the repository; local-only demo passwords were not tried against Preview.
+- Created synthetic ticket #6, ID `42cf080f-7f1b-4846-8124-3ff6584ff384`, for active customer `preview-customer1-20261030-9693f9@example.test`, subject `[PREVIEW FINAL] 7c2fdba validation flow 2026-10-31`. Ticket creation succeeded. Changed status Open→In Progress and priority Medium→High; both activity events appeared. Added a labeled synthetic reply; it appeared in conversation and activity history.
+- Resolved the ticket successfully. Selecting In Progress exposed the required reopen-reason field; submitting an empty reason produced browser required-field validation. Submitting a reason resulted in a reasoned reopen event in activity history, and refresh showed status In Progress. However, the page also displayed a stale-version conflict warning during this interaction even though the reasoned status event was present. The exact request producing that warning was not captured, so this reopen sequence is **ambiguous and not a clean PASS**. The ticket was subsequently returned to Resolved successfully; both reopen and restore events remain visible in Preview. Investigate with request/response capture before treating this route's reopen concurrency state as resolved.
+- The earlier Preview stale-update test from ticket #5 remains the only clear stale-conflict proof: stale update rejected, stored subject/priority unchanged, and no extra activity.
+- No Production database, Production deployment, Vercel settings, or secrets were touched. The new ticket and labeled test reply/events remain synthetic Preview data for repeatable testing.
+
+## Historical Preview verification — 2026-10-31, `40bcce8`
 
 - Branch/commit: `codex/preview-mobile-roster-ux` / `40bcce88e35df94893f8680c2fa9e10192ec4bd7`.
 - Vercel dashboard lists the matching Web deployment `customer-support-platform-8smcp541w.vercel.app` and API deployment `customer-support-platform-2m1kz1496.vercel.app` as Ready on `40bcce8`. The web branch alias used below was `https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app`.
@@ -37,5 +47,5 @@
 ## Acceptance limits
 
 - **A35 remains BLOCKED.** This run authenticated only the admin. Agent and customer Preview credentials were not available in repository evidence and were not guessed. The observed Preview organization did not provide a verified second-tenant/foreign-ticket fixture, so a true foreign-object denial was not run.
-- This report does not claim customer or agent journeys, stale-version behavior, assignment atomicity, deployment migration rollback, or a full accessibility audit.
+- This report does not claim customer or agent journeys, assignment atomicity, deployment migration rollback, or a full accessibility audit. Ticket #5 has a clear Preview stale-version denial with no extra activity; ticket #6 reopen showed an ambiguous stale warning despite a persisted reasoned event, so it needs response-level investigation.
 - Anonymous API probes cannot be treated as health failures because Vercel Authentication intercepted them. The authenticated browser result is the evidence for the health responses above.
