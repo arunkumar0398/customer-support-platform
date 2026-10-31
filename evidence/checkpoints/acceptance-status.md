@@ -2,9 +2,9 @@
 
 ## Current validation snapshot — 2026-10-31
 
-- Clean candidate branch `codex/clean-candidate-b2fd369`, exact SHA `bf41fc9da8d3972d66ec4912f4fca534207285a3`, based on `b2fd3691fe01f81a1652f29ab7ef67d615c0051f`. Original dirty worktree and ten TK-29 screenshot modifications remain untouched and excluded.
-- GitHub Actions run [#69](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41201300343) completed its `verify` job with conclusion `success` on this exact SHA. Steps included disposable DB configuration, install/migrate/seed/required gates, sanitized log upload, and teardown.
-- Vercel API and Web checks report `success` on candidate SHA `bf41fc9da8d3972d66ec4912f4fca534207285a3`; these are separate from base SHA `b2fd369` statuses.
+- Clean candidate branch `codex/clean-candidate-b2fd369`, exact SHA `cebf4ad1d561f969ed7aab7704fe57c511e9462e`, based on `b2fd3691fe01f81a1652f29ab7ef67d615c0051f`. Original dirty worktree and ten TK-29 screenshot modifications remain untouched and excluded.
+- GitHub Actions run [#71](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41201670340) completed its `verify` job with conclusion `success` on this exact SHA. Steps included disposable DB configuration, install/migrate/seed/required gates, sanitized log upload, and teardown.
+- Vercel API and Web checks report `success` on candidate SHA `cebf4ad1d561f969ed7aab7704fe57c511e9462e`; these are separate from base SHA `b2fd369` statuses.
 - Preview role journeys and cross-tenant denial: **BLOCKED / NOT_RUN**. The Preview tab was at sign-in; safe synthetic agent/customer credentials and a verified second-tenant ticket fixture were unavailable. No login, API probe, or hosted-data mutation was made.
 - Cloudflare audit target execution: **BLOCKED / NOT_RUN**. Under constrained offline Docker checks, the available Node base and API images lacked Vitest, Supertest, and Playwright test packages. No package installation/fetch or target test execution occurred.
 - Five deferred areas (session/CSRF, membership mutation, child-resource/dashboard authorization, Vercel proxy, CI/container supply chain) received independent **source-only** review. This does not convert target-execution or Preview acceptance statuses to PASS. See [security and Preview follow-up](../reviews/security-preview-followup-2026-10-31-b2fd369.md).
