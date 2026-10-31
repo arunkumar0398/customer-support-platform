@@ -1,5 +1,14 @@
 # Acceptance Status
 
+## Current validation snapshot — 2026-10-31
+
+- Source base for this candidate: `b2fd3691fe01f81a1652f29ab7ef67d615c0051f`. Candidate is being built in a separate worktree. The original dirty worktree and its ten TK-29 screenshot modifications remain untouched.
+- GitHub combined status reports Vercel API and Web `success` on `b2fd369`. The available Actions workflow-run lookup returned no entries and is PR-trigger-only; exact-head GitHub Actions remains **UNVERIFIED**. Do not use older SHA Actions results as current evidence.
+- Preview role journeys and cross-tenant denial: **BLOCKED / NOT_RUN**. The Preview tab was at sign-in; safe synthetic agent/customer credentials and a verified second-tenant ticket fixture were unavailable. No login, API probe, or hosted-data mutation was made.
+- Cloudflare audit target execution: **BLOCKED / NOT_RUN**. Under constrained offline Docker checks, the available Node base and API images lacked Vitest, Supertest, and Playwright test packages. No package installation/fetch or target test execution occurred.
+- Five deferred areas (session/CSRF, membership mutation, child-resource/dashboard authorization, Vercel proxy, CI/container supply chain) received independent **source-only** review. This does not convert target-execution or Preview acceptance statuses to PASS. See [security and Preview follow-up](../reviews/security-preview-followup-2026-10-31-b2fd369.md).
+- Focused G7 review returned **BLOCKED**. Keep merge/submission on hold until the candidate has exact-SHA Actions evidence, compliant offline audit execution, verified Preview role/tenant tests with no-side-effect denials, and final G7 clearance.
+
 **Baseline:** Workspace/database setup, schema constraints, deterministic two-organization seed, authentication, current membership, role/ownership policies, membership administration, ticket/comment/history APIs, ticket lifecycle, dashboard metrics, health/readiness, scoped frontend journeys, clean-checkout Docker startup, and TK-34 local configuration checks have supporting evidence. A03–A04, A08–A10, A12–A15, A17–A21, A24, and A29 have passed their documented scoped criteria; other checks remain NOT_RUN, BLOCKED, or N/A. Hosted verification of the TK-34 candidate and final release/security gates remain pending.
 **Latest implementation source SHA:** 9c89fb3d5528262733127d0fcd3a93e835c33dce (TK-34 Vercel + Neon local wiring; `npm run check` passed at the exact SHA; hosted Vercel/Neon verification is blocked pending Preview configuration). Each checkpoint binds its executed commands to its own exact source SHA and environment.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
