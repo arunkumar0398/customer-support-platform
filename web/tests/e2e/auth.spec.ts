@@ -77,6 +77,21 @@ test('keeps the sign-in page within narrow tablet viewport bounds', async ({ pag
   await captureCheckpointScreenshot(page, '02-sign-in-mobile.png');
 });
 
+test('shows a visible focus indicator on both sign-in fields during keyboard navigation', async ({ page }) => {
+  await page.goto('/sign-in');
+
+  for (const label of ['Email', 'Password']) {
+    const field = page.getByLabel(label);
+    await field.focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift+Tab');
+
+    expect(await field.evaluate((element) => element.matches(':focus-visible'))).toBe(true);
+    expect(await field.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe('none');
+    expect(Number.parseFloat(await field.evaluate((element) => getComputedStyle(element).outlineWidth))).toBeGreaterThanOrEqual(2);
+  }
+});
+
 test('shows invalid credentials without creating an authenticated session', async ({ page }) => {
   await page.goto('/sign-in');
   await page.getByLabel('Email').fill(email);

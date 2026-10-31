@@ -1,6 +1,5 @@
 import { randomBytes, randomUUID, scryptSync } from 'node:crypto';
-import { existsSync, mkdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -14,8 +13,6 @@ test.describe.configure({ mode: 'serial' });
 
 const envPath = fileURLToPath(new URL('../../../.env', import.meta.url));
 if (existsSync(envPath)) process.loadEnvFile(envPath);
-const hallmarkEvidenceDirectory = resolve(process.cwd(), 'evidence/reviews/hallmark-2026-10-31');
-mkdirSync(hallmarkEvidenceDirectory, { recursive: true });
 
 const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
@@ -92,7 +89,6 @@ test('admin can add an existing account and update its organization role and act
   await expect(adminRow.getByRole('button', { name: `Deactivate ${emails.admin}` })).toHaveText('Deactivate');
   await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   await captureCheckpointScreenshot(page, '11-memberships-desktop.png');
-  await page.screenshot({ path: join(hallmarkEvidenceDirectory, 'memberships-desktop.png'), fullPage: true });
   await page.setViewportSize({ width: 375, height: 812 });
   await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
@@ -120,7 +116,6 @@ test('admin can add an existing account and update its organization role and act
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await captureCheckpointScreenshot(page, '12-memberships-mobile.png');
-  await page.screenshot({ path: join(hallmarkEvidenceDirectory, 'memberships-mobile.png'), fullPage: true });
   const agentCard = mobileRoster.getByRole('listitem').filter({ hasText: emails.agent });
   const roleSelect = agentCard.getByLabel(`Role for ${emails.agent}`);
   await roleSelect.focus();
@@ -129,7 +124,6 @@ test('admin can add an existing account and update its organization role and act
   expect(await roleSelect.evaluate((element) => element.matches(':focus-visible'))).toBe(true);
   expect(await roleSelect.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe('none');
   expect(Number.parseFloat(await roleSelect.evaluate((element) => getComputedStyle(element).outlineWidth))).toBeGreaterThanOrEqual(2);
-  await page.screenshot({ path: join(hallmarkEvidenceDirectory, 'memberships-keyboard-focus.png'), fullPage: true });
   await roleSelect.selectOption('CUSTOMER');
   await agentCard.getByRole('button', { name: `Save ${emails.agent}` }).click();
   await expect(agentCard).toContainText('Current role: Customer');

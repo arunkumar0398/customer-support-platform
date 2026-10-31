@@ -62,7 +62,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-panel form { display: grid; gap: 10px; }
 .auth-panel label { margin-top: 9px; color: #2a3d3c; font-size: 12px; font-weight: 700; }
 .auth-panel input { width: 100%; min-height: 49px; padding: 0 14px; border: 1px solid #cbd7cd; border-radius: 6px; background: var(--white); color: var(--ink); font-size: 14px; transition: border-color 140ms ease, box-shadow 140ms ease; }
-.auth-panel input:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 14%); outline: none; }
+.auth-panel input:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 14%); }
+.auth-panel input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 0; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; transition: background 140ms ease, transform 140ms ease; }
 .button:active { transform: translateY(1px); }
 .button:disabled { cursor: wait; opacity: 0.68; }
