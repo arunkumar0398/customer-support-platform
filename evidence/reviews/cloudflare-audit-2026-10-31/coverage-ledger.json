@@ -1,0 +1,289 @@
+[
+  {
+    "coverage_id": "api-auth::pre-authentication::account-rate-limit::resource-exhaustion",
+    "canonical_refs": {
+      "surface": "api-auth",
+      "boundary": "pre-authentication",
+      "subsystem": "account-rate-limit",
+      "attack_class": "resource-exhaustion"
+    },
+    "surface": "API login endpoint",
+    "boundary": "Unauthenticated principal to account login availability",
+    "subsystem": "Process-local login throttle",
+    "attack_class": "Resource exhaustion",
+    "starting_paths": [
+      "api/src/modules/auth/routes.ts",
+      "api/src/modules/auth/service.ts",
+      "api/src/modules/auth/session.ts",
+      "api/src/middleware/authenticate.ts",
+      "api/src/app.ts",
+      "api/index.ts",
+      "api/vercel.json",
+      "api/tests/auth/auth.test.ts"
+    ],
+    "ordinary_attack_class_block": "Unauthenticated account lockout and request throttling",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Authentication",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Resource exhaustion"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "audit_hunt_throttle",
+    "reviewed_paths": [
+      "api/src/modules/auth/routes.ts",
+      "api/src/middleware/active-membership.ts",
+      "api/src/lib/policy.ts",
+      "api/src/modules/tickets/service.ts",
+      "api/src/modules/tickets/routes.ts",
+      "api/prisma/schema.prisma",
+      "api/src/middleware/authenticate.ts",
+      "api/src/modules/auth/service.ts",
+      "api/src/modules/auth/session.ts",
+      "api/src/app.ts",
+      "api/index.ts",
+      "api/vercel.json",
+      "api/tests/auth/auth.test.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "root",
+        "reviewed_paths": [
+          "api/src/modules/auth/routes.ts",
+          "api/src/middleware/active-membership.ts",
+          "api/src/lib/policy.ts",
+          "api/src/modules/tickets/service.ts",
+          "api/src/modules/tickets/routes.ts",
+          "api/prisma/schema.prisma",
+          "api/src/middleware/authenticate.ts"
+        ],
+        "invariant": "Trace auth, server-derived tenant membership, role/object policy, ticket mutations, and process-local login throttle.",
+        "method": "source",
+        "result": "Source shows origin/CSRF checks, DB-backed session verification, active-membership-derived role, scoped ticket policy, transactional writes, and a process-local login-throttle Map. Source alone cannot establish Vercel instance or proxy topology; no vulnerability is confirmed by this pass.",
+        "artifact": null
+      },
+      {
+        "agent_id": "audit_hunt_throttle",
+        "reviewed_paths": [
+          "api/src/modules/auth/routes.ts",
+          "api/src/modules/auth/service.ts",
+          "api/src/modules/auth/session.ts",
+          "api/src/middleware/authenticate.ts",
+          "api/src/app.ts",
+          "api/index.ts",
+          "api/vercel.json",
+          "api/tests/auth/auth.test.ts"
+        ],
+        "invariant": "Pre-auth login throttling and auth/session controls",
+        "method": "source",
+        "result": "Source trace supports process-local account-keyed 429 after five attempts before credential verification; practical multi-instance impact is not established.",
+        "artifact": null
+      },
+      {
+        "agent_id": "verify_throttle_candidate",
+        "reviewed_paths": [
+          "api/src/modules/auth/routes.ts",
+          "api/src/modules/auth/session.ts",
+          "api/tests/auth/auth.test.ts"
+        ],
+        "invariant": "Independently verify throttle candidate, controls, blocker and safe validation plan",
+        "method": "source",
+        "result": "Verified needs_validation: source supports process-local pre-auth account blocking after five attempts for 15 minutes; Origin/static CSRF do not authenticate direct clients. Vercel instance impact is unknown; no deployment probe allowed.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "auth.login-account-throttle-lockout"
+    ],
+    "unresolved": [
+      "Required sandbox unavailable; local reproduction not run.",
+      "Vercel instance topology is not source-verifiable; deployed probes are prohibited."
+    ]
+  },
+  {
+    "coverage_id": "api-auth::session-lifecycle::session-identity-and-csrf::access-control",
+    "canonical_refs": {
+      "surface": "api-auth",
+      "boundary": "session-lifecycle",
+      "subsystem": "session-identity-and-csrf",
+      "attack_class": "access-control"
+    },
+    "surface": "api-auth",
+    "boundary": "session-lifecycle",
+    "subsystem": "session-identity-and-csrf",
+    "attack_class": "access-control",
+    "starting_paths": [
+      "api/src/modules/auth/service.ts",
+      "api/src/modules/auth/session.ts",
+      "api/src/middleware/authenticate.ts",
+      "api/src/modules/auth/routes.ts"
+    ],
+    "ordinary_attack_class_block": "access-control",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Authentication"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: no dedicated hunter coverage; target execution blocked by missing OS sandbox."
+    ]
+  },
+  {
+    "coverage_id": "api-membership::administrator-authority::membership-role-and-activation::access-control",
+    "canonical_refs": {
+      "surface": "api-membership",
+      "boundary": "administrator-authority",
+      "subsystem": "membership-role-and-activation",
+      "attack_class": "access-control"
+    },
+    "surface": "api-membership",
+    "boundary": "administrator-authority",
+    "subsystem": "membership-role-and-activation",
+    "attack_class": "access-control",
+    "starting_paths": [
+      "api/src/modules/memberships/routes.ts",
+      "api/src/modules/memberships/service.ts",
+      "api/src/modules/memberships/schema.ts"
+    ],
+    "ordinary_attack_class_block": "access-control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Tenant isolation"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: no dedicated coverage unit for admin membership mutations; tests not executed due missing sandbox."
+    ]
+  },
+  {
+    "coverage_id": "api-ticket-child::tenant-and-requester-scope::comments-activity-dashboard-requesters::access-control",
+    "canonical_refs": {
+      "surface": "api-ticket-child",
+      "boundary": "tenant-and-requester-scope",
+      "subsystem": "comments-activity-dashboard-requesters",
+      "attack_class": "access-control"
+    },
+    "surface": "api-ticket-child",
+    "boundary": "tenant-and-requester-scope",
+    "subsystem": "comments-activity-dashboard-requesters",
+    "attack_class": "access-control",
+    "starting_paths": [
+      "api/src/modules/comments/routes.ts",
+      "api/src/modules/comments/service.ts",
+      "api/src/modules/activity/routes.ts",
+      "api/src/modules/activity/service.ts",
+      "api/src/modules/dashboard/routes.ts",
+      "api/src/modules/dashboard/service.ts",
+      "api/src/modules/tickets/service.ts"
+    ],
+    "ordinary_attack_class_block": "access-control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Tenant isolation"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: parallel child-resource/aggregate scope paths require dedicated coverage; foreign-object denials remain unexecuted."
+    ]
+  },
+  {
+    "coverage_id": "ci-release::pull-request-and-build-authority::workflow-dependencies-and-container::supply-chain-and-release",
+    "canonical_refs": {
+      "surface": "ci-release",
+      "boundary": "pull-request-and-build-authority",
+      "subsystem": "workflow-dependencies-and-container",
+      "attack_class": "supply-chain-and-release"
+    },
+    "surface": "ci-release",
+    "boundary": "pull-request-and-build-authority",
+    "subsystem": "workflow-dependencies-and-container",
+    "attack_class": "supply-chain-and-release",
+    "starting_paths": [
+      ".github/workflows/ci.yml",
+      "package.json",
+      "package-lock.json",
+      "api/package.json",
+      "web/package.json",
+      "Dockerfile",
+      "docker-compose.yml"
+    ],
+    "ordinary_attack_class_block": "supply-chain-and-release",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#CI/CD",
+      "CLOUD-AND-DEPLOYMENT.md#Serverless and edge"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: CI/runtime authority is unmapped; CI success is not workflow security review."
+    ]
+  },
+  {
+    "coverage_id": "vercel-web-api::browser-to-api-trust::proxy-cookie-csrf-and-oidc::cloud-and-deployment",
+    "canonical_refs": {
+      "surface": "vercel-web-api",
+      "boundary": "browser-to-api-trust",
+      "subsystem": "proxy-cookie-csrf-and-oidc",
+      "attack_class": "cloud-and-deployment"
+    },
+    "surface": "vercel-web-api",
+    "boundary": "browser-to-api-trust",
+    "subsystem": "proxy-cookie-csrf-and-oidc",
+    "attack_class": "cloud-and-deployment",
+    "starting_paths": [
+      "web/api/index.ts",
+      "web/src/server/api-proxy.ts",
+      "web/vercel.json",
+      "api/index.ts",
+      "api/vercel.json"
+    ],
+    "ordinary_attack_class_block": "cloud-and-deployment",
+    "selected_companion_blocks": [
+      "CLOUD-AND-DEPLOYMENT.md#Serverless and edge",
+      "WEB-PROTOCOL-AND-AUTH.md#Authentication",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Resource exhaustion"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "quick_profile_final_critic: proxy paths and provider trust/body limits need dedicated coverage; deployed probes are forbidden and provider facts are not source-established."
+    ]
+  }
+]
