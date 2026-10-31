@@ -5,9 +5,11 @@
 
 - Application source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; Actions #74 and its Vercel checks remain source-level historical evidence.
 - Latest previously validated documentation snapshot: `5a56600594cb973cae8d1e729e6daf59781f8d70`; Actions #83 succeeded on that exact SHA. Current Vercel Web and API statuses on that SHA are both success: [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/4oMgqTy8ZMtU1rfRoDRbyqQcGcM2), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/H1odPtdSQWMnX32LtuLPPxnVojm3).
+
+- At the subsequent docs snapshot `87fc082059f2cd3c2c0bdedb4ac2b58cce125b75`, Vercel Web and API checks both succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/3TETnP15WFvhMCnVVrSiM7RUXVf), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/6BEQ47a9dgQiyb5vV9rKYNy7DHTf)). The available GitHub connector did not expose its push-triggered Actions run; run #83 remains attached only to `5a566005…`. No G7 review has yet covered `87fc082…`.
 - Focused external sandbox evidence is now published at [run 5](../reviews/cloudflare-audit-2026-10-31/run-5-focused-policy-session.md): policy/session pure-helper tests 14/14 pass. This does not establish Express/middleware/DB integration or close the full Cloudflare audit. The five deferred coverage areas and throttle validation remain open.
 - Preview role journeys and foreign-ticket read/write no-side-effect checks remain BLOCKED / NOT_RUN. Do not retry fixture discovery until Neon Preview compute readiness or fixture state changes; safe role credentials and a verified second-tenant ticket are still prerequisites.
-- Independent G7 follow-up reviewed `5a566005…` and returned BLOCKED. These reconciliation commits are documentation-only and have not yet earned exact-head CI/Vercel status or a new G7 verdict. Keep merge/submission on hold.
+- Independent G7 follow-up reviewed `5a566005…` and returned BLOCKED. Those records were written before the next deployment completed. Reconciliation commits are docs-only; the exact-head Actions and Vercel checks must be verified for each resulting SHA. Keep merge/submission on hold.
 
 ## Historical handoff snapshot before reconciliation — 2026-10-31
 
