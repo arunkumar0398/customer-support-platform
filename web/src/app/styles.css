@@ -10,7 +10,19 @@
   --paper: #f1f4ef;
   --white: #fbfcf9;
   --muted: #6d7c78;
+  --muted-label: #65766d;
+  --label: #43554f;
   --line: #dce4dc;
+  --control-line: #cbd7cd;
+  --control-focus: #557f6b;
+  --focus: #7652bd;
+  --soft-surface: #f8faf6;
+  --subtle-line: #e7ece6;
+  --table-surface: #f5f7f2;
+  --danger: #8d3429;
+  --danger-surface: #fff1eb;
+  --success: #315c41;
+  --success-surface: #edf5e9;
   --lime: #d9f36b;
   --coral: #ec7961;
   --mono: Consolas, 'Courier New', monospace;
@@ -18,10 +30,11 @@
 }
 
 * { box-sizing: border-box; }
+html, body { overflow-x: clip; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
-button, input { font: inherit; }
-button, a, input { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #b5db39; outline-offset: 3px; }
+button, input, select, textarea { font: inherit; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:not([tabindex='-1']):focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
 .auth-layout { min-height: 100vh; display: grid; grid-template-columns: minmax(360px, 0.94fr) minmax(420px, 1.06fr); }
 .auth-story { position: relative; display: flex; flex-direction: column; overflow: hidden; min-height: 100vh; padding: 38px clamp(30px, 5vw, 76px) 30px; background: var(--deep); color: #f4f7f0; }

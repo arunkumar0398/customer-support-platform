@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID, scryptSync } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -13,6 +14,8 @@ test.describe.configure({ mode: 'serial' });
 
 const envPath = fileURLToPath(new URL('../../../.env', import.meta.url));
 if (existsSync(envPath)) process.loadEnvFile(envPath);
+const hallmarkEvidenceDirectory = resolve(process.cwd(), 'evidence/reviews/hallmark-2026-10-31');
+mkdirSync(hallmarkEvidenceDirectory, { recursive: true });
 
 const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
@@ -89,6 +92,7 @@ test('admin can add an existing account and update its organization role and act
   await expect(adminRow.getByRole('button', { name: `Deactivate ${emails.admin}` })).toHaveText('Deactivate');
   await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   await captureCheckpointScreenshot(page, '11-memberships-desktop.png');
+  await page.screenshot({ path: join(hallmarkEvidenceDirectory, 'memberships-desktop.png'), fullPage: true });
   await page.setViewportSize({ width: 375, height: 812 });
   await expect(page.getByText('Scroll horizontally to see roles, access, and actions')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
@@ -99,6 +103,10 @@ test('admin can add an existing account and update its organization role and act
   await expect(mobileRoster.getByText(emails.admin, { exact: true })).toBeVisible();
   await expect(mobileRoster.getByText(emails.agent, { exact: true })).toBeVisible();
   await expect(mobileRoster.getByRole('button', { name: `Save ${emails.admin}` })).toBeDisabled();
+  const memberEmail = mobileRoster.getByText(emails.agent, { exact: true });
+  expect(Number.parseFloat(await memberEmail.evaluate((element) => getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(13);
+  const currentRole = mobileRoster.getByText('Current role: Agent', { exact: true });
+  expect(Number.parseFloat(await currentRole.evaluate((element) => getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(12);
   for (const width of [320, 375, 768, 900, 901, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth), `document width at ${width}px`).toBeLessThanOrEqual(width);
@@ -112,8 +120,17 @@ test('admin can add an existing account and update its organization role and act
   }
   await page.setViewportSize({ width: 375, height: 812 });
   await captureCheckpointScreenshot(page, '12-memberships-mobile.png');
+  await page.screenshot({ path: join(hallmarkEvidenceDirectory, 'memberships-mobile.png'), fullPage: true });
   const agentCard = mobileRoster.getByRole('listitem').filter({ hasText: emails.agent });
-  await agentCard.getByLabel(`Role for ${emails.agent}`).selectOption('CUSTOMER');
+  const roleSelect = agentCard.getByLabel(`Role for ${emails.agent}`);
+  await roleSelect.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  expect(await roleSelect.evaluate((element) => element.matches(':focus-visible'))).toBe(true);
+  expect(await roleSelect.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe('none');
+  expect(Number.parseFloat(await roleSelect.evaluate((element) => getComputedStyle(element).outlineWidth))).toBeGreaterThanOrEqual(2);
+  await page.screenshot({ path: join(hallmarkEvidenceDirectory, 'memberships-keyboard-focus.png'), fullPage: true });
+  await roleSelect.selectOption('CUSTOMER');
   await agentCard.getByRole('button', { name: `Save ${emails.agent}` }).click();
   await expect(agentCard).toContainText('Current role: Customer');
   await expect.poll(() => db.membership.findUniqueOrThrow({

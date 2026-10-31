@@ -35,6 +35,8 @@
 - [x] Run full auth integration suite; 33/33 passed, including explicit override, default-20 and per-account cases.
 - [x] Run full combined Playwright suite against isolated `support_test`; 24/24 passed. The suite modified the ten tracked screenshot assets; originals were restored and SHA-256 verified.
 - [x] Run `npm run check`; exit 0, 395 API tests, 12 web tests, 24 E2E cases discovered, lint, typecheck and both builds.
+- [x] Commit and push the reviewed correction as `40bcce88e35df94893f8680c2fa9e10192ec4bd7` after the user requested exact-SHA CI.
+- [x] Exact-head GitHub Actions [run #23](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41172278881) passed on `40bcce8`: disposable DB migration/seed, 395 API tests, 12 Web tests, combined Playwright 24/24, lint/typecheck/build.
 
 ### Task 2: Reconcile release evidence
 
@@ -43,7 +45,6 @@
 - Modify: `README.md`
 - Modify: `evidence/checkpoints/CURRENT_HANDOFF.md`
 
-- [ ] Record exact historical run #22 failure at commit `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`: 23/24 browser checks passed; the failing case was the narrow-viewport ticket queue test and its shared login helper remained on `/sign-in`. Do not claim CI proved the limiter caused the login failure.
-- [ ] Record the confirmed mechanism separately: 19 direct shared E2E helper logins plus auth-flow logins share one API process/IP; production cap is 20; test isolation is the selected correction.
-- [ ] Push the reviewed local commit and obtain a new exact-head CI run; record its URL, SHA, result and test counts here and in the ledger. Local checks are not a substitute.
-- [ ] Preserve existing security, Preview, Docker, accessibility, migration, and independent-review blockers. Do not change deployment or merge state.
+- [x] Record historical run #22 failure at `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`: 23/24 browser checks passed; the narrow-viewport queue test's login helper remained on `/sign-in`. The run did not expose an HTTP status and does not prove limiter causality.
+- [x] Record exact-head run #23 separately from local checks. Local run: combined Playwright 24/24 and full `npm run check` exit 0; GitHub Actions is the exact committed-SHA evidence.
+- [x] Preserve the existing A35/A36/A37/Docker/final-review blockers in the current handoff and ledger. The user subsequently directed Preview acceptance testing; those synthetic Preview checks are recorded in [Preview validation](../../evidence/reviews/preview-validation-2026-10-31.md). No Production data or deployment was changed.

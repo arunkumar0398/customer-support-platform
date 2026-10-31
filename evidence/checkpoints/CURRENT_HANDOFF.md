@@ -1,4 +1,15 @@
-## Current handoff — 2026-10-31 CI remediation
+## Latest handoff — 2026-10-31 exact candidate `40bcce8`
+
+- Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`; branch `codex/preview-mobile-roster-ux`; committed HEAD `40bcce88e35df94893f8680c2fa9e10192ec4bd7`.
+- GitHub Actions [run #23](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41172278881) is green on that exact SHA: migrations/seed on disposable PostgreSQL, 395 API tests, 12 Web tests, combined Playwright 24/24, lint/typecheck/build. Vercel exact-SHA Web/API Preview deployments report Ready.
+- Preserve provenance: run #22 on `9a5cce3` failed 23/24 Playwright tests, but its logs did not capture a login status or establish 429 causality. The test-only override preserves deployed defaults of 20 IP attempts and 5/account; only the guarded E2E server sets 100.
+- Local pre-push validation also passed on the same code tree: combined Playwright 24/24, `npm run check` exit 0, isolated disposable PostgreSQL. Ten pre-existing TK-29 screenshot modifications were byte-for-byte restored after Playwright touched them; they remain user-owned uncommitted changes. Do not stage or revert them.
+- Preview validation: immutable Web/API deployment health probes passed, but immutable Web login failed origin/CSRF validation. The current branch alias restored the synthetic admin. Admin created synthetic ticket #5 (`ef909eb7-d5dc-4869-9ac4-25b4d56e480b`), changed priority, added a comment, and got the expected stale-version rejection on an overlapping update. The ticket/comment/event remain in Preview. Agent/customer logins and true foreign-tenant denial are unverified because credentials and a verified second-tenant fixture are unavailable.
+- Still open: A35 role and tenant-denial Preview cases; A36 Preview migration rollback compatibility; A37 broader accessibility, focus, and responsive evidence; exact-candidate Docker Compose startup; Cloudflare audit in the required OS-enforced sandbox; final exact-candidate independent review. Hold merge/submission. Production data and deployment were not touched.
+- Detailed live evidence is in [Preview validation](../reviews/preview-validation-2026-10-31.md). The historical handoff snapshots below are retained and superseded by this section.
+- Hallmark follow-up: local membership roster RED→GREEN checks pass, combined Playwright is 24/24, and `npm run check` exits 0. Fresh desktop/mobile/focus screenshots and the accessibility scope limits are in [Hallmark review](../reviews/hallmark-2026-10-31/REVIEW.md). These UI changes are not part of `40bcce8` yet; obtain exact-candidate CI after committing them. Preserve the ten modified TK-29 screenshots unstaged.
+
+## Historical handoff — pre-push CI remediation
 
 - Root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
 - Branch `codex/preview-mobile-roster-ux`; local changes are uncommitted and based on `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`. Do not confuse this local evidence with the remote exact-base run below. Ten modified TK-29 screenshot files are preserved and remain unstaged.
