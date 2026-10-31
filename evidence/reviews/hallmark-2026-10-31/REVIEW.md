@@ -23,9 +23,9 @@ The parent-kit reviewer checked `15a59b36570bf5c2e6658d1a32acb06990e5c727` (`15a
 
 1. **P2: Sign-in focus ring overridden.** `.auth-panel input:focus` removed the outline at higher specificity than the global focus-visible rule. Added an auth browser regression covering both Email and Password, confirmed it failed before the fix (`outlineStyle: none`), then removed the override and added a local focus-visible ring. The focused test now passes.
 2. **P2: Test runs rewrote fixed screenshots.** New fixed-path review screenshot writes were removed. The shared checkpoint capture helper now does nothing unless `CHECKPOINT_SCREENSHOT_DIR` is explicitly set, and rejects a directory inside the protected TK-29 screenshot path. The three review screenshots above are fixed evidence from the first run and no longer get rewritten by Playwright.
-3. **Evidence prose lagged the commit.** README, acceptance status, and handoff were reconciled to run #24 on `15a59b3` and identify the later changes as unverified pending a new exact-SHA run.
+3. **Evidence prose lagged the commit.** At review time, README, acceptance status, and handoff still described the follow-up as uncommitted. They have now been reconciled to committed candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84`; exact-SHA GitHub Actions [run #25](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515) passed. The candidate has not yet received final independent review.
 
-The reviewer's `NOT_READY` applies to `15a59b3`; it is not a final verdict on the follow-up. The new source diff still requires read-only review and exact-head CI.
+The reviewer's `NOT_READY` was issued because the follow-up evidence text had not been reconciled; it was not a source-code objection to `7c2fdba`. After this update, request a read-only follow-up review for the evidence and exact candidate.
 
 ## Verification
 
@@ -50,6 +50,6 @@ The mobile view shows the complete account addresses wrapping within the member 
 ## Limitations and remaining work
 
 - This proves one authenticated admin route on the local test fixture. It is not a route-wide WCAG audit, screen-reader test, color-contrast calculation, or deployed Preview observation.
-- GitHub Actions [run #24](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41175405970) passed on exact SHA `15a59b3` for the first roster changes. The sign-in focus and screenshot-safety follow-up has local full-suite proof but still requires commit, independent review, and exact-SHA CI.
+- GitHub Actions [run #25](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515) passed on exact SHA `7c2fdba6efb7c39dbf723f100644a5c53928fd84`. The parent-kit reviewer confirmed the sign-in focus and screenshot-safety fixes in source. A fresh final independent review is still pending.
 - A35 agent/customer Preview journeys and foreign-object denial remain blocked by missing known role credentials and a verified foreign tenant fixture. A36 migration rollback, exact-candidate Docker Compose, Cloudflare's isolated sandbox audit, and final independent review remain open.
 - No Preview or Production deployment settings or hosted records were changed during this UI work.
