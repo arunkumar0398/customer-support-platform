@@ -314,3 +314,10 @@ Recover Docker engine and rebuild the exact checkout; then obtain safe Preview s
 - The skill expressly prohibits deployed endpoint/external-service probing. No Preview/Production login-throttle request was sent. The process-local throttle's behavior across Vercel instances and proxy address topology remains unvalidated.
 - Audit output is outside the target at `C:/Users/sivaa/security-audit-skill/customer-support-platform/run-2/`. CI run #37 succeeded on audited head `00731039fd1830c4acd7faa2132b3afe27062314` ([run](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41192800488)); that is CI evidence only.
 - Preview agent/customer journeys and verified foreign-ticket denial remain blocked by missing safe credentials/second-tenant fixture. G7 remains BLOCKED; hold merge/submission. Preserve all ten modified TK-29 screenshots.
+
+
+### Security audit review detail — 2026-10-31
+
+- Independent Phase 3/5 verifier retained `auth.login-account-throttle-lockout` as `needs_validation`: source confirms process-local pre-auth account throttling at five attempts/15 minutes; practical Vercel instance behavior is unknown. No severity assigned; no deployed probe.
+- Final quick coverage critic found five unmapped units; per skill, no second hunter wave was run. They are deferred: session lifecycle/CSRF, membership mutation, child-resource/dashboard scope, Web/API proxy, CI/container supply chain.
+- Official ledger/findings validators were rerun and blocked on missing OS no-follow/nonblocking input protection. Audit artifacts remain not schema-validated and run status INCOMPLETE.
