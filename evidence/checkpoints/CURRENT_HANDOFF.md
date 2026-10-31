@@ -1,3 +1,14 @@
+## Evidence reconciliation — 2026-10-31
+
+- Branch `codex/preview-mobile-roster-ux` was at `fa812a964b78f1f2da45477bc1c25cf11a335e93` when this evidence was checked. Actions [run #50](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41196533288) completed **success** on exact SHA `c5123434e52fe5f6b97c214f5d9373ce530d2d6b`; its disposable-PostgreSQL setup and required gates completed successfully. Vercel Web and API statuses were both **success** on that same SHA. Both Vercel checks were also **success** on the README-only successor `c3d1d13f3bcb54c74f7896f6a9508a0ca815b013`. At `fa812a9`, Web/API checks were still pending when queried; no Actions run for that exact head was returned by the available GitHub query. Thus G0 passes for `c512343`, while the newer docs-only evidence head needs its own completed check observation.
+- This reconciliation is documentation/evidence-only; application source remains `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a`.
+- The audit report, structured finding, coverage ledger, and validator output are now published under [the stable audit evidence directory](../reviews/cloudflare-audit-2026-10-31/ARTIFACT-NOTES.md). The report remains **INCOMPLETE**; one candidate is `needs_validation`, and five units remain `deferred`.
+- Validator checks passed in the constrained preinstalled Docker environment. Four installed Linux API images were checked; none contains Vitest or Supertest. No dependency was installed/fetched, and no target-controlled test or deployed throttle probe ran. Audit target execution and throttle behavior remain **NOT_RUN**.
+- The five deferred areas have source-review notes only; they are not Cloudflare test coverage or audit passes. Preview agent/customer journeys and verified foreign-ticket denial remain blocked because safe credentials and a verified second-tenant fixture are unavailable.
+- G7 remains **BLOCKED**. Keep merge/submission on hold until permitted isolated audit work and separate Preview acceptance are completed and independently reviewed.
+
+---
+
 ## Recorded successful docs candidate — 2026-10-31 (`a25f59d`)
 
 - Recorded docs-only candidate: `a25f59d18cf59a7bbf7f09b1515c659b1e569acc` on branch `codex/preview-mobile-roster-ux`. GitHub Actions [run #45](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41194464115) completed `success` on this exact docs-only commit. The `verify` job and its database/gates step succeeded; the workflow configures a disposable PostgreSQL database, migrates and seeds it, then runs the API, web, browser, lint, typecheck, and build gates. Vercel Web and API status checks are both `success` on this same SHA. G0 is PASS for this candidate pipeline. Application source remains `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a`; this record is not proof of Preview role acceptance or the Cloudflare audit.
