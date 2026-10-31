@@ -4,11 +4,11 @@
 
 - Candidate base: `b2fd3691fe01f81a1652f29ab7ef67d615c0051f`; candidate worktree: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-clean-b2fd369` on `codex/clean-candidate-b2fd369`.
 - The original worktree remains dirty and unchanged, including ten TK-29 screenshot edits and pre-existing documentation/evidence changes. This candidate intentionally excludes those screenshots and unrelated dirty files.
-- GitHub Actions run [#72](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202224549) completed `verify` successfully on exact SHA `c316e1c708d0d45d16264ba75104f1d0acaf9d8f`; disposable DB setup, migrations, seed, required gates, and teardown succeeded. Vercel API and Web checks also report `success` on this candidate; retain the separate historical statuses for base `b2fd369`.
+- GitHub Actions runs [#72](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202224549) and [#73](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202475531) completed `verify` successfully on exact source SHAs `c316e1c` and `de7b8d1`; disposable DB setup, migrations, seed, required gates, and teardown succeeded. Vercel API and Web checks report `success` on both candidate commits; retain the separate historical statuses for base `b2fd369`.
 - Preview remains BLOCKED/NOT_RUN: the browser was signed out and safe synthetic agent/customer credentials plus a verified second-tenant ticket fixture were unavailable. No authentication attempt, live probe, or hosted data mutation was made.
 - Audit target execution remains BLOCKED/NOT_RUN: constrained offline Docker images lack the required preinstalled test runners. No packages were installed/fetched and no target tests ran.
 - Five deferred areas have source-only review; see `../reviews/security-preview-followup-2026-10-31-b2fd369.md`. Source inspection is not target execution or deployment verification.
-- Focused G7 follow-up against candidate `c316e1c708d0d45d16264ba75104f1d0acaf9d8f` is pending. Keep merge/submission on hold until compliant offline audit tests, authenticated Preview role and foreign-ticket denial checks with no-write evidence, and G7 clearance.
+- Focused G7 follow-up remains **BLOCKED** on open Preview and audit gates. Keep merge/submission on hold until compliant offline audit tests, authenticated Preview role and foreign-ticket denial checks with no-write evidence, and G7 clearance.
 
 Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
 Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
