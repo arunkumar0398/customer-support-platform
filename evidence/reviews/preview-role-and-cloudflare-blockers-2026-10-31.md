@@ -1,20 +1,18 @@
-# Preview role and isolated audit blockers — 2026-10-31
+# Preview role and Cloudflare audit blockers
 
-## Preview role journeys and foreign-object denial
+## Preview role and tenant validation
 
-- An earlier per-deployment alias, https://customer-support-platform-2tzahnjil.vercel.app/, rejected the documented synthetic admin sign-in with “Request origin or CSRF proof is invalid.”
-- Vercel deployment details identify the current branch Web alias as https://customer-support-platfo-git-f28eab-arunkumars-projects-67bc2fdd.vercel.app/, built from docs head a5673cb with app source 2bcf65f. Admin sign-in succeeded there, and the Members page roster loaded. The roster shows the synthetic Preview Alpha organization with four active same-organization memberships: one admin, one agent, and two customers. This proves the admin sign-in and roster read only.
-- Agent/customer passwords are not documented or verified. No agent/customer login was attempted. No new accounts, tickets, or other records were created, and no account or ticket writes were attempted.
-- Local .env contains only the loopback support_dev and support_test database configurations; no Neon Preview connection is configured. No verified second organization/ticket fixture is available in local evidence, and no Neon Preview DB connection is configured locally.
-- Result: agent/customer role journeys, setup of Preview-only agent/customer users, and true foreign-tenant object denial are BLOCKED. No credentials were guessed and no Preview/Production database was modified.
-- Safe continuation: use the exact Vercel Preview origin configured in API APP_ORIGIN and a Neon Preview-only DB connection; establish an admin session; create labeled synthetic agent/customer memberships and a second-tenant foreign ticket; record IDs and verify the foreign object denial without changing Production.
+- Admin sign-in and roster read were observed on the current Preview branch alias as recorded in the acceptance ledger.
+- Agent/customer passwords and a verified second-tenant foreign-ticket fixture are not available in the repository evidence. Keep agent/customer journeys and true foreign-ticket denial **BLOCKED**.
+- No Preview/Production account or ticket writes were performed in this audit. Do not use Production data for Preview acceptance.
 
 ## Cloudflare audit and deployed throttle
 
-- Result: NOT_RUN. No Cloudflare audit skill is installed in the discovered user/agent/plugin skill directories, and no OS-enforced isolated audit sandbox is available in this session.
-- No deployed login-throttle probing was performed. Do not run audit traffic against Preview or Production until the required sandbox and Cloudflare audit procedure are available.
-- Required continuation: provision the mandated isolated environment, then follow its audit procedure against the isolated target only. Include normal login, threshold boundary, lockout/recovery, distributed/serverless behavior observation, and confirm no throttle weakening; record environment identity, exact commands, response codes, and evidence.
+- The official Cloudflare security-audit skill was located and applied from the parent security-audit-skill repository. Run `run-2026-10-31-02` is **INCOMPLETE** and source-only; the login-throttle candidate remains `needs_validation`.
+- The skill validators passed in a constrained no-network Docker environment. The available Linux API image has no preinstalled Vitest/Supertest, and audit rules prohibit fetching/installing dependencies. Target-controlled security tests and deployed throttle validation remain **NOT_RUN**.
+- The report, structured findings, coverage ledger, and validator output are external/local under the parent-owned run directory. They are not published at `evidence/reviews/cloudflare-audit-2026-10-31/`; the expected REPORT.md path is absent. This file is a blocker note, not the audit report.
+- Do not probe Preview or Production throttle behavior as part of the audit. No external endpoint or live control plane was contacted.
 
-## Prerequisite recheck — 2026-10-31
+## Release status
 
-No new Preview agent/customer credentials, Neon Preview connection, or verified tenant-two foreign-ticket fixture were available in the repository or current authenticated session. No login attempt, account/ticket creation, or hosted mutation was made. No Cloudflare audit skill or OS-enforced isolated sandbox was found in the available skill locations; no deployed throttle probe was performed. Keep Preview acceptance BLOCKED and Cloudflare audit/throttle validation NOT_RUN until those prerequisites are supplied.
+Preview acceptance and Cloudflare target execution remain open. Request focused G7 review after those evidence gaps are addressed. Hold merge/submission.
