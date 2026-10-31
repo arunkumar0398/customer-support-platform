@@ -1,37 +1,40 @@
-# Testing and CI
+# Testing and CI evidence
 
-Use Node 24, npm 11, Docker Desktop with Compose, and a Chromium installation for the browser suite. `npm ci` installs the exact dependency tree from `package-lock.json`.
+## Reproducible local commands
 
-## Disposable database
-
-The Compose database initializes separate `support_dev` and `support_test` databases and roles. Run `npm ci`, create a local `.env` from `.env.example` with unique local credentials, then start the database:
+Use Node 24, npm 11, Docker Compose, and Chromium for browser tests. The following commands are instructions for a fresh local test environment, not evidence that they ran in this documentation update:
 
 ```powershell
+npm ci
 docker compose up -d --wait database
 npm run db:migrate
 npm run db:seed
 npm run db:verify-test
 npm run db:migrate:test
-```
-
-The demo seed is guarded for loopback `support_dev`; the test migration helper and integration tests require the verified loopback `support_test` role and database. Never aim test setup at a shared or production database. The seed contains synthetic records only. See the README for the full local setup.
-
-## Local gates
-
-```powershell
-npm run lint
-npm run typecheck
-npm run test:api
-npm run test:web
-npm exec -- playwright install chromium
+npm run check
 npm run test:e2e
-npm run build
 ```
 
-Run the database setup before the database-backed API and browser suites. `npm run check` runs lint, typecheck, API tests, web tests, Playwright **discovery** (`--list`), and builds. It does **not** execute the browser suite; `npm run test:e2e` does. Playwright starts its own API and Vite servers and uses `support_test` fixtures. It must be able to bind ports 3101 and 5173.
+`npm run check` runs lint, typecheck, API tests, web tests, Playwright test discovery (`--list`), and builds. It does not execute Playwright journeys. `npm run test:e2e` executes those journeys. Database tests must use the verified, disposable loopback `support_test` identity; demo seed writes only to local `support_dev`.
 
-## Hosted CI
+## Exact recorded CI evidence
 
-`.github/workflows/ci.yml` runs on a clean Ubuntu checkout for pushes, pull requests, and manual dispatch. It creates temporary local credentials, starts the Compose PostgreSQL container, migrates and seeds `support_dev`, verifies and migrates `support_test`, then runs lint, typecheck, API tests, web tests, the real Chromium Playwright suite, and builds. Each required command stops the job on failure. The workflow masks generated credentials, redacts configured secrets, database URLs, bearer tokens, and authentication or cookie fields in line and structured logs, then uploads only sanitized gate logs for seven days. The sanitizer regression test runs in CI. GitHub Actions dependencies are pinned to immutable full commit SHAs. It does not need repository secrets.
+The CI workflow `.github/workflows/ci.yml` creates fresh synthetic credentials, starts disposable PostgreSQL, installs the lockfile with `npm ci`, applies migrations and seed, then runs the sanitizer regression test, lint, typecheck, API tests, web tests, installs Chromium in CI, executes Playwright, and builds API/web. The passing runs below are exact-SHA evidence; docs-only runs do not create a new application-source SHA.
 
-The workflow covers the code and browser gates for A34. G5 and A24 also require a separate fresh Docker application startup from the README; the current Compose file starts the database only. A26 remains subject to the final document audit. Record actual CI run URL and source SHA before marking any acceptance result `PASS`.
+| Run | Exact SHA | Result and scope |
+|---|---|---|
+| [Actions #74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) | `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` application source | `verify` passed. This is the source SHA with recorded successful Vercel Web/API checks. |
+| [Actions #90](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41220472826) | `85ae41ebf76fea8e1a919f309de8c1a6a1195518` docs-only | `verify` passed. Vercel Web/API statuses on that SHA were both provider quota failures. |
+| [Actions #91](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41222046884) | `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
+
+Run #91 tests the repository tree at `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`; app source files remain at `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. Its CI success does not turn the API quota status into an app build result or close Preview/security gates.
+
+## Security and acceptance work not run
+
+- The external Cloudflare run-6 report records 6/6 Node built-in tests of the extracted login-throttle helper: 5/6 account attempts, 20/21 IP attempts, 15-minute expiry, a 4,096-entry map bound, forwarding-header non-influence on the supplied `req.ip`, and independent helper instances. It does **not** exercise the Express route/order, PostgreSQL, cross-process sharing, Vercel runtime, or deployed behavior. Its full report/output are outside this repo at `C:\Users\sivaa\security-audit-skill\customer-support-platform\run-6`.
+- No new full security audit ran here. The compliant sandbox has a local Docker engine and Node 24 image, but the available Linux audit image has no preinstalled Vitest, Supertest, Playwright, or Prisma runner. The WSL Ubuntu/Kali environments also have no Node/npm test toolchain. Host `node_modules` is Windows-built and not a compatible preinstalled Linux test toolchain. Per the audit skill, no dependency was installed/fetched and target tests were not run in an unsuitable environment.
+- Preview agent/customer journeys, cross-tenant and same-tenant-other-customer denials, and before/after ticket/comment/activity checks remain **BLOCKED / NOT_RUN**. They require Neon owner-confirmed compute readiness, safe synthetic role credentials, and a verified second-tenant fixture.
+- SQL migration reversal is **NOT_RUN**. Existing code rollback/schema-compatibility evidence must not be described as an actual down-migration test.
+- Any documentation-only descendant has separate exact-SHA status checks; do not inherit CI or Vercel outcomes from `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`.
+
+No Production request, Preview request, database write, or deployed throttle probe is part of the evidence above.

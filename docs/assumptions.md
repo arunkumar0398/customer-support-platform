@@ -14,7 +14,7 @@ This document separates requirements from the employer assessment PDF (`referenc
 | Ticket behavior | Create, discover, update, assign, and discuss tickets | Customers create for themselves; admins/agents may create on behalf of an eligible same-organization customer. Ticket status, priority, ownership, and allowed transitions are fixed below; disallowed transitions return a validation error |
 | Audit/history | Meaningful change history | Mutations and immutable activity events commit in one transaction; comments and events are append-only |
 | Scale | Discuss growth and large ticket volumes | MVP uses capped offset pagination and tenant-first indexes; cursor pagination is the documented growth path |
-| Hosting | Explain hosting and operations; live deployment is optional | Docker-local PostgreSQL is mandatory; Vercel plus Neon is the planned hosted shape and requires separate approval |
+| Hosting | Explain hosting and operations; a deployment URL is optional | Docker-local PostgreSQL is mandatory. Vercel plus Neon is the selected hosted topology; verification is recorded per exact SHA, and the assessment does not require a deployment URL |
 | Notifications | Explain integration behavior; sender is optional/stretch | No outbound sender in the MVP; document an outbox, retry, and operator recovery contract |
 | Delivery evidence | Provide working source, tests, setup, architecture, data model, API, seed, limitations, and disclosure | Each acceptance result remains `NOT_RUN` until executed evidence identifies command, exit code, environment, and SHA |
 
@@ -65,4 +65,4 @@ The MVP has no email or external notification provider. When one is added, the t
 
 ## Deferred and optional scope
 
-Live Vercel/Neon deployment, notification sending, attachments, realtime updates, advanced analytics, microservices, managed cache, and an observability dashboard are outside the initial local MVP. A30 duplicate-request idempotency is conditional in the assessment plan. Any deviation that changes security, data integrity, or acceptance scope requires a reviewed ADR and updated evidence.
+Vercel/Neon deployment is optional in the employer assessment; the hosted topology exists, but status must be reported against the exact SHA and the current API quota status is a provider constraint. Notification sending, attachments, realtime updates, advanced analytics, microservices, managed cache, and an observability dashboard are outside the MVP. A30 duplicate-request idempotency is conditional in the assessment plan. Any deviation that changes security, data integrity, or acceptance scope requires a reviewed ADR and updated evidence.
