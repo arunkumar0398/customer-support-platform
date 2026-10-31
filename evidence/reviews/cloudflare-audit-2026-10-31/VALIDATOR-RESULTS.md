@@ -1,6 +1,6 @@
 # Official validator results
 
-Both official validators passed inside Docker using node:24-alpine, network disabled, read-only root filesystem, read-only mounts for the trusted skill checkout and parent-created audit output, memory limit 256 MiB, CPU quota 0.5, and process limit 32.
+Both official validators passed inside Docker using node:24-alpine, network disabled, read-only root filesystem, read-only mounts for the trusted skill checkout and parent-created audit output, memory limit 256 MiB, CPU quota 0.5, and process limit 32. After publishing, both validators were rerun against the normalized repo copies with the same sandbox limits and passed again.
 
 - validate-coverage-ledger.cjs: PASS, 6 coverage units valid.
 - validate-findings.cjs: PASS, 1 finding valid.
