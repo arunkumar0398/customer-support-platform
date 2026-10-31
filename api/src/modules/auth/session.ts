@@ -13,6 +13,8 @@ export interface AuthOptions {
   sessionSecret?: string;
   production?: boolean;
   now?: () => Date;
+  /** Override used by the guarded Playwright server; deployed apps omit this. */
+  loginIpAttemptLimit?: number;
 }
 
 export interface AuthContext {

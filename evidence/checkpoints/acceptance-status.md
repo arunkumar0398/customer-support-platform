@@ -1,5 +1,22 @@
 # Acceptance Status
 
+## Current local-vs-remote reconciliation — 2026-10-31
+
+- Remote exact-head baseline remains `9a5cce31e7bdd96c029fb1442afafaa21843b6ee` on `codex/preview-mobile-roster-ux`. GitHub Actions [run #22](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41168579477) failed there: 23/24 browser tests passed; the narrow-viewport queue case stayed on `/sign-in`. The log did not show a login HTTP status. Do not record a 429 or causal link as observed.
+- The current working tree is uncommitted and based on that SHA. Its reviewed change injects an optional IP cap into the API factory, defaults to 20, and sets 100 only in the guarded E2E server. The account cap remains 5. The explicit override test passes alongside the existing default and account-limit tests.
+- Fresh local run: combined `npm run test:e2e` exited 0 with 24/24 passing; `npm run check` exited 0 with 395 API tests, 12 web tests, 24 Playwright cases discovered, lint, typecheck and builds. Both used isolated disposable Docker PostgreSQL `support_dev`/`support_test` at port 15545. This is local working-tree evidence, not a hosted run and not evidence attached to a new commit SHA.
+- All ten pre-existing modified TK-29 screenshots were modified by Playwright, restored from byte-for-byte backup, and SHA-256 checked against pre-run values. They remain user changes and must not be staged or reverted.
+- New exact-SHA GitHub Actions evidence is pending commit/push. Keep A35 Preview role journeys and foreign-object denial, A36 rollback compatibility, A37 broad accessibility, exact-candidate Docker, and final independent review open until independently verified. Hold merge/submission.
+
+## Current reconciliation — 2026-10-31 (supersedes status above)
+
+- Current branch is `codex/preview-mobile-roster-ux`; committed baseline is `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`. It is 18 commits ahead of the default branch and has no open PR (per current council check).
+- Exact-head GitHub Actions [run #22](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41168579477) failed on that SHA. The Playwright step ran 24 tests: 23 passed and `web/tests/e2e/ticket-list.spec.ts:237` failed because the sign-in helper remained on `/sign-in`. The run log does not show the login response status, so it does not prove a 429 or prove rate limiting caused this failure. Current Vercel Web/API deployment checks are success on this SHA; they do not replace CI.
+- Source count: the browser suite submits 19 helper logins plus the auth success and invalid-credential flows through one API process/IP. The production per-IP limit is 20 per 15 minutes; account limit is 5. This is a plausible shared-suite collision, not a proven run #22 response cause.
+- Working-tree correction: the guarded Playwright API server now has an explicit higher per-IP budget; deployed apps still omit the override and keep the default 20. The API auth suite retains tests for default IP limit, account limit/recovery, and spoofed forwarding headers; a focused explicit-override case was added.
+- Fresh local lint, typecheck, Playwright discovery (24 cases), and API/web build passed. Local auth integration execution is BLOCKED: `support_test` at the configured local port returned PostgreSQL password authentication failure; no DB credentials were changed. The full browser run and exact-head CI after the correction are pending. Do not mark A34 PASS for the fix until hosted CI completes on its exact commit.
+- A35 Preview agent/customer journeys and foreign-ticket denial, A36 migration rollback compatibility, A37 broad accessibility, exact-candidate Docker, and final independent review remain open. No Preview or Production data/deployment changed in this check. Preserve the ten modified TK-29 screenshot files.
+
 **Historical snapshot — 2026-10-30:** Candidate `eb4f2855207b9b743227a52e7e569d9e9a4737d4` had Ready Vercel deployments and exact-head GitHub Actions run #19. See the historical evidence below; the current candidate is recorded in the latest reconciliation section.
 **Rule:** Do not change a result from `NOT_RUN` without observed command/output, exit code, environment, and SHA.
 

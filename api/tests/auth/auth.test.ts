@@ -242,6 +242,26 @@ describe('origin and CSRF protection', () => {
 });
 
 describe('login throttling', () => {
+  it('uses an explicit per-IP attempt limit when configured', async () => {
+    const limitedApp = createApp({
+      getClient: () => db,
+      appOrigin: origin,
+      sessionSecret,
+      production: false,
+      loginIpAttemptLimit: 2,
+    });
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const response = await login(limitedApp, { email: `ip-limit-${attempt}@example.test`, password: 'wrong' });
+      expect(response.status).toBe(401);
+    }
+
+    const blocked = await login(limitedApp, { email: 'ip-limit-final@example.test', password: 'wrong' });
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.error.code).toBe('RATE_LIMITED');
+    expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0);
+  });
+
   it('limits attempts for a normalized account and recovers after its window', async () => {
     for (let attempt = 0; attempt < 5; attempt++) {
       const response = await login(app, { email: `  ${email.toUpperCase()}  `, password: 'wrong' });

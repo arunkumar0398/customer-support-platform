@@ -31,10 +31,11 @@ async function start() {
   process.env.NODE_ENV = 'test';
 
   startupPhase = 'API module loading';
-  const [{ default: app }, { closePrismaClient }] = await Promise.all([
+  const [{ createApp }, { closePrismaClient }] = await Promise.all([
     import('../src/app.js'),
     import('../src/db/client.js'),
   ]);
+  const app = createApp({ loginIpAttemptLimit: 100 });
   startupPhase = 'API listener startup';
   const server = app.listen(3101, '127.0.0.1');
   const stop = () => server.close(() => {

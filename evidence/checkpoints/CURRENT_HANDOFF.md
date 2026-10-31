@@ -1,3 +1,21 @@
+## Current handoff — 2026-10-31 CI remediation
+
+- Root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
+- Branch `codex/preview-mobile-roster-ux`; local changes are uncommitted and based on `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`. Do not confuse this local evidence with the remote exact-base run below. Ten modified TK-29 screenshot files are preserved and remain unstaged.
+- Remote baseline evidence: GitHub Actions [run #22](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41168579477) failed on exact SHA `9a5cce3`: 23/24 Playwright tests passed; `ticket-list.spec.ts:237` remained on `/sign-in`. The run log did not show a login response status and did not prove that rate limiting caused the failure.
+- Change reviewed: `AuthOptions.loginIpAttemptLimit` is optional, `loginThrottle` defaults it to the unchanged production cap of 20, and only `api/tests/e2e-server.ts` passes 100. The five-attempt per-account limit is unchanged. A focused API test checks the explicit cap returns 429 and `Retry-After`; existing tests retain production-default, account-recovery and spoofed-forwarding coverage.
+- Fresh local evidence on the uncommitted tree: combined `npm run test:e2e` passed 24/24 in 31.9s; `npm run check` exited 0 with 395 API tests, 12 web tests, 24 browser cases discovered, lint, typecheck and API/Web builds. Both used the isolated disposable Compose PostgreSQL stack `csp-login-fix-20261031` at port 15545, with separate `support_dev` and `support_test` databases. Playwright modified all ten tracked user screenshots during its run; the originals were restored and every SHA-256 matched the pre-run hash.
+- Exact-head hosted CI remains pending until this work is committed and pushed. Preserve A35 Preview role/foreign-object checks, A36 rollback compatibility, A37 broad accessibility, exact-candidate Docker and final independent review as open. Hold merge/submission. No Preview or Production data was changed.
+
+## Historical handoff snapshot — 2026-10-31 before local rerun
+
+- Root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
+- Branch `codex/preview-mobile-roster-ux`; committed base `9a5cce31e7bdd96c029fb1442afafaa21843b6ee`. Eighteen commits ahead of default; no open PR per council check. Ten TK-29 screenshot modifications were already present and must remain untouched/unstaged.
+- GitHub Actions [run #22](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41168579477) failed on exact base SHA: 23/24 browser tests passed. Failure was `ticket-list.spec.ts:237` in the narrow viewport test; sign-in helper timed out on `/sign-in`. Run logs did not expose the login HTTP status. Do not record 429 as observed fact.
+- Source indicates 19 shared E2E helper logins plus auth-flow submissions hit the same process/IP; production login defaults are 20 per-IP and 5 per-account per 15 minutes. A test-only E2E server option now sets only the IP budget to 100. Deployed entrypoints omit it; account limit and production defaults are unchanged. Regression test covers the explicit override, while existing API tests cover default 20/IP, account blocking/recovery, and forwarding-header spoof resistance.
+- Verified on the uncommitted working tree: `npm run lint`, `npm run typecheck`, `npm run test:e2e -- --list` (24 tests discovered), `npm run build` all exit 0. The auth API test attempt was blocked before test execution: the local `support_test` PostgreSQL endpoint rejected the configured password; no credentials or DB state were altered. Full browser run and CI after fix remain pending.
+- Next: obtain clean exact-head GitHub Actions evidence for the fix, then record the run URL/SHA/test counts here and in `acceptance-status.md`. Preserve A35 Preview role/foreign-object blockers, A36 rollback, A37 broad accessibility, exact-candidate Docker, and final independent review as open. Hold merge/submission. No Production or Preview mutation/deployment was performed.
+
 ## Current snapshot — 2026-10-31 post-push
 
 - Repository root: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`.
