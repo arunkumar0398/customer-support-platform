@@ -1,7 +1,8 @@
-# Cloudflare security audit — sandbox unavailable
+# Cloudflare security audit — incomplete, target execution not run
 
-- Date: 2026-10-31.
-- The required Cloudflare security-audit skill and its execution environment were not available in the installed Codex skills or local assessment-review kits inspected for this task. The review instructions require target execution inside a strict OS-enforced isolated sandbox. This Windows session does not expose that required sandbox.
-- The audit was **not run**. No probes, scans, or security tests were sent to Vercel Preview or Production. No hosted data/settings changed.
-- Do not treat ordinary Docker or a temporary database as satisfying an OS-enforced target-execution sandbox.
-- Status: BLOCKED pending the required skill instructions and compliant isolated sandbox. Once available, run the prescribed phases only there and record exact tool/version/scope/results. Final independent whole-project release review remains deferred until that gate and A37 remediation close.
+- Date: 2026-10-31. The requested official skill was available at the parent review kit, and Docker VMM provided a no-network Linux environment. This supersedes earlier statements that the skill or sandbox was unavailable.
+- Audit run: `run-2026-10-31-02`, quick/source-only, reviewed application source `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a` (audited checkout HEAD `00731039fd1830c4acd7faa2132b3afe27062314`). Result: incomplete; no confirmed vulnerability. The login-throttle candidate remains `needs_validation` without severity.
+- Official validators passed in preinstalled `node:24-alpine` with network disabled, read-only root/mounts, 256 MiB memory, 0.5 CPU and 32-process limit: 6 coverage units and 1 finding validated. The target test runner is not present in the available Linux API image (Vitest and Supertest absent). No dependencies were installed/fetched and no target-controlled tests, build, browser, or live endpoint probes were run.
+- The report, structured findings, coverage ledger and validator results are in the parent-owned external run directory `security-audit-skill/customer-support-platform/run-2/`. They are not committed into this repository. In particular, `evidence/reviews/cloudflare-audit-2026-10-31/REPORT.md` is absent. The committed file is only this status/blocker note; do not represent it as the audit report.
+- Five quick-profile coverage units remain deferred after parent source review; quick-profile instructions do not permit launching a second hunter wave. Source review and the successful ordinary CI candidate do not substitute for target execution in the Cloudflare sandbox.
+- No deployed Vercel/Neon probing was performed. Preview agent/customer journeys and true foreign-ticket denial remain blocked pending safe synthetic credentials and a verified second-tenant fixture. Keep G7 blocked and hold merge/submission until these gates are closed and independently reviewed.
