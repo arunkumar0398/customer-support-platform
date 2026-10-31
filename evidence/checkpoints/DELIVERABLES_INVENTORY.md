@@ -1,6 +1,6 @@
 # Assessment deliverables inventory
 
-Reviewed against the employer assessment, `reference/assessment.pdf` page 2, and remote branch `codex/clean-candidate-b2fd369`. Latest fully checked documentation/source tree for this review is `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`; application code remains at source SHA `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. The documentation files here are evidence of submission content, not proof of every acceptance gate.
+Reviewed against the employer assessment, `reference/assessment.pdf` page 2, and remote branch `codex/clean-candidate-b2fd369`. Latest fully checked documentation/source tree for this review is `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` (Actions #92); its parent docs snapshot `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` passed Actions #91. Application code remains at source SHA `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. The documentation files here are evidence of submission content, not proof of every acceptance gate.
 
 | Required submission | Status | Evidence path / observed state | Remaining action |
 |---|---|---|---|
@@ -17,8 +17,8 @@ Reviewed against the employer assessment, `reference/assessment.pdf` page 2, and
 
 - Application source `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`: Actions #74 `verify` success; Vercel Web and API checks success.
 - Prior docs-only candidate `85ae41ebf76fea8e1a919f309de8c1a6a1195518`: Actions #90 `verify` success; Vercel Web and API checks both failed with “Deployment rate limited — retry in 24 hours.”
-- Latest verified docs snapshot `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`: Actions #91 `verify` success; Vercel Web success; API failed with the same provider build-quota reason.
-- The documentation update following `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` is a new candidate and its CI/Vercel outcomes must be checked against that new exact SHA. No status is inferred across commits.
+- Latest checked docs candidate `baa72999f558c6b2f97f4990c8bacc21e4d0bf83`: Actions #92 `verify` success; Vercel Web success; API failed with the same provider build-quota reason. Parent docs snapshot `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` / Actions #91 remains historical.
+- The recorded exact-SHA status for `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` does not transfer to later commits.
 
 ## Open gates
 

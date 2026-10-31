@@ -26,6 +26,7 @@ The CI workflow `.github/workflows/ci.yml` creates fresh synthetic credentials, 
 | [Actions #74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) | `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` application source | `verify` passed. This is the source SHA with recorded successful Vercel Web/API checks. |
 | [Actions #90](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41220472826) | `85ae41ebf76fea8e1a919f309de8c1a6a1195518` docs-only | `verify` passed. Vercel Web/API statuses on that SHA were both provider quota failures. |
 | [Actions #91](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41222046884) | `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
+| [Actions #92](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223260270) | `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` docs-only | `verify` passed. Vercel Web succeeded; API status was a 24-hour provider build-rate-limit failure. |
 
 Run #91 tests the repository tree at `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`; app source files remain at `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. Its CI success does not turn the API quota status into an app build result or close Preview/security gates.
 
@@ -35,6 +36,6 @@ Run #91 tests the repository tree at `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`;
 - No new full security audit ran here. The compliant sandbox has a local Docker engine and Node 24 image, but the available Linux audit image has no preinstalled Vitest, Supertest, Playwright, or Prisma runner. The WSL Ubuntu/Kali environments also have no Node/npm test toolchain. Host `node_modules` is Windows-built and not a compatible preinstalled Linux test toolchain. Per the audit skill, no dependency was installed/fetched and target tests were not run in an unsuitable environment.
 - Preview agent/customer journeys, cross-tenant and same-tenant-other-customer denials, and before/after ticket/comment/activity checks remain **BLOCKED / NOT_RUN**. They require Neon owner-confirmed compute readiness, safe synthetic role credentials, and a verified second-tenant fixture.
 - SQL migration reversal is **NOT_RUN**. Existing code rollback/schema-compatibility evidence must not be described as an actual down-migration test.
-- Any documentation-only descendant has separate exact-SHA status checks; do not inherit CI or Vercel outcomes from `6d8f19bcca5d03c0ae9dc42ced379928bd818ac1`.
+- The latest checked documentation candidate is `baa72999f558c6b2f97f4990c8bacc21e4d0bf83` with Actions #92 success, Vercel Web success, and API quota failure. Any later documentation-only descendant has separate exact-SHA status checks; do not inherit outcomes.
 
 No Production request, Preview request, database write, or deployed throttle probe is part of the evidence above.
