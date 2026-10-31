@@ -14,3 +14,7 @@
 - Result: NOT_RUN. No Cloudflare audit skill is installed in the discovered user/agent/plugin skill directories, and no OS-enforced isolated audit sandbox is available in this session.
 - No deployed login-throttle probing was performed. Do not run audit traffic against Preview or Production until the required sandbox and Cloudflare audit procedure are available.
 - Required continuation: provision the mandated isolated environment, then follow its audit procedure against the isolated target only. Include normal login, threshold boundary, lockout/recovery, distributed/serverless behavior observation, and confirm no throttle weakening; record environment identity, exact commands, response codes, and evidence.
+
+## Prerequisite recheck — 2026-10-31
+
+No new Preview agent/customer credentials, Neon Preview connection, or verified tenant-two foreign-ticket fixture were available in the repository or current authenticated session. No login attempt, account/ticket creation, or hosted mutation was made. No Cloudflare audit skill or OS-enforced isolated sandbox was found in the available skill locations; no deployed throttle probe was performed. Keep Preview acceptance BLOCKED and Cloudflare audit/throttle validation NOT_RUN until those prerequisites are supplied.
