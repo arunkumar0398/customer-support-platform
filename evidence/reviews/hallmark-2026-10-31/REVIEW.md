@@ -25,7 +25,7 @@ The parent-kit reviewer checked `15a59b36570bf5c2e6658d1a32acb06990e5c727` (`15a
 2. **P2: Test runs rewrote fixed screenshots.** New fixed-path review screenshot writes were removed. The shared checkpoint capture helper now does nothing unless `CHECKPOINT_SCREENSHOT_DIR` is explicitly set, and rejects a directory inside the protected TK-29 screenshot path. The three review screenshots above are fixed evidence from the first run and no longer get rewritten by Playwright.
 3. **Evidence prose lagged the commit.** At review time, README, acceptance status, and handoff still described the follow-up as uncommitted. They have now been reconciled to committed candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84`; exact-SHA GitHub Actions [run #25](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515) passed. The candidate has not yet received final independent review.
 
-The reviewer's `NOT_READY` was issued because the follow-up evidence text had not been reconciled; it was not a source-code objection to `7c2fdba`. After this update, request a read-only follow-up review for the evidence and exact candidate.
+The reviewer's `NOT_READY` was issued because the follow-up evidence text had not been reconciled; it was not a source-code objection to `7c2fdba`. The read-only parent-kit follow-up then returned READY_FOR_REVIEW for the reconciled docs; the whole-project release review remains pending.
 
 ## Verification
 

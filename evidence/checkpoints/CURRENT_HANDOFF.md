@@ -3,12 +3,13 @@
 - Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`; branch `codex/preview-mobile-roster-ux`; code candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84` is pushed. Evidence-only commits follow it.
 - Run #25 passed on exact code SHA `7c2fdba6efb7c39dbf723f100644a5c53928fd84`: [GitHub Actions](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515). Local combined Playwright passed 25/25; `npm run check` passed with 395 API, 12 Web, 25 browser cases discovered, lint/typecheck/build. Production throttle defaults remain 20/IP and 5/account; E2E-only IP override is 100.
 - Historical run #22 on `9a5cce3` remains failed 23/24. No login response status was captured; do not attribute it to 429.
+- Evidence-only branch-head `858ee91f10295611ee819e2d81219f39e0bc6178` passed exact-SHA CI [run #28](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41183097517), including the full CI workflow with combined Playwright; Vercel Web/API checks are successful. App source remains `7c2fdba`.
 - Ten modified TK-29 screenshots are owner changes, remain unstaged, and must not be staged, restored, or overwritten.
 - Vercel: exact 7c Web and API Preview deployments show Ready. API readiness returned `status=ready`; Web `/api/health` proxy returned `status=ok`.
 - Preview: synthetic admin login, ticket #6 create, status/priority update, and comment passed. Reasoned reopen showed a stale warning despite the reasoned event and refreshed In Progress state; classify as ambiguous pending request/response capture. The ticket was later returned to Resolved. See [Preview record](../reviews/preview-validation-2026-10-31.md).
 - Docker: isolated Compose startup, migration, seed, and API/Web health smoke passed for the 7c2fdba application tree; local ignored .env migration URLs were corrected to port 15544 and match APP_DB_PASSWORD. Details: [Docker smoke](docker-smoke-2026-10-31-7c2fdba.md).
 - Still open: A35 agent/customer journeys and foreign-object denial; A36 Preview migration rollback compatibility; A37 route-wide accessibility/screen-reader/contrast; Cloudflare audit in the required OS-enforced sandbox; whole-project independent release review. The exact-candidate Docker smoke is now complete. Hold merge/submission.
-- Prior scoped parent-kit review returned READY_FOR_REVIEW on an earlier documentation revision and identified one stale status phrase. The phrase is now corrected; a fresh read-only review of this reconciliation is pending. This is not a final whole-project release signoff.
+- Prior scoped parent-kit review returned READY_FOR_REVIEW on an earlier documentation revision and identified one stale status phrase. The phrase is now corrected; the parent-kit follow-up returned READY_FOR_REVIEW for the reconciled docs. This is not a final whole-project release signoff.
 
 ### Current release-gate snapshot
 
