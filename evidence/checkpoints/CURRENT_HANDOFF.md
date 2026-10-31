@@ -321,3 +321,8 @@ Recover Docker engine and rebuild the exact checkout; then obtain safe Preview s
 - Independent Phase 3/5 verifier retained `auth.login-account-throttle-lockout` as `needs_validation`: source confirms process-local pre-auth account throttling at five attempts/15 minutes; practical Vercel instance behavior is unknown. No severity assigned; no deployed probe.
 - Final quick coverage critic found five unmapped units; per skill, no second hunter wave was run. They are deferred: session lifecycle/CSRF, membership mutation, child-resource/dashboard scope, Web/API proxy, CI/container supply chain.
 - Official ledger/findings validators were rerun and blocked on missing OS no-follow/nonblocking input protection. Audit artifacts remain not schema-validated and run status INCOMPLETE.
+
+
+### Post-audit CI update — 2026-10-31
+
+The audit evidence documentation at exact branch head `85f3bcea220434bbe3a831bf66fe3925ff96968f` passed GitHub Actions [run #41](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41194109274). This confirms the docs commit gates only. Security audit run-2 remains INCOMPLETE; the throttle candidate remains needs_validation; five critic-discovered coverage units are deferred; G7 remains BLOCKED. Keep merge/submission on hold.
