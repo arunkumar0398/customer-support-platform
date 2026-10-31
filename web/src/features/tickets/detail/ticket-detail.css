@@ -2,7 +2,7 @@
 .ticket-detail-back { display: inline-block; margin-bottom: 24px; color: var(--deep); font-size: 12px; font-weight: 700; text-decoration: none; }
 .ticket-detail-back:hover, .ticket-detail-queue-link:hover { text-decoration: underline; }
 .ticket-detail-heading { margin-bottom: 26px; }
-.ticket-detail-heading .eyebrow { margin: 0 0 10px; color: #75877e; }
+.ticket-detail-heading .eyebrow { margin: 0 0 10px; color: #53645d; }
 .ticket-detail-heading h1 { max-width: 850px; margin: 0; color: var(--ink); font-family: var(--display); font-size: clamp(38px, 5.5vw, 58px); font-weight: 500; letter-spacing: -.045em; line-height: 1.05; overflow-wrap: anywhere; }
 .ticket-detail-number { margin: 12px 0 0; color: #61736c; font-family: var(--mono); font-size: 13px; }
 .ticket-detail-receipt { color: #426b53; font-size: 13px; }
@@ -29,7 +29,7 @@
 .ticket-activity-list li:not(:last-child)::after { position: absolute; top: 11px; bottom: 0; left: 5px; width: 1px; background: #dce5dd; content: ''; }
 .activity-mark { z-index: 1; width: 11px; height: 11px; margin-top: 2px; border: 2px solid #557f6b; border-radius: 50%; background: #fff; }
 .ticket-activity-list strong { display: block; color: var(--ink); font-size: 12px; }
-.ticket-activity-list time, .ticket-comments-list time { display: block; margin-top: 5px; color: #839087; font-size: 10px; }
+.ticket-activity-list time, .ticket-comments-list time { display: block; margin-top: 5px; color: #53645d; font-size: 10px; }
 .ticket-activity-list p { margin: 6px 0 0; color: #687870; font-size: 11px; }
 .ticket-comments-list { gap: 12px; margin-bottom: 20px; }
 .ticket-comments-list li { padding: 15px; border: 1px solid #e3e9e2; border-radius: 6px; background: #fbfcf9; }

@@ -158,7 +158,13 @@ function DashboardOverview({ data, refreshing, refresh }: { data: DashboardMetri
           {data.agentWorkloads.length === 0 ? (
             <p className="dashboard-empty-note" role="status">No active agents are assigned to this organization.</p>
           ) : (
-            <div className="dashboard-table-wrap">
+            <div className="dashboard-table-wrap" role="region" aria-label="Agent workload table" tabIndex={0} onKeyDown={(event) => {
+              const delta = event.key === 'ArrowRight' ? 80 : event.key === 'ArrowLeft' ? -80 : 0;
+              if (delta !== 0) {
+                event.preventDefault();
+                event.currentTarget.scrollBy({ left: delta, behavior: 'auto' });
+              }
+            }}>
               <table className="dashboard-workload-table" aria-describedby="dashboard-workload-definition">
                 <thead><tr><th scope="col">Agent</th><th scope="col">Open</th><th scope="col">In progress</th><th scope="col">Active</th></tr></thead>
                 <tbody>{data.agentWorkloads.map((agent) => (

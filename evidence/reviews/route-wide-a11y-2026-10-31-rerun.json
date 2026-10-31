@@ -1,0 +1,380 @@
+{
+  "baseSha": "770bfaac575b9d4b3aaf2abdabec294d7273e1b6",
+  "date": "2026-10-31",
+  "scanner": "axe-core 4.11.1",
+  "criteria": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa",
+    "wcag22aa"
+  ],
+  "scans": 32,
+  "distinctCoverage": [
+    "ADMIN:dashboard:1280",
+    "ADMIN:dashboard:375",
+    "ADMIN:members:1280",
+    "ADMIN:members:375",
+    "ADMIN:ticket-create:1280",
+    "ADMIN:ticket-create:375",
+    "ADMIN:ticket-detail:1280",
+    "ADMIN:ticket-detail:375",
+    "ADMIN:ticket-queue:1280",
+    "ADMIN:ticket-queue:375",
+    "AGENT:dashboard:1280",
+    "AGENT:dashboard:375",
+    "AGENT:ticket-create:1280",
+    "AGENT:ticket-create:375",
+    "AGENT:ticket-detail:1280",
+    "AGENT:ticket-detail:375",
+    "AGENT:ticket-queue:1280",
+    "AGENT:ticket-queue:375",
+    "CUSTOMER:dashboard:1280",
+    "CUSTOMER:dashboard:375",
+    "CUSTOMER:ticket-create:1280",
+    "CUSTOMER:ticket-create:375",
+    "CUSTOMER:ticket-detail:1280",
+    "CUSTOMER:ticket-detail:375",
+    "CUSTOMER:ticket-queue:1280",
+    "CUSTOMER:ticket-queue:375",
+    "SIGNED_OUT:sign-in:1280",
+    "SIGNED_OUT:sign-in:375"
+  ],
+  "results": [
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-queue",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-queue",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-create",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-create",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-detail",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-detail",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "members",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "members",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 375,
+      "repeat": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 1280,
+      "repeat": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-queue",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-queue",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "AGENT",
+      "route": "dashboard",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "dashboard",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-create",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-create",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-detail",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-detail",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "AGENT",
+      "route": "dashboard",
+      "width": 375,
+      "repeat": true,
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "help": "Elements must only use permitted ARIA attributes"
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-queue",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-queue",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "dashboard",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "dashboard",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-create",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-create",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-detail",
+      "width": 1280,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-detail",
+      "width": 375,
+      "repeat": false,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-detail",
+      "width": 375,
+      "repeat": true,
+      "violations": [],
+      "incomplete": []
+    }
+  ]
+}

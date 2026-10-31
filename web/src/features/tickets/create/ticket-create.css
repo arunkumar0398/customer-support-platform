@@ -4,7 +4,7 @@
 .ticket-create-back:hover { text-decoration: underline; }
 .ticket-create-heading { max-width: 660px; margin-bottom: 28px; }
 .ticket-create-heading .eyebrow,
-.ticket-created > .eyebrow { margin-bottom: 12px; color: #75877e; }
+.ticket-created > .eyebrow { margin-bottom: 12px; color: #53645d; }
 .ticket-create-heading h1,
 .ticket-created h1 { margin: 0; color: var(--ink); font-family: var(--display); font-size: clamp(39px, 5.5vw, 58px); font-weight: 500; letter-spacing: -0.045em; line-height: 1.05; }
 .ticket-create-heading > p:last-child { max-width: 520px; margin: 13px 0 0; color: var(--muted); font-size: 14px; line-height: 1.65; }

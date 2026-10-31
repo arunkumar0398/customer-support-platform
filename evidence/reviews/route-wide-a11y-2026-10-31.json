@@ -1,0 +1,1785 @@
+{
+  "sha": "7c2fdba6efb7c39dbf723f100644a5c53928fd84",
+  "date": "2026-10-31",
+  "scanner": "axe-core 4.11.1",
+  "criteria": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa",
+    "wcag22aa"
+  ],
+  "scans": 32,
+  "routeCoverage": [
+    "ADMIN:dashboard:1280",
+    "ADMIN:dashboard:375",
+    "ADMIN:members:1280",
+    "ADMIN:members:375",
+    "ADMIN:ticket-create:1280",
+    "ADMIN:ticket-create:375",
+    "ADMIN:ticket-detail:1280",
+    "ADMIN:ticket-detail:375",
+    "ADMIN:ticket-queue:1280",
+    "ADMIN:ticket-queue:375",
+    "AGENT:dashboard:1280",
+    "AGENT:dashboard:375",
+    "AGENT:ticket-create:1280",
+    "AGENT:ticket-create:375",
+    "AGENT:ticket-detail:1280",
+    "AGENT:ticket-detail:375",
+    "AGENT:ticket-queue:1280",
+    "AGENT:ticket-queue:375",
+    "CUSTOMER:dashboard:1280",
+    "CUSTOMER:dashboard:375",
+    "CUSTOMER:ticket-create:1280",
+    "CUSTOMER:ticket-create:375",
+    "CUSTOMER:ticket-detail:1280",
+    "CUSTOMER:ticket-detail:375",
+    "CUSTOMER:ticket-queue:1280",
+    "CUSTOMER:ticket-queue:375",
+    "SIGNED_OUT:sign-in:1280",
+    "SIGNED_OUT:sign-in:375"
+  ],
+  "violations": [
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".story-footer"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #849b95, background color: #15383b, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".panel-eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #71827c, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".form-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.48 (foreground color: #64736e, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".privacy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #71817a, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".story-footer"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #849b95, background color: #15383b, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".panel-eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #71827c, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".form-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.48 (foreground color: #64736e, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".privacy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #71817a, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-queue",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(4)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(5)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-number"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #71817a, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-title-cell > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.23 (foreground color: #829089, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".assignee-cell"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.03 (foreground color: #708079, background color: #fbfcf9, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-queue",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-number"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #71817a, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-title-cell > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.23 (foreground color: #829089, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div > p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#dashboard-workload-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(4)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div > p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#dashboard-workload-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "dashboard",
+      "width": 375,
+      "id": "scrollable-region-focusable",
+      "impact": "serious",
+      "help": "Scrollable region must have keyboard access",
+      "nodes": [
+        {
+          "target": [
+            ".dashboard-table-wrap"
+          ],
+          "summary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-create",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#requester-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-title-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-description-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-create",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#requester-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-title-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-description-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-detail",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "span:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "form > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "ticket-detail",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "span:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "form > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "members",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".members-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #65766d, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".members-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.45 (foreground color: #65766d, background color: #f5f7f2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.45 (foreground color: #65766d, background color: #f5f7f2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.45 (foreground color: #65766d, background color: #f5f7f2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(4)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.45 (foreground color: #65766d, background color: #f5f7f2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(5)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.45 (foreground color: #65766d, background color: #f5f7f2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".members-policy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #65766d, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "route": "members",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".members-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #65766d, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".members-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "li:nth-child(1) > .member-card-current-role"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.37 (foreground color: #6d7c78, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "li:nth-child(2) > .member-card-current-role"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.37 (foreground color: #6d7c78, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "li:nth-child(3) > .member-card-current-role"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.37 (foreground color: #6d7c78, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".members-policy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #65766d, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".story-footer"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #849b95, background color: #15383b, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".panel-eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #71827c, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".form-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.48 (foreground color: #64736e, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".privacy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #71817a, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".story-footer"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #849b95, background color: #15383b, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".panel-eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #71827c, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".form-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.48 (foreground color: #64736e, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".privacy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #71817a, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-queue",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(4)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(5)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-number"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #71817a, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-title-cell > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.23 (foreground color: #829089, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".assignee-cell"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.03 (foreground color: #708079, background color: #fbfcf9, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-queue",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-number"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #71817a, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-title-cell > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.23 (foreground color: #829089, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "dashboard",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div > p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#dashboard-workload-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(4)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "dashboard",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "div > p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-status-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-priority-panel > .dashboard-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > div > .eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #75877e, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".dashboard-workload-panel > .dashboard-panel-heading > .dashboard-panel-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #73817a, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#dashboard-workload-definition"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.02 (foreground color: #718079, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.65 (foreground color: #788780, background color: #fbfcf9, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "dashboard",
+      "width": 375,
+      "id": "scrollable-region-focusable",
+      "impact": "serious",
+      "help": "Scrollable region must have keyboard access",
+      "nodes": [
+        {
+          "target": [
+            ".dashboard-table-wrap"
+          ],
+          "summary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-create",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#requester-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-title-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-description-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-create",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#requester-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-title-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-description-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-detail",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "span:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "form > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "AGENT",
+      "route": "ticket-detail",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "span:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "form > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".story-footer"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #849b95, background color: #15383b, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".panel-eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #71827c, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".form-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.48 (foreground color: #64736e, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".privacy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #71817a, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "sign-in",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".story-footer"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #849b95, background color: #15383b, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".panel-eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #71827c, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".form-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.48 (foreground color: #64736e, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".privacy-note"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.69 (foreground color: #71817a, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-queue",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(4)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(5)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-number"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #71817a, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-title-cell > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.23 (foreground color: #829089, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".assignee-cell"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.03 (foreground color: #708079, background color: #fbfcf9, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-queue",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-intro"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".queue-total"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "th[scope=\"col\"]:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #73817a, background color: #f5f7f2, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-number"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #71817a, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".ticket-title-cell > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.23 (foreground color: #829089, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "dashboard",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "dashboard",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-create",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-title-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-description-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-create",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            ".account-copy > small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "p:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-title-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "#ticket-description-hint"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-detail",
+      "width": 1280,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "span:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "role": "CUSTOMER",
+      "route": "ticket-detail",
+      "width": 375,
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": [
+        {
+          "target": [
+            "small"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.24 (foreground color: #6d7c78, background color: #fbfcf9, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            ".eyebrow"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #75877e, background color: #f1f4ef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "target": [
+            "span:nth-child(3)"
+          ],
+          "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.93 (foreground color: #6d7c78, background color: #f1f4ef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    }
+  ],
+  "incomplete": [
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 1280,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 1280,
+      "id": "color-contrast"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 375,
+      "id": "color-contrast"
+    },
+    {
+      "role": "ADMIN",
+      "route": "/dashboard",
+      "width": 1280,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "ADMIN",
+      "route": "/dashboard",
+      "width": 375,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "ADMIN",
+      "route": "/dashboard",
+      "width": 375,
+      "id": "color-contrast"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 1280,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 1280,
+      "id": "color-contrast"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 375,
+      "id": "color-contrast"
+    },
+    {
+      "role": "AGENT",
+      "route": "/dashboard",
+      "width": 1280,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "AGENT",
+      "route": "/dashboard",
+      "width": 375,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "AGENT",
+      "route": "/dashboard",
+      "width": 375,
+      "id": "color-contrast"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 1280,
+      "id": "aria-prohibited-attr"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 1280,
+      "id": "color-contrast"
+    },
+    {
+      "role": "SIGNED_OUT",
+      "route": "/sign-in",
+      "width": 375,
+      "id": "color-contrast"
+    }
+  ]
+}

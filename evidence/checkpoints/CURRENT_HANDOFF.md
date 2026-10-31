@@ -1,4 +1,27 @@
-## Latest handoff — 2026-10-31 exact candidate 7c2fdba
+## Latest handoff — 2026-10-31 remediation based on 770bfaac
+
+- Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`; branch `codex/preview-mobile-roster-ux`; base branch head `770bfaac575b9d4b3aaf2abdabec294d7273e1b6` (docs/evidence-only after app source candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84`). The current working tree adds accessibility remediation and evidence; it is not yet committed.
+- GitHub Actions [run #29](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41183458143) succeeded on the earlier 770bfaac evidence head; it predates this UI source remediation. The current working-tree `npm run check` passed and full Playwright passed 25/25; exact-source hosted CI is pending commit/push. Vercel Web/API checks are success for the earlier deployed candidate, not this local fix.
+- Preview retry on the authenticated branch alias: ticket #6 moved Resolved→In Progress with a reason; UI showed success and a matching activity event. It was restored to Resolved. Raw request/response and HTTP status were inaccessible from the in-app browser surface. See [reopen evidence](../reviews/preview-reopen-770bfaac-2026-10-31.md).
+- Agent/customer Preview journeys and true foreign-ticket denial remain blocked by missing known role credentials and verified foreign-tenant fixture. A36 code rollback compatibility PASS: previous-code API suite 395/395 against all current migrations on an isolated DB. A37 PASS for its stated baseline scope: final axe matrix 32/32, zero violations (28 distinct points plus four marked repeats), and combined Playwright keyboard-scroll assertions pass. Fourteen axe checks remain incomplete/manual. See [migration evidence](../reviews/migration-rollback-compatibility-2026-10-31.md) and [accessibility remediation](../reviews/route-wide-a11y-remediation-2026-10-31.md). Cloudflare audit awaits its required isolated OS-enforced sandbox; see [blocker record](../reviews/cloudflare-audit-sandbox-blocker-2026-10-31.md). Final whole-project review is requested now; its verdict must retain A35 and Cloudflare blockers.
+- Ten modified TK-29 screenshot PNGs remain user-owned, unstaged, untouched. No Production data/settings changed. Hold merge/submission.
+
+### Current gate snapshot (run #29 head)
+
+| Gate | Result | Current evidence / remaining work |
+|---|---|---|
+| G0 | PARTIAL | Earlier exact-head Actions #29 passed; current source local checks pass, but hosted CI on the accessibility fix is pending. |
+| G1 | PASS (local); earlier CI PASS | Fresh disposable PostgreSQL migrations and the 395-test API integration suite passed locally; #29 evidence predates this source change. |
+| G2 | PARTIAL | Local auth/isolation tests exist; Preview agent/customer and true foreign-object checks remain unavailable. |
+| G3 | PARTIAL | API assignment rollback tests are in CI; authenticated Preview reopen UI is confirmed, raw response status unavailable. |
+| G4 | PASS for local baseline checks; Preview journeys partial | Combined browser suite 25/25 and final axe 32/32 with zero violations; 14 manual/incomplete checks and Preview agent/customer/foreign-object journeys remain open. |
+| G5 | PARTIAL | Exact-source Docker smoke and A36 code rollback compatibility pass; Cloudflare audit sandbox and final release review remain open. |
+| G6 | PARTIAL | Vercel checks pass; admin Preview flow verified; agent/customer and foreign-tenant checks remain open. A36 is isolated local code rollback proof, not hosted Preview deployment proof. |
+| G7 | IN_PROGRESS | Final independent whole-project review requested after this evidence update; verdict must include open A35 and Cloudflare sandbox blockers. |
+
+> Historical sections below retain their original dated observations and are not current status.
+
+
 
 - Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform-preview-fixes`; branch `codex/preview-mobile-roster-ux`; code candidate `7c2fdba6efb7c39dbf723f100644a5c53928fd84` is pushed. Evidence-only commits follow it.
 - Run #25 passed on exact code SHA `7c2fdba6efb7c39dbf723f100644a5c53928fd84`: [GitHub Actions](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41177630515). Local combined Playwright passed 25/25; `npm run check` passed with 395 API, 12 Web, 25 browser cases discovered, lint/typecheck/build. Production throttle defaults remain 20/IP and 5/account; E2E-only IP override is 100.
