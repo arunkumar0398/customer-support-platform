@@ -2,7 +2,7 @@
 
 These files publish the output of official skill run `run-2026-10-31-02`, a quick, scoped, source-only audit of application source `2bcf65fe0e7a388ff4d43695b5601ec6ce680e7a` (audited checkout HEAD `00731039fd1830c4acd7faa2132b3afe27062314`). The package is incomplete and is not a clean bill of health.
 
-The four generated artifacts were checked for connection-string credentials, bearer tokens, JWTs, private-key blocks, AWS access keys, and email addresses; no matches were found. The host-specific absolute path to the skill checkout was replaced in the report with a generic label. The structured finding and coverage ledger otherwise retain their run output.
+The four generated artifacts were checked for connection-string credentials, bearer tokens, JWTs, private-key blocks, AWS access keys, and email addresses; no matches were found. The host-specific absolute path to the skill checkout was replaced in the report with a generic label. In the published copies, stale blocker wording in findings.json and coverage-ledger.json was corrected from “sandbox unavailable” to the observed blocker: no compatible preinstalled Vitest/Supertest test runner. No finding verdict, evidence trace, coverage assignment, or status changed. The original files in the external run directory remain unchanged.
 
 ## What was run
 
