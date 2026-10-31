@@ -1,0 +1,30 @@
+# Assessment deliverables inventory
+
+Reviewed against the employer assessment, `reference/assessment.pdf` page 2, and repository content at remote branch `codex/clean-candidate-b2fd369`, candidate `85ae41ebf76fea8e1a919f309de8c1a6a1195518`. Source implementation SHA is `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. This inventory distinguishes file presence from release validation; stale statements are not treated as proof.
+
+| Required submission | Status | Evidence path / observed state | Gap or next action |
+|---|---|---|---|
+| 1. Source repository | **COMPLETE** | [GitHub repository](https://github.com/arunkumar0398/customer-support-platform), branch `codex/clean-candidate-b2fd369`, assessed docs candidate `85ae41ebf76fea8e1a919f309de8c1a6a1195518`; application source `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. | Keep the source SHA distinct from later documentation-only commits. The dirty local `b2fd369…` worktree was not validated by Actions #90. |
+| 2. README setup and run instructions | **COMPLETE** | [README.md](../../README.md): prerequisites, `.env.example`, local DB/migrations/seed, Docker-local app, checks and browser tests. | Confirm setup remains synchronized if scripts or prerequisites change; do not infer remote/Preview acceptance from local commands. |
+| 3. Architecture diagram | **PARTIAL** | [docs/architecture.md](../../docs/architecture.md) includes a Mermaid component/request flow for React/Vite → same-origin API proxy → Express/auth/domain → PostgreSQL and a local flow. | Hosted topology section still says “after approval” although Vercel/Neon projects exist. Reconcile actual deployment topology and clearly separate it from optional future operations. |
+| 4. Data model and key indexes | **PARTIAL** | [docs/data-model.md](../../docs/data-model.md), [Prisma schema](../../api/prisma/schema.prisma), and migrations under `api/prisma/migrations/` are present. Schema defines organization/user/membership/ticket/comment/activity/session relations, composite tenant constraints, and tenant-first indexes. | The data-model document says schema/migrations are future TK-04–06 work and calls itself only a design contract; that is stale. Align it with the actual schema and index names, then verify constraints against migrations. |
+| 5. API documentation/examples | **PARTIAL** | [docs/api.md](../../docs/api.md) has route sections for health, auth, membership, ticket CRUD/assignment, comments/activity, dashboard, policies and error semantics. | Its opening says local listener/launch and browser journeys remain later tasks, which is stale. Reconcile implemented route behavior/examples to current source and list auth/role expectations for each route. |
+| 6. Sample credentials or seed instructions | **COMPLETE** | [docs/demo-accounts.md](../../docs/demo-accounts.md) documents local synthetic Alpha/Beta admin/agent/customer accounts and the shared demo-only password; [api/prisma/seed.ts](../../api/prisma/seed.ts) guards writes to loopback `support_dev` and seeds two organizations and tickets. | Explicitly keep these local-only synthetic credentials out of deployed environments; they are not Preview or Production credentials. |
+| 7. Test instructions and results | **PARTIAL** | [docs/testing.md](../../docs/testing.md), [acceptance ledger](acceptance-status.md), per-task evidence under this directory, and [Actions #74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) / [Actions #90](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41220472826). Run #74 is source `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; run #90 is docs candidate `85ae41ebf76fea8e1a919f309de8c1a6a1195518`, both `verify` success. | Acceptance statuses still include historical SHA-scoped evidence and open NOT_RUN/BLOCKED cases. Reconcile stale rows as needed. Preview acceptance and full audit remain blocked/not run. The Vercel failures on `85ae41ebf76fea8e1a919f309de8c1a6a1195518` are quota statuses, not test failures. |
+| 8. Tradeoffs, limitations, next steps | **PARTIAL** | [docs/assumptions.md](../../docs/assumptions.md), [docs/performance.md](../../docs/performance.md), [docs/architecture.md](../../docs/architecture.md), and [operations](../../docs/operations.md) record role assumptions, query limits, throughput tradeoffs, and operations. | Some status text is stale and spread across files. Add/reconcile one short current summary of known limitations and next steps. Clearly state deployment URL is optional under the assessment; the Vercel build quota is not an application failure. |
+
+## Exact candidate evidence
+
+- Documentation candidate at inventory review: `85ae41ebf76fea8e1a919f309de8c1a6a1195518`.
+- Actions #90: completed success, job `verify`, exact SHA `85ae41ebf76fea8e1a919f309de8c1a6a1195518`.
+- Vercel status contexts on `85ae41ebf76fea8e1a919f309de8c1a6a1195518`: Web and API both returned `failure` with “Deployment rate limited — retry in 24 hours.” These are provider build-quota outcomes.
+- Application source SHA: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; Actions #74 passed at that exact source SHA with successful Web/API checks recorded in the acceptance ledger.
+- The source-to-docs comparison and historical statuses remain SHA-specific in [acceptance-status.md](acceptance-status.md).
+
+## Open acceptance gates
+
+- Preview agent/customer journeys and foreign-ticket read/write denial with before/after state: **BLOCKED / NOT_RUN** pending owner-confirmed Neon compute readiness, safe synthetic credentials, and a verified second-tenant fixture.
+- Full Cloudflare audit under a compliant OS-enforced offline sandbox with preinstalled tools: **BLOCKED / NOT_RUN**. External run-6 is only six throttle-helper unit checks and does not close route/runtime, datastore, multi-instance, or deployed behavior.
+- Fresh independent G7 review: **BLOCKED** until the missing Preview/audit evidence and document corrections are addressed.
+- Deployment URL: **OPTIONAL** per the assessment. No plan upgrade is required.
+
