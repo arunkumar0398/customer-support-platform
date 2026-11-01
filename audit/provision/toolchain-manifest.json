@@ -1,0 +1,44 @@
+{
+  "manifest_version": 1,
+  "bundle_status": "prepared_local_image_preflight_passed",
+  "prepared_from_source_sha": "ddf3d69b32db494e04ae36256633633bf9132583",
+  "target_lockfile_sha256": "30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0",
+  "prisma_schema_sha256": "5d69924bc79db63b85462f29d416f0116145c2f11c566f32a2742d97e8ff86bb",
+  "platform": "linux/amd64",
+  "base_image": "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c",
+  "versions": {
+    "node": "24.22.1",
+    "npm": "11.19.1",
+    "vitest": "5.0.5",
+    "supertest": "7.3.1",
+    "prisma": "7.10.1",
+    "prisma_client": "7.10.1",
+    "playwright": "1.64.1",
+    "postgresql_server": "15.19 (Debian 15.19-0+deb12u1)",
+    "postgresql_client": "15.19 (Debian 15.19-0+deb12u1)"
+  },
+  "cloudflare_security_audit_skill": {
+    "repository": "https://github.com/cloudflare/security-audit-skill",
+    "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+    "directory_in_image": "/opt/cloudflare-security-audit-skill/skills/security-audit"
+  },
+  "image_id": "sha256:dd0936da81c2bf37973a481266bff97ae97d6af0f2a44486b2cadc81734435af",
+  "image_digest_or_archive_sha256": "sha256:dd0936da81c2bf37973a481266bff97ae97d6af0f2a44486b2cadc81734435af",
+  "toolchain_build_inputs": {
+    "dockerfile_sha256": "e996138b10d45755a29fba9e958220b61707006f9053b51ab710d970570d018d",
+    "preflight_script_sha256": "bd024428f2d915b5b3fa199911f5500cb0017e0b2fbe92a4b89b2056fa82e34f",
+    "offline_runner_sha256": "aebbbbd34cbc6d5fa57ed135903775870072aed3bb3682044d249ebb2139eb99",
+    "worktree_state": "The image build preceded the package commit, but the recorded Dockerfile, preflight, and runner SHA-256 values match the committed bytes. The image remains local and unexported; rebuild and update this manifest if any hashed build input changes."
+  },
+  "provenance": "Local Docker Desktop build 1rqh5muvefb4p2yqydse6eftz on 2026-11-01 from audit/provision/Dockerfile. Base image digest, target package lockfile and Prisma schema hashes, and Cloudflare audit skill commit are pinned. Image ID is local to this Docker engine and has not been exported or independently attested. A no-network preflight passed against a clean shallow clone at prepared_from_source_sha, including exact Git HEAD, lockfile and schema checks. The Dockerfile, preflight, and runner hashes identify the exact committed package bytes used in the image. No target audit tests were run.",
+  "preflight_verification": {
+    "result": "PASS_PREFLIGHT_ONLY",
+    "exit_code": 0,
+    "observed_controls": "Linux AMD64 container, non-root uid 10001, --network=none, --read-only rootfs, /target read-only, /scratch bounded tmpfs, no active interface except loopback, no inherited proxy, CPU/memory/swap/PID/file-size ceilings, toolchain versions, pinned validator commit, lockfile and Prisma schema hashes verified; mounted clean Git HEAD matched ddf3d69b32db494e04ae36256633633bf9132583.",
+    "negative_checks": [
+      "An unallowlisted UNSAFE_TEST environment variable was refused with exit 1 before target execution.",
+      "An unsupported runner lane was refused with exit 2 before target execution."
+    ]
+  },
+  "audit_execution_status": "NOT_RUN"
+}
