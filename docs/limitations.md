@@ -14,7 +14,8 @@
 - Full offline security audit: **BLOCKED / NOT_RUN** pending a compliant OS-enforced sandbox with compatible preinstalled Linux runners. Do not install/fetch packages or probe deployed endpoints for that audit.
 - Fresh G7 approval: **BLOCKED** until Preview/audit evidence and document review close.
 - Evaluator access to the private GitHub repo: **UNVERIFIED**. Owner must grant access to the evaluator or provide an approved private source handoff. Do not change repository visibility without authorization.
-- Vercel deployment is optional in the employer assessment. At task start, docs candidate `5e27f68` had provider build-rate-limit statuses for both Web and API; these are quota statuses, not application build failures. No plan upgrade is required.
+- Vercel deployment is optional in the employer assessment. Results must stay tied to their SHA: source `3e613c0…` has recorded Web/API success; `cd0b04f…` / Actions #101 had provider “Deployment has completed” statuses; `24f1d95…` / Actions #102 has Web/API state `success` with “Canceled by Ignored Build Step” descriptions. The latter are build cancellations, not deployment checks or app failures. No plan upgrade or docs-only Vercel retry is required.
+- Local A36 evidence now covers a disposable PostgreSQL backup/restore and forward migration verification, plus 28/28 API tests from pre-fix application snapshot `39b9ae3` against the migrated schema. There is no SQL down migration, and Neon PITR/hosted restore remains unverified.
 
 ## Next steps
 

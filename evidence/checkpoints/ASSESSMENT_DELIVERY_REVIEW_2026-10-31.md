@@ -1,16 +1,22 @@
 # Assessment deliverables and review preparation
 
-Review date: 2026-10-31 (Asia/Calcutta)
+Review date: 2026-11-01 (Asia/Calcutta)
 Repository: `arunkumar0398/customer-support-platform`, private branch `codex/clean-candidate-b2fd369`
 Application implementation source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`
 Original documentation candidate reviewed: `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` (historical)
 
-Latest reconciled docs-status candidate: `cd0b04ff830a187d45fd3370db97a22c2adba476`, Actions #101 `verify` passed. Exact-SHA Vercel Web/API statuses say “Deployment has completed”; no runtime/database/role-flow smoke was run. Parent docs-status candidates `3fde220d2586cbd67935b75019e7347cf79a3a47` / #98, `d30a24b771dc32a3b80ceffa14a15b60ea15ca69` / #99, and `7ec417024dbaaf4884c0f8eaba4758deafdcc01f` / #100 also passed. Latest test-bearing candidate: `e78b19c6d6aa2e02876e8444aa42413fa4159428`, Actions #97 passed, with Vercel ignored-build cancellations. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
+Reviewed docs-status candidate: `24f1d953ef487a42928ccc21923bf0dc3cca1dd7`, Actions #102 `verify` passed on the exact SHA. Its Vercel Web/API status markers are `success`, but both descriptions say “Canceled by Ignored Build Step”; neither is a deployment. The independent G7 review on this exact SHA returned **BLOCKED_BY_ENVIRONMENT**; see [the sanitized report](../reviews/g7-24f1d95-2026-11-01.md). Previous docs candidate `cd0b04ff830a187d45fd3370db97a22c2adba476` / #101 had provider deployment-completed statuses without runtime smoke. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
 
 Latest exact-CI/Vercel-verified docs/test candidate before this review refresh: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions #95, Web/API success.
 Assessment basis: `reference/assessment.pdf`, implementation scope and deliverables section.
 
 This is a repository-content review. It does not establish that an evaluator can access the private GitHub repository, that cloud controls are configured, or that blocked Preview/audit work ran.
+
+## Preview and local gate refresh — 2026-11-01
+
+Neon recovery and the one-time read-only synthetic fixture discovery are **reported PASS**: branch production, endpoint ep-shy-surf-b36pzssx; observed 2026-11-01 09:11 IST / 03:41 UTC; SELECT 1 returned 1; discovery found 15 active synthetic memberships and 15 tickets. Vercel Preview Web/API health checks passed against source a5673cbcee3c6b30178404c80c1eb1bf56f963a4. Exact API-to-Neon branch alignment is unverified. A35 preconditions are ready, but authenticated A35 role and denial acceptance remains BLOCKED / NOT_RUN because safe synthetic Preview passwords are not available. No migrations/seeding or Production checks occurred. Details: [readiness report](PREVIEW-READINESS-2026-11-01.md).
+
+A36 is PASS only for the documented local disposable-DB recovery/restore-forward path and previous-code compatibility; SQL down-migration and hosted Neon PITR remain untested. A22/A23/A37 remain partial evidence and are not full acceptance passes. The full bounded security audit remains incomplete.
 
 ## Required submission items (A26)
 
@@ -56,7 +62,7 @@ The following answer outlines are grounded in `docs/performance.md`, `docs/data-
 
 ## Independent release review
 
-Exact docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428` received a read-only G7 review after Actions #97 completed. Verdict: **BLOCKED_BY_ENVIRONMENT**. Fresh read-only G7 reviews of docs-status candidates `d30a24b771dc32a3b80ceffa14a15b60ea15ca69`, `7ec417024dbaaf4884c0f8eaba4758deafdcc01f`, and `cd0b04ff830a187d45fd3370db97a22c2adba476` also returned **BLOCKED_BY_ENVIRONMENT** after Actions #99–#101 passed. Remaining blockers include Preview role/tenant acceptance, full compliant offline security audit, evaluator access, broader A22/A23 coverage, A28 human rehearsal, and SQL migration reversal evidence. Vercel Web/API statuses on cd0 say “Deployment has completed”; no runtime/database/role smoke was run.
+Exact docs candidate `24f1d953ef487a42928ccc21923bf0dc3cca1dd7` received a read-only G7 review after Actions #102 completed. Verdict: **BLOCKED_BY_ENVIRONMENT**. The sanitized report is [here](../reviews/g7-24f1d95-2026-11-01.md). The review preceded the local evidence now recorded in [the UI matrix](UI_A22_A23_MATRIX_2026-11-01.md) and [A36 recovery report](A36-migration-recovery-2026-11-01.md); a new G7 follow-up is still required after the next exact candidate. Preview role/tenant acceptance, the full compliant offline audit, evaluator access, broader A22/A23/A37 coverage, and A28 human rehearsal remain open. A36 local restore/forward recovery and previous-code compatibility now have evidence; this is not a SQL down migration or hosted PITR test. Vercel on 24f1 reports ignored-build cancellations, not runtime checks.
 
 ## Exact local acceptance rerun
 
@@ -67,4 +73,4 @@ Application implementation source under test: `3e613c0b7df5bec290553cfb7b5a9404b
 - Full check on the source worktree: `npm run check` — exit 0; lint/typecheck passed; API 391/391; web 12/12; 23 Playwright tests discovered; API and Web builds passed.
 - Assignment-atomicity addition in this candidate: `npm run test:api -- tests/tickets/assignment.test.ts` — exit 0; 14/14 passed. A disposable PostgreSQL trigger forced the `ASSIGNMENT_CHANGED` insert to fail; the HTTP response was sanitized, assignee/version and event count remained unchanged, and assignment succeeded after trigger removal. Full check with this added regression test: exit 0; API 392/392, web 12/12, 23 Playwright tests discovered, builds passed. This tests code rollback, not migration reversal.
 
-The commands above did not use a live service. At exact docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428`, A25 has a local result: the verified disposable `support_test` E2E setup seeds synthetic accounts and the browser session journey signs in as the seeded Alpha admin, reloads, and signs out (23/23 browser suite pass on loopback PostgreSQL port 5546). Actions #97 passed on the same candidate. This closes only local A25. A22/A23 remain NOT_RUN because route-wide responsive/state criteria are broader than the performed suite. A16 has explicit assignment rollback evidence in addition to earlier create/update/comment rollback cases.
+The new local full browser rerun at worktree HEAD `24f1d953ef487a42928ccc21923bf0dc3cca1dd7` used verified disposable `support_test` on loopback port 5546: `npm run test:e2e` exit 0, 23/23; focused keyboard case exit 0, 1/1. Route/role/viewport/state limits are enumerated in [the matrix](UI_A22_A23_MATRIX_2026-11-01.md); A22/A23 remain NOT_RUN as complete criteria. A36 local migration/recovery and pre-fix compatibility evidence is in [the recovery report](A36-migration-recovery-2026-11-01.md). The commands did not use Preview or Production.
