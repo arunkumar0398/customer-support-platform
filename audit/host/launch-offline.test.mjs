@@ -1,5 +1,6 @@
 import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
 import { formatPromoterDiagnostics, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
@@ -8,7 +9,12 @@ async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
  git('init','-q'); git('config','user.email','test@example.invalid'); git('config','user.name','test');
- await writeFile(path.join(root,'tracked.txt'),'trusted source\n'); await import('node:fs/promises').then(async fs=>{await fs.mkdir(path.join(root,'audit/provision'),{recursive:true}); await fs.writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:'lock',prisma_schema_sha256:'schema'}));}); git('add','.'); git('commit','-qm','source'); return {root,git};
+ const files={'tracked.txt':'trusted source\n','audit/host/launch-offline.mjs':'fixture launcher\n','audit/run/promote_artifacts.py':'fixture promoter\n','audit/run/preflight.sh':'fixture preflight\n','audit/run/run-offline.sh':'fixture runner\n','audit/run/verify_input.py':'fixture verifier\n','package-lock.json':'{"name":"fixture","lockfileVersion":3}\n','api/prisma/schema.prisma':'// fixture schema\n'};
+ const fs=await import('node:fs/promises');for(const [name,content] of Object.entries(files)){const file=path.join(root,name);await fs.mkdir(path.dirname(file),{recursive:true});await writeFile(file,content);}
+ const lock=files['package-lock.json'];const schema=files['api/prisma/schema.prisma'];const digest=value=>createHash('sha256').update(value).digest('hex');
+ await fs.mkdir(path.join(root,'audit/provision'),{recursive:true});
+ await writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:digest(lock),prisma_schema_sha256:digest(schema)}));
+ git('add','.'); git('commit','-qm','source'); return {root,git};
 }
 async function readTarMember(archivePath,name){
  const bytes=await readFile(archivePath);let offset=0;
@@ -71,6 +77,10 @@ test('keeps selected Git blob bytes when host core.autocrlf is enabled', async t
  const outputDir=await mkdtemp(path.join(os.tmpdir(),'audit-autocrlf-out-'));t.after(()=>rm(outputDir,{recursive:true,force:true}));
  const result=await prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir});
  assert.deepEqual(await readTarMember(result.archivePath,'.dockerignore'),Buffer.from('.cache\nnode_modules\n'));
+ const launcherBlob=execFileSync('git',['cat-file','blob',result.source.commit+':audit/host/launch-offline.mjs'],{cwd:root,encoding:null});
+ const manifestBlob=execFileSync('git',['cat-file','blob',result.source.commit+':audit/provision/toolchain-manifest.json'],{cwd:root,encoding:null});
+ assert.equal(result.trustedCode.launcherSha256,createHash('sha256').update(launcherBlob).digest('hex'));
+ assert.equal(result.toolchain.manifestSha256,createHash('sha256').update(manifestBlob).digest('hex'));
 });
 test('reads the Git archive commit marker without breaking a large archive stream', async t => {
  const {root,git}=await repo(t);await writeFile(path.join(root,'large-source.bin'),Buffer.alloc(8*1024*1024,0x41));git('add','large-source.bin');git('commit','-qm','large source');
