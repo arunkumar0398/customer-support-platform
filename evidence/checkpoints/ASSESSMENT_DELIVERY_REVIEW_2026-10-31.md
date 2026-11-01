@@ -5,7 +5,7 @@ Repository: `arunkumar0398/customer-support-platform`, private branch `codex/cle
 Application implementation source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`
 Documentation candidate reviewed: `5e27f68a7f2c8aa12c502995b26c2b5063e1309b`
 
-Current docs/test candidate: `e78b19c6d6aa2e02876e8444aa42413fa4159428`, Actions #97 `verify` passed. Vercel Web/API status contexts say success but descriptions show “Canceled by Ignored Build Step”; no deployment validation occurred. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
+Current docs-status baseline: `3fde220d2586cbd67935b75019e7347cf79a3a47`, Actions #98 `verify` passed. Exact-SHA Vercel Web/API statuses say “Deployment has completed”; no runtime/database/role-flow smoke was run. Latest test-bearing candidate: `e78b19c6d6aa2e02876e8444aa42413fa4159428`, Actions #97 passed, with Vercel ignored-build cancellations. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
 
 Latest exact-CI/Vercel-verified docs/test candidate before this review refresh: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions #95, Web/API success.
 Assessment basis: `reference/assessment.pdf`, implementation scope and deliverables section.
