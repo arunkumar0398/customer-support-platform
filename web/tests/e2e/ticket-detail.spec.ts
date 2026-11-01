@@ -24,7 +24,7 @@ const adminId = randomUUID();
 const userIds = [...agentIds, ...customerIds, adminId];
 const emailByUserId = new Map(userIds.map((id, index) => [id, id === adminId ? `detail-admin-${id}@example.test` : `detail-${index}-${id}@example.test`]));
 const password = 'synthetic-ticket-detail-fixture-password';
-const ticketIds = [randomUUID(), randomUUID(), randomUUID()];
+const ticketIds = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
 let verified = false;
 
 test.beforeAll(async () => {
@@ -151,6 +151,22 @@ test('admin can open ticket detail and access staff controls', async ({ page }) 
   await expect(page.getByLabel('Subject')).toHaveValue('Detail fixture 1');
 });
 
+test('admin can edit ticket detail without overflow on a narrow viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, adminId);
+  await page.goto(`/tickets/${ticketIds[3]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 4' })).toBeVisible();
+  await expect(page.getByLabel('Ticket status')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  await page.getByLabel('Subject').fill('Admin mobile detail update');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('status')).toContainText('Ticket updated');
+  await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[3] }, select: { title: true } }))
+    .toMatchObject({ title: 'Admin mobile detail update' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
 test('customer can read and reply to a ticket from a narrow viewport', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, customerIds[0]);
@@ -247,4 +263,30 @@ test('stale edit shows a refresh path and allows retry with the current version'
   await expect(page.getByRole('status')).toContainText('Ticket updated');
   await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[2] }, select: { description: true } }))
     .toMatchObject({ description: 'Retry using the refreshed version.' });
+});
+
+test('staff ticket detail controls have visible focus and keyboard order on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, agentIds[0]);
+  await page.goto(`/tickets/${ticketIds[1]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 2' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  const subject = page.getByLabel('Subject');
+  const description = page.getByLabel('Description');
+  const status = page.getByLabel('Ticket status');
+  const priority = page.getByLabel('Priority');
+  const save = page.getByRole('button', { name: 'Save changes' });
+  await subject.focus();
+  await expect(subject).toBeFocused();
+  await expect.poll(() => subject.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe('none');
+  await page.keyboard.press('Tab');
+  await expect(description).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(status).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(priority).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(save).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });

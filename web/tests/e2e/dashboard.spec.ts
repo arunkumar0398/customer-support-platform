@@ -177,12 +177,23 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
 });
 
 test('admin can open the team dashboard', async ({ page }) => {
+  // Keep this empty-state assertion independent of the preceding dashboard
+  // workflow, which also deletes fixtures after exercising its refresh path.
+  await db.activityEvent.deleteMany({ where: { organizationId } });
+  await db.ticket.deleteMany({ where: { organizationId } });
+  await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, adminEmail);
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
   await expect(page).toHaveURL('/dashboard');
   await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Support totals' })).toContainText('0');
   await expect(page.getByRole('status')).toContainText('No tickets yet');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('No tickets yet');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
 });
 
 test('customer dashboard is not in navigation and direct access is denied', async ({ page }) => {

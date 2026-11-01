@@ -1,6 +1,28 @@
 # Assessment deliverables inventory
 
-## Latest evidence reconciliation — 2026-11-01
+## Current candidate — 2026-11-01 (supersedes older “latest candidate” snapshots)
+
+- **Prepared worktree:** branch `codex/ui-matrix-2dee30d`, based on `2dee30dbf1d0bc51ab5676850c1b29bc51eb841f` (Actions [#113](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41280744967) passed on the base commit only). The prepared content is three Playwright specs plus the UI matrix and status reconciliation in README, testing guide, acceptance ledger, handoff, deliverables inventory, and assessment review; no application source changed. Local commands below ran on this complete candidate tree before commit. The resulting commit SHA and its Actions result must be read from GitHub; #113 remains evidence for the base commit only.
+- **Local checks on the prepared tree:** `npm run db:generate` exit 0; `npm run check` exit 0 (lint, API/Web typechecks, API 392/392, Web 12/12, 35 Playwright tests discovered, API/Web builds); `npm run test:e2e` exit 0, 35/35 passed in 44.1 seconds. Environment: Windows, Node 24.22.1, npm 11.19.1, Playwright 1.64.1/Chromium, disposable loopback PostgreSQL `support_test / support_test` on port 55432. These are **local working-tree** results, not remote CI evidence. All 12 checkpoint screenshots were byte-compared after E2E; none changed.
+- **Implementation provenance:** application implementation remains `24f51c05328fc764bf7089fce8f398adad475648` / Actions #105. `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74 is the historical source baseline. #113 is not evidence for the uncommitted candidate.
+- **Open release gates:** A35 Preview role journeys and same-/cross-tenant denial no-write checks are BLOCKED / NOT_RUN; API-to-Neon Preview binding and temporary synthetic credentials are unverified. The bounded offline Cloudflare audit is BLOCKED / NOT_RUN because the available no-network image lacks the required preinstalled test runners; no packages or deployed endpoints were used. A22/A23/A37 remain partial. A36 passes only its local forward-recovery/prior-code criterion; SQL down-migration and hosted PITR remain untested. Evaluator access and A28 rehearsal remain open. No current candidate Vercel runtime check was performed; deployment is optional under the assessment. Keep merge/submission on hold.
+
+### Required assessment deliverables
+
+| Required item | Path | Current disposition | Remaining action |
+|---|---|---|---|
+| Source repository | Private GitHub repository and candidate branch | Present; evaluator access unverified | Confirm evaluator read access or approved private handoff.
+| README setup/run | `README.md` | Present | Keep aligned to scripts and local-only seed guard.
+| Architecture diagram | `docs/architecture.md` | Present | No change required for this UI-only candidate.
+| Data model/indexes | `docs/data-model.md` | Present | No change required for this UI-only candidate.
+| API docs/examples | `docs/api.md` | Present | No change required for this UI-only candidate.
+| Sample accounts/seed | `docs/demo-accounts.md`, `api/prisma/seed.ts` | Present; local-only synthetic accounts | Never use the local shared password in Preview.
+| Tests/results | `docs/testing.md`, acceptance ledger, UI matrix | Partial | Record exact-candidate CI after it runs; Preview and audit remain open.
+| Tradeoffs/next steps | `docs/limitations.md` | Present | Keep deployment clearly optional and blockers explicit.
+
+
+
+## Historical evidence reconciliation — 2026-11-01
 
 **Superseding exact-SHA record:** docs/evidence candidate `cd6e64cd9ed9e61e40f90306a3b4a40d86f9be67` passed Actions [#111](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41278121491), job `verify`, on the exact SHA. Its Vercel API/Web descriptions were “Deployment has completed,” provider statuses only. Fresh G7 on cd6e returned **BLOCKED_BY_ENVIRONMENT**; this candidate still lacks Preview role evidence and full audit execution. This supersedes the older docs-candidate lines below; app/test and application implementation SHAs remain as listed below.
 
@@ -8,7 +30,7 @@ Application/test candidate `c179180a56977cda6fe084786989ae6098afe995` passed Act
 
 Docs/evidence candidate `0d9589643aec1514694fb12c5e7c29583b99911b` passed Actions [#110](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41276642408), job `verify`, on the exact SHA. Its Vercel API/Web status descriptions said “Deployment has completed,” provider status only. G7 on preceding candidate `4b404f7…` returned **BLOCKED_BY_ENVIRONMENT**; see [report](../reviews/g7-4b404f7-2026-11-01.md). The later docs-only candidate records that verdict and does not modify app/test code.
 
-## Current evidence snapshot — 2026-11-01
+## Historical evidence snapshot — 2026-11-01
 
 ### Latest Preview readiness recheck — 10:08 IST / 04:38 UTC
 

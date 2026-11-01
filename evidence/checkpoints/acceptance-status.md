@@ -1,7 +1,17 @@
 # Acceptance Status
 
+## Current candidate — 2026-11-01 (supersedes older “latest candidate” snapshots)
 
-## Release and validation status — 2026-11-01
+- **Prepared worktree:** branch `codex/ui-matrix-2dee30d`, based on `2dee30dbf1d0bc51ab5676850c1b29bc51eb841f` (Actions [#113](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41280744967) passed on the base commit only). The prepared content is three Playwright specs plus the UI matrix and status reconciliation in README, testing guide, acceptance ledger, handoff, deliverables inventory, and assessment review; no application source changed. Local commands below ran on this complete candidate tree before commit. The resulting commit SHA and its Actions result must be read from GitHub; #113 remains evidence for the base commit only.
+- **Local checks on the prepared tree:** `npm run db:generate` exit 0; `npm run check` exit 0 (lint, API/Web typechecks, API 392/392, Web 12/12, 35 Playwright tests discovered, API/Web builds); `npm run test:e2e` exit 0, 35/35 passed in 44.1 seconds. Environment: Windows, Node 24.22.1, npm 11.19.1, Playwright 1.64.1/Chromium, disposable loopback PostgreSQL `support_test / support_test` on port 55432. These are **local working-tree** results, not remote CI evidence. All 12 checkpoint screenshots were byte-compared after E2E; none changed.
+- **Implementation provenance:** application implementation remains `24f51c05328fc764bf7089fce8f398adad475648` / Actions #105. `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74 is the historical source baseline. #113 is not evidence for the uncommitted candidate.
+- **Open release gates:** A35 Preview role journeys and same-/cross-tenant denial no-write checks are BLOCKED / NOT_RUN; API-to-Neon Preview binding and temporary synthetic credentials are unverified. The bounded offline Cloudflare audit is BLOCKED / NOT_RUN because the available no-network image lacks the required preinstalled test runners; no packages or deployed endpoints were used. A22/A23/A37 remain partial. A36 passes only its local forward-recovery/prior-code criterion; SQL down-migration and hosted PITR remain untested. Evaluator access and A28 rehearsal remain open. No current candidate Vercel runtime check was performed; deployment is optional under the assessment. Keep merge/submission on hold.
+
+This ledger summary does not change individual A-row outcomes without additional observed evidence. In particular, the expanded local browser suite is scoped UI evidence only; it does not close full A22/A23/A37 matrices or Preview A35.
+
+
+
+## Historical release snapshot — superseded by the current candidate record above
 
 **Latest application-test candidate:** `c179180a56977cda6fe084786989ae6098afe995` on `codex/clean-candidate-b2fd369`; Actions [#107](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41274734553), job `verify`, passed on this exact SHA, including disposable database setup and required gates. The commit changes browser assertions and evidence only; deployed application implementation remains `24f51c05328fc764bf7089fce8f398adad475648` / #105. Exact-SHA Vercel API and Web status contexts are both `success` ([API status](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/7y7Rd9UXf1gX624wgzhhaMjq8d9S), [Web status](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/CBYdHnBPY2iYT2HcDCmRavTSVqPn)); these are provider results, not runtime acceptance. `3e613c0…` / #74 remains historical implementation-baseline evidence.
 
