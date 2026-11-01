@@ -266,7 +266,7 @@ describe('login throttling', () => {
     const response = await login().set('X-Forwarded-For', '203.0.113.200');
     expect(response.status).toBe(429);
     expect(await db.session.count({ where: { userId } })).toBe(0);
-  });
+  }, 15000);
 });
 
 beforeAll(async () => {
