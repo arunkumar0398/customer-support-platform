@@ -35,11 +35,15 @@ test('refuses dirty or non-HEAD source', async t => {
  await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit:'0'.repeat(40),outputDir:path.join(os.tmpdir(),'unused-output')}),/HEAD|commit/i);
 });
 test('refuses tracked secret and cache paths', async t => {
- for(const entry of ['.env','credentials.txt','node_modules/pkg/index.js','.cache/state.bin']) {
+ for(const entry of ['.env','.env.production','credentials.txt','passwords.md','secrets.json','node_modules/pkg/index.js','.cache/state.bin']) {
   const {root,git}=await repo(t); const full=path.join(root,entry); await (await import('node:fs/promises')).mkdir(path.dirname(full),{recursive:true}); await writeFile(full,'sensitive');
   git('add','-f',entry); git('commit','-qm','bad path');
   await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir:path.join(os.tmpdir(),'unused-output')}),/secret|credential|cache|node_modules|unsafe|excluded/i,entry);
  }
+});
+test('allows source modules that implement password handling', async t => {
+ const {root,git}=await repo(t);const source=path.join(root,'api/src/modules/auth/password.ts');await (await import('node:fs/promises')).mkdir(path.dirname(source),{recursive:true});await writeFile(source,'export function verifyPassword() {}\n');git('add','api/src/modules/auth/password.ts');git('commit','-qm','password source module');
+ assert.doesNotThrow(()=>validateTrackedSourceTree(root,git('rev-parse','HEAD')));
 });
 test('accepts only the sanitized root environment template', async t => {
  const actualTemplate=await readFile(new URL('../../.env.example',import.meta.url),'utf8');assert.doesNotThrow(()=>validateEnvExample(actualTemplate));

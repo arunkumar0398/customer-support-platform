@@ -11,9 +11,18 @@ const HERE=path.dirname(fileURLToPath(import.meta.url));
 const PROJECT=path.resolve(HERE,'../..');
 const IMAGE_DIGEST='sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3';
 const MAX_ARCHIVE=600*1024*1024;
+const SENSITIVE_DIRECTORY=/^(?:credentials?|secrets?|tokens?|passwords?)$/i;
+const SENSITIVE_DATA_FILE=/^(?:credentials?|secrets?|tokens?|passwords?)(?:\..*)?$/i;
+const SOURCE_CODE_FILE=/\.(?:[cm]?[jt]sx?|py|sh|go|rs|java)$/i;
+function isSecretPath(name){
+ const parts=name.split('/');const file=parts.at(-1)||'';
+ if(parts.some(part=>/^\.env(?:$|\.)/i.test(part)))return name!=='.env.example';
+ if(parts.slice(0,-1).some(part=>SENSITIVE_DIRECTORY.test(part)))return true;
+ if(/^(?:id_rsa|id_ed25519)(?:\..*)?$/i.test(file)||/\.(?:pem|key)$/i.test(file))return true;
+ return SENSITIVE_DATA_FILE.test(file)&&!SOURCE_CODE_FILE.test(file);
+}
 const ENV_TEMPLATE_KEYS=new Set(['NODE_ENV','PORT','HOST','PGPORT','WEB_PORT','POSTGRES_SUPERUSER_PASSWORD','APP_DB_PASSWORD','TEST_DB_PASSWORD','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL','SESSION_SECRET','APP_ORIGIN']);
 const SAFE_ENV_PLACEHOLDERS=new Set(['LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE','REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE']);
-const SECRET_PATH=/(^|\/)\.env(?:$|\.)|(^|\/)(?:credentials?|secrets?|tokens?|passwords?)(?:[._/-]|$)|(?:id_rsa|id_ed25519|\.pem$|\.key$)/i;
 const FORBIDDEN_PART=/(^|\/)(?:node_modules|\.cache|\.npm|\.turbo|\.vite|\.next|coverage|playwright-report|test-results|output|backups?)(?:\/|$)/i;
 function runGit(repoRoot,args,{encoding='utf8',input}={}) {
  const result=spawnSync('git',args,{cwd:repoRoot,encoding,input,maxBuffer:32*1024*1024,windowsHide:true});
@@ -50,7 +59,7 @@ export function validateTrackedSourceTree(repoRoot,commit){
   const tab=entry.indexOf('\t'); if(tab<0) throw new Error('malformed git tree entry'); const meta=entry.slice(0,tab),name=entry.slice(tab+1); const mode=meta.split(' ')[0];
   if(mode==='120000') throw new Error('symlink source entry refused: '+name);
   if(mode==='160000') throw new Error('gitlink/submodule source entry refused: '+name);
-  if(SECRET_PATH.test(name)&&name!=='.env.example') throw new Error('secret or credential path refused: '+name);
+  if(isSecretPath(name)) throw new Error('secret or credential path refused: '+name);
   if(FORBIDDEN_PART.test(name)) throw new Error('cache/output path refused: '+name);
   if(name.startsWith('/')||name.split('/').some(part=>!part||part==='.'||part==='..')) throw new Error('unsafe source path refused');
  }
@@ -114,8 +123,8 @@ async function launchSandbox({repoRoot,commit,lane,evidenceDir,timeoutSeconds=54
  let helper=null,helperDone=null,createdScratch=false,createdArtifacts=false,completed=false;
  try{
   const dockerEndpoint=docker(['context','inspect','--format','{{.Endpoints.docker.Host}}']);if(!dockerEndpoint.startsWith('npipe:')&&!dockerEndpoint.startsWith('unix://')&&!/^tcp:\/(\/)?(127\.0\.0\.1|localhost)(:|$)/.test(dockerEndpoint))throw new Error('Docker context is not a local engine endpoint');const dockerServer=docker(['version','--format','{{.Server.Os}}/{{.Server.Arch}} {{.Server.Version}}']);if(!dockerServer.startsWith('linux/amd64 '))throw new Error('Docker server must be local Linux AMD64');
-  makeVolume(scratchVolume,1153433600);createdScratch=true;makeVolume(artifactVolume,67108864);createdArtifacts=true;
   const record=await prepareSourceSnapshot({repoRoot,commit,outputDir:inputDir,lane,toolchainDigest:IMAGE_DIGEST});
+  makeVolume(scratchVolume,1153433600);createdScratch=true;makeVolume(artifactVolume,67108864);createdArtifacts=true;
   for(const name of ['preflight.sh','run-offline.sh','promote_artifacts.py','verify_input.py']){const source=path.resolve(HERE,'../run/'+name);const dest=path.join(inputDir,name);await (await import('node:fs/promises')).copyFile(source,dest);await (await import('node:fs/promises')).chmod(dest,0o444);}
   record.execution.hostInputDir=inputDir;record.execution.dockerEndpointKind=dockerEndpoint.split(':')[0];record.execution.dockerServer=dockerServer;record.execution.dockerContext=docker(['context','show']);record.execution.hostPlatform=os.platform()+'/'+os.arch();record.execution.hostRelease=os.release();record.execution.requestedTimeoutSeconds=timeoutSeconds;record.execution.promoterLimits={cpu:0.25,memoryBytes:268435456,swapBytes:0,pids:32,fileSizeLimitBytes:10485760};record.execution.runId=runId;record.execution.scratchVolume=scratchVolume;record.execution.artifactVolume=artifactVolume;record.execution.inputMount='/input and /runner read-only';record.execution.scratchPath='/scratch';record.execution.artifactPath='/artifacts, helper only';record.execution.targetContainerName=targetName;record.execution.promoterContainerName=helperName;
   const fixed=['--pull=never','--network=none','--read-only','--user','10001:10001','--cap-drop=ALL','--security-opt=no-new-privileges','--mount','type=volume,source='+scratchVolume+',target=/scratch','--mount','type=bind,source='+inputDir+',target=/runner,readonly'];
