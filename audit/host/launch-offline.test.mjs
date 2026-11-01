@@ -1,14 +1,21 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { prepareSourceSnapshot } from './launch-offline.mjs';
+import { prepareSourceSnapshot, removePrivateInputDir } from './launch-offline.mjs';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
  git('init','-q'); git('config','user.email','test@example.invalid'); git('config','user.name','test');
  await writeFile(path.join(root,'tracked.txt'),'trusted source\n'); await import('node:fs/promises').then(async fs=>{await fs.mkdir(path.join(root,'audit/provision'),{recursive:true}); await fs.writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:'lock',prisma_schema_sha256:'schema'}));}); git('add','.'); git('commit','-qm','source'); return {root,git};
 }
+test('removes only a real direct child of the private host temp directory', async t => {
+ const input=await mkdtemp(path.join(os.tmpdir(),'csp-audit-input-test-')); await writeFile(path.join(input,'source.tar'),'synthetic source');
+ await removePrivateInputDir(input); await assert.rejects(readFile(path.join(input,'source.tar')));
+ const outside=await mkdtemp(path.join(os.tmpdir(),'unrelated-audit-test-')); t.after(()=>rm(outside,{recursive:true,force:true}));
+ const link=path.join(os.tmpdir(),'csp-audit-input-link-'+Date.now()); await symlink(outside,link); t.after(()=>rm(link,{force:true}));
+ await assert.rejects(removePrivateInputDir(link),/unverified/); await writeFile(path.join(outside,'keep.txt'),'preserved'); assert.equal(await readFile(path.join(outside,'keep.txt'),'utf8'),'preserved');
+});
 test('binds clean exact HEAD to git archive marker, tree and bytes', async t => {
  const {root,git}=await repo(t); const outputDir=await mkdtemp(path.join(os.tmpdir(),'audit-out-')); t.after(()=>rm(outputDir,{recursive:true,force:true}));
  const result=await prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir,toolchainDigest:'sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',launcherVersion:'test'});

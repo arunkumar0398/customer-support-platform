@@ -1,4 +1,4 @@
-import os, pathlib, socket, tempfile, unittest
+import json, os, pathlib, socket, subprocess, sys, tempfile, unittest
 from promote_artifacts import promote_files, _validate_limits
 class PromotionTests(unittest.TestCase):
  def setUp(self):
@@ -13,6 +13,17 @@ class PromotionTests(unittest.TestCase):
   for limits in ((0,1),(1,0),(8*1024*1024+1,20*1024*1024),(1,20*1024*1024+1),(True,1)):
    with self.assertRaises(ValueError): _validate_limits(*limits)
   _validate_limits(8*1024*1024,20*1024*1024)
+ def test_serve_opens_parent_roots_before_accepting_target_output(self):
+  command=[sys.executable,str(pathlib.Path(__file__).with_name('promote_artifacts.py')),'--serve',str(self.scratch),str(self.artifacts)]
+  process=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+  try:
+   ready=json.loads(process.stdout.readline()); self.assertEqual(ready,{'ready':True,'platform':'linux'})
+   self.put('post-ready.log',b'created after helper opened roots')
+   output,_=process.communicate(json.dumps({'run_id':'run-ready','files':['post-ready.log'],'per_file_limit':128,'total_limit':256})+'\n',timeout=5)
+   result=json.loads(output.strip().splitlines()[-1]); self.assertTrue(result['promoted'])
+   self.assertEqual((self.artifacts/'run-ready'/'post-ready.log').read_bytes(),b'created after helper opened roots')
+  finally:
+   if process.poll() is None: process.kill(); process.wait(timeout=5)
  def test_promotes_only_allowlisted_regular_files(self):
   self.put('api.log',b'bounded'); self.put('ignored.secret',b'secret'); result=promote_files(self.scratch,self.artifacts,'run-test',['api.log'],per_file_limit=64,total_limit=96)
   self.assertEqual((self.artifacts/'run-test'/'api.log').read_bytes(),b'bounded'); self.assertFalse((self.artifacts/'run-test'/'ignored.secret').exists()); self.assertEqual(result['files'],['api.log'])
