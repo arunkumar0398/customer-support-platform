@@ -132,7 +132,7 @@ export async function removePrivateInputDir(inputDir){
  if(!st.isDirectory()||st.isSymbolicLink()||path.dirname(actual)!==root||!path.basename(actual).startsWith('csp-audit-input-'))throw new Error('refusing to remove an unverified audit input directory');
  await rm(actual,{recursive:true,force:false,maxRetries:0});
 }
-async function launchSandbox({repoRoot,commit,lane,evidenceDir,timeoutSeconds=5400}){
+export async function launchSandbox({repoRoot,commit,lane,evidenceDir,timeoutSeconds=5400}){
  if(!evidenceDir)throw new Error('external evidence directory is required');if(timeoutSeconds<1||timeoutSeconds>5400)throw new Error('timeout must be 1..5400 seconds');
  const nonce=randomUUID().replaceAll('-','');const runId='audit-'+commit.slice(0,12)+'-'+Date.now()+'-'+nonce.slice(0,8);const runDir=await makeEvidenceRun(repoRoot,evidenceDir,runId);
  const inputDir=await (await import('node:fs/promises')).mkdtemp(path.join(os.tmpdir(),'csp-audit-input-'));const scratchVolume='csp-scratch-'+nonce;const artifactVolume='csp-artifacts-'+nonce;const targetName='csp-target-'+nonce;const helperName='csp-promoter-'+nonce;
