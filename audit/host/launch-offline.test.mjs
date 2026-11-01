@@ -2,7 +2,8 @@ import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { prepareSourceSnapshot, removePrivateInputDir, verifyLauncherLocation } from './launch-offline.mjs';
+import { prepareSourceSnapshot, removePrivateInputDir, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation } from './launch-offline.mjs';
+const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
@@ -39,6 +40,25 @@ test('refuses tracked secret and cache paths', async t => {
   git('add','-f',entry); git('commit','-qm','bad path');
   await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir:path.join(os.tmpdir(),'unused-output')}),/secret|credential|cache|node_modules|unsafe|excluded/i,entry);
  }
+});
+test('accepts only the sanitized root environment template', async t => {
+ const actualTemplate=await readFile(new URL('../../.env.example',import.meta.url),'utf8');assert.doesNotThrow(()=>validateEnvExample(actualTemplate));
+ const {root,git}=await repo(t);
+ await writeFile(path.join(root,'.env.example'),SAFE_ENV_TEMPLATE); git('add','.env.example'); git('commit','-qm','sanitized template');
+ assert.doesNotThrow(()=>validateTrackedSourceTree(root,git('rev-parse','HEAD')));
+});
+test('rejects secret-bearing or non-local root environment templates', async t => {
+ for (const [name,content] of [
+  ['real password',SAFE_ENV_TEMPLATE.replace('SESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE','SESSION_SECRET=actual-secret-value')],
+  ['non-local database',SAFE_ENV_TEMPLATE.replace('postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public','postgresql://support_dev:placeholder@db.example.test:5432/support_dev?schema=public')],
+  ['unknown credential variable',SAFE_ENV_TEMPLATE+'UNREVIEWED_API_TOKEN=placeholder\n']
+ ]) {
+  const {root,git}=await repo(t); await writeFile(path.join(root,'.env.example'),content);
+  git('add','.env.example'); git('commit','-qm','unsafe template');
+  assert.throws(()=>validateTrackedSourceTree(root,git('rev-parse','HEAD')),/environment template|secret|credential|unsafe/i,name);
+ }
+ const {root,git}=await repo(t);await (await import('node:fs/promises')).mkdir(path.join(root,'api'),{recursive:true});await writeFile(path.join(root,'api/.env.example'),SAFE_ENV_TEMPLATE);git('add','-f','api/.env.example');git('commit','-qm','nested template');
+ assert.throws(()=>validateTrackedSourceTree(root,git('rev-parse','HEAD')),/secret or credential/i,'nested environment template');
 });
 test('refuses symlink source entries', async t => {
  const {root,git}=await repo(t); await (await import('node:fs/promises')).symlink('tracked.txt',path.join(root,'link')); git('add','link'); git('commit','-qm','link');

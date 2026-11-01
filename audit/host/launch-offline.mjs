@@ -11,6 +11,8 @@ const HERE=path.dirname(fileURLToPath(import.meta.url));
 const PROJECT=path.resolve(HERE,'../..');
 const IMAGE_DIGEST='sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3';
 const MAX_ARCHIVE=600*1024*1024;
+const ENV_TEMPLATE_KEYS=new Set(['NODE_ENV','PORT','HOST','PGPORT','WEB_PORT','POSTGRES_SUPERUSER_PASSWORD','APP_DB_PASSWORD','TEST_DB_PASSWORD','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL','SESSION_SECRET','APP_ORIGIN']);
+const SAFE_ENV_PLACEHOLDERS=new Set(['LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE','REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE']);
 const SECRET_PATH=/(^|\/)\.env(?:$|\.)|(^|\/)(?:credentials?|secrets?|tokens?|passwords?)(?:[._/-]|$)|(?:id_rsa|id_ed25519|\.pem$|\.key$)/i;
 const FORBIDDEN_PART=/(^|\/)(?:node_modules|\.cache|\.npm|\.turbo|\.vite|\.next|coverage|playwright-report|test-results|output|backups?)(?:\/|$)/i;
 function runGit(repoRoot,args,{encoding='utf8',input}={}) {
@@ -23,17 +25,38 @@ async function gitArchiveCommit(archivePath,repoRoot){
  const closed=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);}); await pipeline(createReadStream(archivePath),child.stdin); const code=await closed;
  if(code!==0) throw new Error('git get-tar-commit-id failed: '+stderr.trim()); return stdout.trim();
 }
-function validateTrackedTree(repoRoot,commit){
+export function validateEnvExample(content){
+ if(typeof content!=='string'||Buffer.byteLength(content,'utf8')>65536||content.includes('\0'))throw new Error('environment template exceeds bounds or contains invalid text');
+ const values=new Map();
+ for(const [index,raw] of content.split(/\r?\n/).entries()){
+  const line=raw.trim();if(!line||line.startsWith('#'))continue;
+  const match=/^([A-Z][A-Z0-9_]*)=([^\r\n]*)$/.exec(line);if(!match)throw new Error('environment template has invalid assignment syntax at line '+(index+1));
+  const [,key,value]=match;if(!ENV_TEMPLATE_KEYS.has(key))throw new Error('environment template has an unreviewed variable: '+key);if(values.has(key))throw new Error('environment template repeats a variable: '+key);values.set(key,value);
+ }
+ for(const key of ENV_TEMPLATE_KEYS)if(!values.has(key))throw new Error('environment template is missing required variable: '+key);
+ const fixed={NODE_ENV:'development',PORT:'3101',HOST:'127.0.0.1',PGPORT:'5433',WEB_PORT:'8080',APP_ORIGIN:'http://localhost:5173'};
+ for(const [key,value] of Object.entries(fixed))if(values.get(key)!==value)throw new Error('environment template contains an unsafe or unexpected value for '+key);
+ for(const key of ['POSTGRES_SUPERUSER_PASSWORD','APP_DB_PASSWORD','TEST_DB_PASSWORD','SESSION_SECRET'])if(!SAFE_ENV_PLACEHOLDERS.has(values.get(key)))throw new Error('environment template contains a non-placeholder secret value for '+key);
+ for(const [key,username,database] of [['DATABASE_URL','support_dev','support_dev'],['DATABASE_URL_UNPOOLED','support_dev','support_dev'],['TEST_DATABASE_URL','support_test','support_test']]){
+  let url;try{url=new URL(values.get(key));}catch{throw new Error('environment template has an invalid local database URL: '+key);}
+  if(url.protocol!=='postgresql:'||url.hostname!=='localhost'||url.port!=='5433'||decodeURIComponent(url.username)!==username||decodeURIComponent(url.password)!=='LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE'||url.pathname!=='/'+database||url.search!=='?schema=public'||url.hash)throw new Error('environment template has an unsafe or non-local database URL: '+key);
+ }
+ return true;
+}
+export function validateTrackedSourceTree(repoRoot,commit){
  const raw=runGit(repoRoot,['ls-tree','-rz','-r','--full-tree',commit]);
  const entries=raw.split('\0').filter(Boolean); if(entries.length>50000) throw new Error('source tree exceeds 50,000 tracked entries');
  for(const entry of entries){
   const tab=entry.indexOf('\t'); if(tab<0) throw new Error('malformed git tree entry'); const meta=entry.slice(0,tab),name=entry.slice(tab+1); const mode=meta.split(' ')[0];
   if(mode==='120000') throw new Error('symlink source entry refused: '+name);
   if(mode==='160000') throw new Error('gitlink/submodule source entry refused: '+name);
-  if(SECRET_PATH.test(name)) throw new Error('secret or credential path refused: '+name);
+  if(SECRET_PATH.test(name)&&name!=='.env.example') throw new Error('secret or credential path refused: '+name);
   if(FORBIDDEN_PART.test(name)) throw new Error('cache/output path refused: '+name);
   if(name.startsWith('/')||name.split('/').some(part=>!part||part==='.'||part==='..')) throw new Error('unsafe source path refused');
  }
+ const template=spawnSync('git',['show',commit+':.env.example'],{cwd:repoRoot,encoding:'utf8',windowsHide:true,maxBuffer:65536});
+ if(template.status===0)validateEnvExample(template.stdout);
+ else if(entries.some(entry=>entry.slice(entry.indexOf('\t')+1)==='.env.example'))throw new Error('root environment template could not be read safely');
  return runGit(repoRoot,['rev-parse',commit+'^{tree}']).trim();
 }
 function buildTreeManifest(repoRoot,commit,tree){
@@ -56,7 +79,7 @@ export async function prepareSourceSnapshot({repoRoot,commit,outputDir,toolchain
  if(!['api','web','browser','browser-smoke','all'].includes(lane)) throw new Error('unsupported fixed audit lane');
  const actualHead=runGit(repoRoot,['rev-parse','HEAD']).trim(); if(actualHead!==commit) throw new Error('selected commit is not the current HEAD');
  const dirty=runGit(repoRoot,['status','--porcelain','--untracked-files=all']).trim(); if(dirty) throw new Error('source worktree must be clean');
- const tree=validateTrackedTree(repoRoot,commit); const treeManifest=buildTreeManifest(repoRoot,commit,tree); await mkdir(outputDir,{recursive:true,mode:0o700});
+ const tree=validateTrackedSourceTree(repoRoot,commit); const treeManifest=buildTreeManifest(repoRoot,commit,tree); await mkdir(outputDir,{recursive:true,mode:0o700});
  const resolvedRepo=await (await import('node:fs/promises')).realpath(repoRoot);const resolvedOutput=await (await import('node:fs/promises')).realpath(outputDir);const outputRel=path.relative(resolvedRepo,resolvedOutput);if(outputRel===''||(!outputRel.startsWith('..'+path.sep)&&outputRel!=='..'&&!path.isAbsolute(outputRel)))throw new Error('private archive output must be outside the source repository');
  const outputStat=await (await import('node:fs/promises')).lstat(outputDir); if(!outputStat.isDirectory()||outputStat.isSymbolicLink())throw new Error('private archive output must be a real directory');
  if((await (await import('node:fs/promises')).readdir(outputDir)).length!==0)throw new Error('private archive output directory must be empty');
