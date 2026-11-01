@@ -52,9 +52,14 @@ def validate_execution(execution):
  target=execution.get('targetArgumentsTemplate'); promoter=execution.get('promoterArguments')
  if not isinstance(target,list) or not isinstance(promoter,list): fail('Docker argument records are missing')
  target_text='\\0'.join(target); promoter_text='\\0'.join(promoter)
- required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly','target=/scratch']
+ required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly']
  if any(value not in target_text for value in required_target) or 'target=/artifacts' in target_text or '/var/run/docker.sock' in target_text or '--privileged' in target_text: fail('unsafe or incomplete target Docker arguments')
- required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/artifacts','target=/scratch','--pids-limit=32']
+ tmpfs='/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid=10001,gid=10001,mode=0700'
+ tmpfs_args=[target[index+1] for index,value in enumerate(target[:-1]) if value=='--tmpfs']
+ if tmpfs_args != [tmpfs] or 'target=/scratch' in target_text: fail('unsafe target scratch configuration: expected one private bounded tmpfs only')
+ promotion_input=execution.get('parentPromotionInputDir')
+ if not isinstance(promotion_input,str) or not promotion_input or len(promotion_input)>4096 or promotion_input==execution.get('hostInputDir') or promotion_input not in promoter_text or promotion_input in target_text: fail('parent promotion input must be separate and promoter-only')
+ required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/runner,readonly','target=/artifacts','target=/scratch,readonly','--pids-limit=32']
  if any(value not in promoter_text for value in required_promoter) or '/var/run/docker.sock' in promoter_text or '--privileged' in promoter_text: fail('unsafe trusted-promoter Docker arguments')
 
 def verify():

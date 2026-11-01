@@ -19,9 +19,11 @@ class PromotionTests(unittest.TestCase):
   try:
    ready=json.loads(process.stdout.readline()); self.assertEqual(ready,{'ready':True,'platform':'linux'})
    self.put('post-ready.log',b'created after helper opened roots')
-   output,_=process.communicate(json.dumps({'run_id':'run-ready','files':['post-ready.log'],'per_file_limit':128,'total_limit':256})+'\n',timeout=5)
-   result=json.loads(output.strip().splitlines()[-1]); self.assertTrue(result['promoted'])
+   process.stdin.write(json.dumps({'run_id':'run-ready','files':['post-ready.log'],'per_file_limit':128,'total_limit':256})+'\n'); process.stdin.flush()
+   result=json.loads(process.stdout.readline()); self.assertTrue(result['promoted'])
    self.assertEqual((self.artifacts/'run-ready'/'post-ready.log').read_bytes(),b'created after helper opened roots')
+   process.stdin.write(json.dumps({'ack':'run-ready'})+'\n');process.stdin.close();process.stdin=None
+   self.assertEqual(json.loads(process.stdout.readline()),{'complete':True,'run_id':'run-ready'});process.communicate(timeout=5);self.assertEqual(process.returncode,0)
   finally:
    if process.poll() is None: process.kill(); process.wait(timeout=5)
  def test_promotes_only_allowlisted_regular_files(self):

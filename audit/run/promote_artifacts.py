@@ -89,6 +89,11 @@ def serve(scratch,artifacts):
   _validate_limits(request['per_file_limit'],request['total_limit'])
   result=_promote_with_fds(scratch_fd,artifact_fd,request['run_id'],request['files'],request['per_file_limit'],request['total_limit'])
   print(json.dumps({'promoted':True,**result}),flush=True)
+  ack_raw=sys.stdin.readline(65537)
+  if not ack_raw or len(ack_raw)>65536: raise ValueError('missing or oversized parent completion acknowledgement')
+  ack=json.loads(ack_raw)
+  if ack!={'ack':request['run_id']}: raise ValueError('parent completion acknowledgement does not match promoted run')
+  print(json.dumps({'complete':True,'run_id':request['run_id']}),flush=True)
  finally:
   os.close(scratch_fd); os.close(artifact_fd)
 def main():

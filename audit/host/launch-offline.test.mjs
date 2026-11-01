@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { formatPromoterDiagnostics, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation } from './launch-offline.mjs';
+import { formatPromoterDiagnostics, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -25,7 +25,7 @@ test('normalizes and bounds retained promoter container output', () => {
 });
 test('summarizes target failure without retaining target-controlled output text', () => {
  const summary=summarizeTargetOutcome({exitCode:125,signal:null,timedOut:false,truncated:false,stdout:'possibly-sensitive stdout',stderr:'docker startup error'});
- assert.deepEqual(summary,{started:true,exitCode:125,signal:null,timedOut:false,outputTruncated:false,stdoutBytes:25,stderrBytes:20,stdoutSha256:'f36f1f337da2a156243a258f4303b7df8069f4f86a4c21dd6e348352cac52825',stderrSha256:'523de8c997b1165dfcd0864507da8948a185b9f0bc4111bc5860b76f135d3e9f'});
+ assert.deepEqual(summary,{started:true,exitCode:125,signal:null,timedOut:false,outputTruncated:false,stdoutBytes:25,stderrBytes:20,stdoutCapturedBytes:25,stderrCapturedBytes:20,stdoutCapturedSha256:'f36f1f337da2a156243a258f4303b7df8069f4f86a4c21dd6e348352cac52825',stderrCapturedSha256:'523de8c997b1165dfcd0864507da8948a185b9f0bc4111bc5860b76f135d3e9f'});
  assert.doesNotMatch(JSON.stringify(summary),/possibly-sensitive|docker startup/);
  assert.deepEqual(summarizeTargetOutcome(null),{started:false});
 });
@@ -33,6 +33,14 @@ test('retains only a bounded allowlisted startup diagnostic line', () => {
  assert.equal(safeTargetDiagnostic("/runner/run-offline.sh:16: mkdir: cannot create directory '/scratch/home': Permission denied\nmore target output"),"/runner/run-offline.sh:16: mkdir: cannot create directory '/scratch/home': Permission denied");
  assert.equal(safeTargetDiagnostic('docker: Error response from daemon: secret=do-not-retain'),'target stderr omitted: sensitive or unrecognized content');
  assert.equal(safeTargetDiagnostic('an arbitrary test assertion containing private data'),'target stderr omitted: sensitive or unrecognized content');
+});
+test('stages only fixed output files in the parent-owned promotion directory', async t => {
+ const directory=await mkdtemp(path.join(os.tmpdir(),'csp-audit-promote-test-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ const result=await writePromotionInputs({directory,lane:'api',commit:'a'.repeat(40),runId:'audit-test-123',preflight:{stdout:'PREFLIGHT_PASS: bounded\n',stderr:'',exitCode:0},target:{stdout:'test output\n',stderr:'password=local-dummy\nuser=agent@example.test\npostgresql://user:local-dummy@127.0.0.1/db\n',exitCode:1,signal:null,timedOut:false,truncated:false,stdoutObservedBytes:12,stderrObservedBytes:105}});
+ assert.deepEqual((await (await import('node:fs/promises')).readdir(directory)).sort(),['lane-result.json','lane.log','preflight.out']);
+ const log=await readFile(path.join(directory,'lane.log'),'utf8');assert.match(log,/password=\[REDACTED\]/);assert.match(log,/\[EMAIL\]/);assert.match(log,/postgresql:\/\/\[REDACTED\]@/);assert.doesNotMatch(log,/local-dummy|agent@example\.test/);
+ const resultFile=JSON.parse(await readFile(path.join(directory,'lane-result.json'),'utf8'));assert.equal(resultFile.commit,'a'.repeat(40));assert.equal(resultFile.exitCode,1);assert.equal(result.totalBytes,Buffer.byteLength(await readFile(path.join(directory,'preflight.out')))+Buffer.byteLength(log)+Buffer.byteLength(await readFile(path.join(directory,'lane-result.json'))));assert.equal(resultFile.capturedTextBytes,Buffer.byteLength(await readFile(path.join(directory,'preflight.out')))+Buffer.byteLength(log));
+ await assert.rejects(writePromotionInputs({directory,lane:'api',commit:'a'.repeat(40),runId:'audit-test-456',preflight:{stdout:'',stderr:'',exitCode:0},target:{stdout:'',stderr:'',exitCode:0}}),/empty/);
 });
 test('removes only a real direct child of the private host temp directory', async t => {
  const input=await mkdtemp(path.join(os.tmpdir(),'csp-audit-input-test-')); await writeFile(path.join(input,'source.tar'),'synthetic source');
