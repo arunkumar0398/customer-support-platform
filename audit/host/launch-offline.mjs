@@ -96,7 +96,7 @@ export async function prepareSourceSnapshot({repoRoot,commit,outputDir,toolchain
  const resolvedRepo=await (await import('node:fs/promises')).realpath(repoRoot);const resolvedOutput=await (await import('node:fs/promises')).realpath(outputDir);const outputRel=path.relative(resolvedRepo,resolvedOutput);if(outputRel===''||(!outputRel.startsWith('..'+path.sep)&&outputRel!=='..'&&!path.isAbsolute(outputRel)))throw new Error('private archive output must be outside the source repository');
  const outputStat=await (await import('node:fs/promises')).lstat(outputDir); if(!outputStat.isDirectory()||outputStat.isSymbolicLink())throw new Error('private archive output must be a real directory');
  if((await (await import('node:fs/promises')).readdir(outputDir)).length!==0)throw new Error('private archive output directory must be empty');
- const archivePath=path.join(outputDir,'source.tar'); runGit(repoRoot,['archive','--format=tar','--output='+archivePath,commit]);
+ const archivePath=path.join(outputDir,'source.tar'); runGit(repoRoot,['-c','core.autocrlf=false','archive','--format=tar','--output='+archivePath,commit]);
  const archiveStat=await stat(archivePath); if(archiveStat.size<=0||archiveStat.size>maxArchiveBytes) throw new Error('source archive size is outside the configured bound');
  const archiveSha256=await hashFile(archivePath); const archiveCommit=await gitArchiveCommit(archivePath,repoRoot);
  if(archiveCommit!==commit) throw new Error('Git archive commit marker does not match selected commit');

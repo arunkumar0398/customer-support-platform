@@ -10,6 +10,17 @@ async function repo(t) {
  git('init','-q'); git('config','user.email','test@example.invalid'); git('config','user.name','test');
  await writeFile(path.join(root,'tracked.txt'),'trusted source\n'); await import('node:fs/promises').then(async fs=>{await fs.mkdir(path.join(root,'audit/provision'),{recursive:true}); await fs.writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:'lock',prisma_schema_sha256:'schema'}));}); git('add','.'); git('commit','-qm','source'); return {root,git};
 }
+async function readTarMember(archivePath,name){
+ const bytes=await readFile(archivePath);let offset=0;
+ while(offset+512<=bytes.length){
+  const header=bytes.subarray(offset,offset+512);if(header.every(byte=>byte===0))break;
+  const memberName=header.subarray(0,100).toString('utf8').replace(/\0.*$/s,'');const sizeText=header.subarray(124,136).toString('ascii').replace(/\0.*$/s,'').trim();const size=Number.parseInt(sizeText,8);
+  if(!Number.isSafeInteger(size)||size<0)throw new Error('invalid tar member size');const dataStart=offset+512;
+  if(memberName===name)return bytes.subarray(dataStart,dataStart+size);
+  offset=dataStart+Math.ceil(size/512)*512;
+ }
+ throw new Error('tar member not found: '+name);
+}
 test('requires the trusted launcher itself to come from the selected repository', async t => {
  const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../..'); assert.match(await verifyLauncherLocation(root),/audit[\\/]host[\\/]launch-offline\.mjs$/);
  const foreign=await mkdtemp(path.join(os.tmpdir(),'foreign-audit-repo-')); t.after(()=>rm(foreign,{recursive:true,force:true}));
@@ -54,6 +65,12 @@ test('binds clean exact HEAD to git archive marker, tree and bytes', async t => 
  const result=await prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir,toolchainDigest:'sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',launcherVersion:'test'});
  assert.equal(result.source.commit,git('rev-parse','HEAD')); assert.equal(result.source.tree,git('rev-parse','HEAD^{tree}')); assert.equal(result.source.archiveCommit,result.source.commit); assert.match(result.source.archiveSha256,/^[a-f0-9]{64}$/);
  assert.equal((await readFile(result.archivePath)).length,result.source.archiveSize);
+});
+test('keeps selected Git blob bytes when host core.autocrlf is enabled', async t => {
+ const {root,git}=await repo(t);await writeFile(path.join(root,'.dockerignore'),'.cache\nnode_modules\n');git('add','.dockerignore');git('config','core.autocrlf','true');git('commit','-qm','add line-ending fixture');
+ const outputDir=await mkdtemp(path.join(os.tmpdir(),'audit-autocrlf-out-'));t.after(()=>rm(outputDir,{recursive:true,force:true}));
+ const result=await prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir});
+ assert.deepEqual(await readTarMember(result.archivePath,'.dockerignore'),Buffer.from('.cache\nnode_modules\n'));
 });
 test('reads the Git archive commit marker without breaking a large archive stream', async t => {
  const {root,git}=await repo(t);await writeFile(path.join(root,'large-source.bin'),Buffer.alloc(8*1024*1024,0x41));git('add','large-source.bin');git('commit','-qm','large source');
