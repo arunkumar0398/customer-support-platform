@@ -87,3 +87,8 @@ Cleanup locks and validates the manifest's full shape, uniqueness, role assignme
 The intended matrix is: customer create/list/detail/comment on own ticket; agent permitted update with activity history; admin permitted membership action; same-organization other-customer denial; cross-organization ticket read and write denials; and non-admin membership denials. For each denied write, capture sanitized request/response status and compare ticket fields/version, comments, and activity counts before and after. A denied response alone is not proof that no mutation occurred.
 
 No Preview fixture provisioning or A35 request was performed while preparing this package. Hosted writes remain subject to explicit owner approval.
+
+
+## Prepared owner approval package
+
+A sanitized, target-specific but **not approved** Preview request is at [PREVIEW-EXECUTION-APPROVAL-2026-11-01](../evidence/checkpoints/PREVIEW-EXECUTION-APPROVAL-2026-11-01.md). It records the previously observed Neon/Vercel identifiers, the unique run ID, and the empty ACL-restricted credential directory. The project/branch/endpoint mapping and exact database role remain unverified/missing; the API/Web deployment records must be reconfirmed before execution. No hosted write is authorized by this package.
