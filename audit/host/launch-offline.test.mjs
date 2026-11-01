@@ -28,6 +28,12 @@ test('binds clean exact HEAD to git archive marker, tree and bytes', async t => 
  assert.equal(result.source.commit,git('rev-parse','HEAD')); assert.equal(result.source.tree,git('rev-parse','HEAD^{tree}')); assert.equal(result.source.archiveCommit,result.source.commit); assert.match(result.source.archiveSha256,/^[a-f0-9]{64}$/);
  assert.equal((await readFile(result.archivePath)).length,result.source.archiveSize);
 });
+test('reads the Git archive commit marker without breaking a large archive stream', async t => {
+ const {root,git}=await repo(t);await writeFile(path.join(root,'large-source.bin'),Buffer.alloc(8*1024*1024,0x41));git('add','large-source.bin');git('commit','-qm','large source');
+ const outputDir=await mkdtemp(path.join(os.tmpdir(),'audit-large-out-'));t.after(()=>rm(outputDir,{recursive:true,force:true}));
+ const result=await prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir});
+ assert.equal(result.source.archiveCommit,result.source.commit);assert.ok(result.source.archiveSize>8*1024*1024);
+});
 test('refuses dirty or non-HEAD source', async t => {
  const {root,git}=await repo(t); const commit=git('rev-parse','HEAD'); await writeFile(path.join(root,'tracked.txt'),'changed');
  await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit,outputDir:path.join(os.tmpdir(),'unused-output')}),/clean|dirty/i);
@@ -35,7 +41,7 @@ test('refuses dirty or non-HEAD source', async t => {
  await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit:'0'.repeat(40),outputDir:path.join(os.tmpdir(),'unused-output')}),/HEAD|commit/i);
 });
 test('refuses tracked secret and cache paths', async t => {
- for(const entry of ['.env','.env.production','credentials.txt','passwords.md','secrets.json','node_modules/pkg/index.js','.cache/state.bin']) {
+ for(const entry of ['.env','.env.production','credentials.txt','passwords.md','passwords.ts','api/src/utils/password.ts','secrets.json','node_modules/pkg/index.js','.cache/state.bin']) {
   const {root,git}=await repo(t); const full=path.join(root,entry); await (await import('node:fs/promises')).mkdir(path.dirname(full),{recursive:true}); await writeFile(full,'sensitive');
   git('add','-f',entry); git('commit','-qm','bad path');
   await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir:path.join(os.tmpdir(),'unused-output')}),/secret|credential|cache|node_modules|unsafe|excluded/i,entry);

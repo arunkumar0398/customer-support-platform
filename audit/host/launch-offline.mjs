@@ -13,13 +13,13 @@ const IMAGE_DIGEST='sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fad
 const MAX_ARCHIVE=600*1024*1024;
 const SENSITIVE_DIRECTORY=/^(?:credentials?|secrets?|tokens?|passwords?)$/i;
 const SENSITIVE_DATA_FILE=/^(?:credentials?|secrets?|tokens?|passwords?)(?:\..*)?$/i;
-const SOURCE_CODE_FILE=/\.(?:[cm]?[jt]sx?|py|sh|go|rs|java)$/i;
+const REVIEWED_SENSITIVE_SOURCE_PATHS=new Set(['api/src/modules/auth/password.ts']);
 function isSecretPath(name){
  const parts=name.split('/');const file=parts.at(-1)||'';
  if(parts.some(part=>/^\.env(?:$|\.)/i.test(part)))return name!=='.env.example';
  if(parts.slice(0,-1).some(part=>SENSITIVE_DIRECTORY.test(part)))return true;
  if(/^(?:id_rsa|id_ed25519)(?:\..*)?$/i.test(file)||/\.(?:pem|key)$/i.test(file))return true;
- return SENSITIVE_DATA_FILE.test(file)&&!SOURCE_CODE_FILE.test(file);
+ return SENSITIVE_DATA_FILE.test(file)&&!REVIEWED_SENSITIVE_SOURCE_PATHS.has(name);
 }
 const ENV_TEMPLATE_KEYS=new Set(['NODE_ENV','PORT','HOST','PGPORT','WEB_PORT','POSTGRES_SUPERUSER_PASSWORD','APP_DB_PASSWORD','TEST_DB_PASSWORD','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL','SESSION_SECRET','APP_ORIGIN']);
 const SAFE_ENV_PLACEHOLDERS=new Set(['LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE','REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE']);
@@ -31,8 +31,12 @@ function runGit(repoRoot,args,{encoding='utf8',input}={}) {
 function sha(bytes){return createHash('sha256').update(bytes).digest('hex');}
 async function gitArchiveCommit(archivePath,repoRoot){
  const child=spawn('git',['get-tar-commit-id'],{cwd:repoRoot,windowsHide:true,stdio:['pipe','pipe','pipe']}); let stdout='',stderr=''; child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8'); child.stdout.on('data',x=>stdout+=x); child.stderr.on('data',x=>stderr+=x);
- const closed=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);}); await pipeline(createReadStream(archivePath),child.stdin); const code=await closed;
- if(code!==0) throw new Error('git get-tar-commit-id failed: '+stderr.trim()); return stdout.trim();
+ const closed=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});let inputError=null;
+ try{await pipeline(createReadStream(archivePath),child.stdin);}catch(error){inputError=error;}
+ const code=await closed;const marker=stdout.trim();
+ if(code!==0) throw new Error('git get-tar-commit-id failed: '+stderr.trim());
+ if(inputError&&!(inputError.code==='EPIPE'&&/^[0-9a-f]{40}$/.test(marker)))throw inputError;
+ if(!/^[0-9a-f]{40}$/.test(marker))throw new Error('git archive commit marker is invalid');return marker;
 }
 export function validateEnvExample(content){
  if(typeof content!=='string'||Buffer.byteLength(content,'utf8')>65536||content.includes('\0'))throw new Error('environment template exceeds bounds or contains invalid text');
