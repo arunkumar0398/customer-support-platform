@@ -20,3 +20,18 @@
 No migration, seeding, authenticated request, or hosted data mutation was performed. Do not publish passwords, hashes, full account identifiers, or fixture IDs in evidence.
 
 No credentials, password hashes, or personal credentials were accessed or recorded.
+
+## Docs-candidate deployment follow-up — 2026-11-01 10:03 IST / 04:33 UTC
+
+- GitHub Actions [#106](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41273276178) passed job `verify` on docs SHA `c30917c021d9414f6b870419097b66d69faa4caa`; application/test source in this docs-only descendant remains `24f51c05328fc764bf7089fce8f398adad475648`.
+- Vercel Web deployment `ubvjpjJAaMtcVCzbaKXjXHRoQXD5` and API deployment `APwUMh5gSNTRW6dVDVebf84LmvHh` show Preview/Ready on `c30917c`. Read-only GET `/api/health/ready` against the Web branch alias `customer-support-platfo-git-2c9bab-arunkumars-projects-67bc2fdd.vercel.app` and API branch alias `customer-support-platfo-git-973332-arunkumars-projects-67bc2fdd.vercel.app` returned `{"status":"ready"}`. This is health evidence only.
+- Neon Preview remains project `customer-support-platform-preview`, branch `production`, endpoint `ep-shy-surf-b36pzssx`; existing one-time read-only discovery at 09:11 IST reported 15 synthetic memberships and 15 synthetic tickets. Compute showed ACTIVE at 09:52; no further fixture query or mutation was performed. Exact API runtime branch alignment and Vercel protection policy/authenticated access remain unverified.
+- No Preview role credentials were available, so no role journey or denial request ran. No migration, seed, or Production check was run. A35 preconditions remain READY; A35 remains BLOCKED / NOT_RUN.
+
+## Neon recovery retry — 2026-11-01 10:08 IST / 04:38 UTC
+
+- The authorized retry resumed Neon compute. Project `customer-support-platform-preview`, branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx` showed ACTIVE.
+- A read-only `SELECT 1 AS connectivity_check` at about 10:07 IST returned one row with value `1` (162 ms shown in the console). The Tables view showed `_prisma_migrations`, `ActivityEvent`, `Comment`, `Membership`, `Organization`, `Session`, `Ticket`, and `User` in the public schema.
+- The original one-time read-only fixture discovery at 09:11 IST / 03:41 UTC remains the only fixture query: 15 active synthetic memberships and 15 synthetic tickets across two organizations. It was not repeated. No migration, seed, or data write was run.
+- API Vercel Deployment Protection shows Require Log In enabled and `customer-support-platform-web` as a Preview trusted source. This is configuration evidence only. The API runtime's actual Neon branch is not verified because its secret database URL was not read. The Web Preview protection checkbox was previously observed enabled.
+- A35 preconditions remain READY. A35 remains BLOCKED / NOT_RUN because safe, short-lived synthetic role credentials and authenticated role/denial checks are still missing. No credential hashes or personal identifiers were inspected or recorded.

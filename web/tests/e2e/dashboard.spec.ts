@@ -191,6 +191,11 @@ test('customer dashboard is not in navigation and direct access is denied', asyn
   await page.goto('/dashboard');
   await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard.');
   await expect(page.getByRole('region', { name: 'Support totals' })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard.');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
 
 test('workload table can be focused and scrolled with the keyboard on mobile', async ({ page }) => {

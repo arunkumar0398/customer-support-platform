@@ -1,5 +1,27 @@
 # Current session handoff
 
+## Neon Preview recovery recheck — 2026-11-01 10:08 IST / 04:38 UTC
+
+- The authorized retry resumed Neon Preview compute: project `customer-support-platform-preview`, branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx` showed ACTIVE.
+- Read-only `SELECT 1 AS connectivity_check` completed at about 10:07 IST with one row (`1`). The Tables view showed the app's public schema entities. No migrations, fixture query, seed, or writes were run in this recheck.
+- The one approved fixture discovery remains the 09:11 IST / 03:41 UTC query: 15 active synthetic memberships and 15 synthetic tickets across two organizations. It was not rerun.
+- API Deployment Protection shows Vercel Authentication `Require Log In` enabled and the Web project listed as a Preview trusted source. This confirms configured protection/trust, not a successful authenticated app journey or that the deployed API's database URL resolves to this Neon branch. Web Preview protection was separately observed enabled earlier.
+- A35 preconditions are READY; A35 remains BLOCKED / NOT_RUN pending safe short-lived synthetic role credentials and authenticated role/denial checks. See [Preview readiness report](PREVIEW-READINESS-2026-11-01.md).
+
+## Local UI and audit-tool readiness — 2026-11-01 10:17 IST / 04:47 UTC
+
+- Added local-only E2E assertions for keyboard Tab order and visible sign-in focus styling at 375px, and for customer dashboard route denial/no overflow at 375px. Targeted runs passed 3/3 and 10/10; full `npm run test:e2e` passed 29/29 (32.1s) with screenshot output redirected to a temp directory. `npm run check` passed: API 392/392, Web 12/12, lint, typecheck, Playwright discovery, and both builds. Test edits remain uncommitted at this handoff; they are not covered by hosted CI. A22/A23/A37 remain partial.
+- Docker Desktop Linux is available, but the local audit image lacks the required preinstalled runners (`vitest`, `@playwright/test`, `supertest`, `axe-core`). No dependency was installed/fetched and no audit target tests or deployed probes ran. Full audit remains BLOCKED / NOT_RUN; see [audit environment note](SECURITY-AUDIT-ENVIRONMENT-2026-11-01.md).
+- The app/test source itself is unchanged from `24f51c0` in this worktree; the new browser assertions are test-source changes. Exact commit/CI status must be recorded after committing and running hosted CI.
+
+## Latest published evidence — 2026-11-01 10:03 IST
+
+Docs/evidence head `c30917c021d9414f6b870419097b66d69faa4caa` on `codex/clean-candidate-b2fd369` passed Actions [#106](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41273276178), job `verify`, on the exact SHA. App/test candidate remains `24f51c05328fc764bf7089fce8f398adad475648` / #105. Vercel Web ([deployment](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/ubvjpjJAaMtcVCzbaKXjXHRoQXD5)) and API ([deployment](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/APwUMh5gSNTRW6dVDVebf84LmvHh)) are Preview/Ready on c30917c; current branch-alias readiness GETs returned `{"status":"ready"}` at about 10:03 IST. They are health checks only: no authenticated roles, API-to-Neon branch identity, or active Preview protection settings were proven.
+
+Neon Preview branch `production` / endpoint `ep-shy-surf-b36pzssx` recovery and the one read-only discovery are reported PASS from 09:11 IST: `SELECT 1`, 15 active synthetic memberships and 15 synthetic tickets across two organizations. Compute was observed ACTIVE at 09:52; no second fixture query ran. A35 preconditions are ready, but A35 remains BLOCKED / NOT_RUN due absent safe short-lived role credentials and unverified runtime DB alignment. Local seed credentials were not tried.
+
+Local exact 24f app/test verification: `npm run check` exit 0 and `npm run test:e2e` 29/29 against disposable loopback PostgreSQL. A22/A23/A37 remain partial; A36 passes only its stated local restore/forward-recovery and previous-code compatibility criterion, with SQL down migration/hosted PITR untested. Full Cloudflare audit, evaluator access, and A28 human rehearsal remain open. Keep merge/submission on hold. Preserve the ten modified TK-29 screenshots; they remain unstaged.
+
 ## Current snapshot — 2026-11-01 09:52 IST
 
 Current application/test candidate is `24f51c05328fc764bf7089fce8f398adad475648` on `codex/clean-candidate-b2fd369`. Actions [#105](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41272626603) completed with `verify` success on that exact SHA; the job includes disposable DB setup/migrations/seed and required gates. Vercel Web and API deployment records ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/GZwzX4yme3DraJgf32HNFNtWYHyA), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/AEp2x3kR68FCA6rsdchApNx8WG8U)) show Preview/Ready on the same source commit. Read-only GET `/api/health/ready` to each current deployment alias returned `{"status":"ready"}`. These responses do not verify the configured Neon branch or authenticated Vercel protection access.

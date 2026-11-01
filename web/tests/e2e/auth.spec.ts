@@ -76,6 +76,14 @@ test('keeps the sign-in page within narrow tablet viewport bounds', async ({ pag
   expect(panel).not.toBeNull();
   expect(panel!.y).toBeGreaterThanOrEqual(story!.y + story!.height);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await page.keyboard.press('Tab');
+  const email = page.getByLabel('Email');
+  await expect(email).toBeFocused();
+  await expect.poll(() => email.evaluate((input) => getComputedStyle(input).boxShadow)).not.toBe('none');
+  await page.keyboard.press('Tab');
+  await expect(page.getByLabel('Password')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Sign in' })).toBeFocused();
   await captureCheckpointScreenshot(page, '02-sign-in-mobile.png');
 });
 
