@@ -19,11 +19,13 @@ const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
 const agentId = randomUUID();
+const adminId = randomUUID();
 const customerIds = Array.from({ length: 3 }, () => randomUUID());
 const emailByUserId = new Map<string, string>();
 const password = 'synthetic-ticket-create-fixture-password';
 for (const [index, id] of customerIds.entries()) emailByUserId.set(id, `create-customer-${index}-${id}@example.test`);
 emailByUserId.set(agentId, `create-agent-${agentId}@example.test`);
+emailByUserId.set(adminId, `create-admin-${adminId}@example.test`);
 let verified = false;
 
 test.beforeAll(async () => {
@@ -48,6 +50,14 @@ test.beforeAll(async () => {
       memberships: { create: { organizationId, role: 'AGENT' } },
     },
   });
+  await db.user.create({
+    data: {
+      id: adminId,
+      email: emailByUserId.get(adminId)!,
+      passwordHash,
+      memberships: { create: { organizationId, role: 'ADMIN' } },
+    },
+  });
   await Promise.all(customerIds.map((id) => db.user.create({
     data: {
       id,
@@ -62,9 +72,9 @@ test.afterAll(async () => {
   if (verified) {
     await db.activityEvent.deleteMany({ where: { organizationId } });
     await db.ticket.deleteMany({ where: { organizationId } });
-    await db.session.deleteMany({ where: { userId: { in: [agentId, ...customerIds] } } });
+    await db.session.deleteMany({ where: { userId: { in: [agentId, adminId, ...customerIds] } } });
     await db.membership.deleteMany({ where: { organizationId } });
-    await db.user.deleteMany({ where: { id: { in: [agentId, ...customerIds] } } });
+    await db.user.deleteMany({ where: { id: { in: [agentId, adminId, ...customerIds] } } });
     await db.organization.deleteMany({ where: { id: organizationId } });
   }
   await db.$disconnect();
@@ -153,6 +163,18 @@ test('staff can create a ticket for an active same-organization customer with se
   await expect(page.getByText('Urgent priority')).toBeVisible();
   const ticket = await db.ticket.findFirst({ where: { organizationId, requesterUserId: customerIds[2] } });
   expect(ticket).toMatchObject({ requesterUserId: customerIds[2], priority: 'URGENT', title: 'Agent-created follow-up' });
+});
+
+test('admin can create a ticket for an active same-organization customer', async ({ page }) => {
+  await signIn(page, adminId);
+  await openCreateForm(page);
+  await page.getByLabel('Customer membership ID').fill(customerIds[0]);
+  await page.getByLabel('Subject').fill('Admin-created ticket');
+  await page.getByLabel('Description').fill('The organization administrator created a synthetic ticket.');
+  await page.getByRole('button', { name: 'Submit ticket' }).click();
+  await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);
+  await expect(page.getByRole('heading', { name: 'Ticket submitted' })).toBeVisible();
+  await expect.poll(() => db.ticket.count({ where: { organizationId, requesterUserId: customerIds[0] } })).toBe(1);
 });
 
 test('server rejects a customer requester-id field injected into the create request', async ({ page }) => {

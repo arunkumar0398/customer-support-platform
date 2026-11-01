@@ -1,6 +1,6 @@
 # Assessment deliverables and review preparation
 
-**Latest docs-status candidate:** `158ddaeffd7d3e61dbc49ea79e43d7300ee10ace`; Actions #103 `verify` passed on exact SHA. Vercel Web/API status markers say success but provider descriptions report ignored-build cancellation, not deployment/runtime evidence. Application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74. Exact-candidate G7 returned **BLOCKED_BY_ENVIRONMENT** ([report](../reviews/g7-158ddae-2026-11-01.md)); it predates this documentation reconciliation.
+**Prior docs-status candidate:** `33fdf49a30aee3b67dfac852ba7850f0549d9518`; Actions #104 `verify` passed on exact SHA. Vercel Web/API provider statuses said “Deployment has completed”; this is not runtime/database/role evidence. G7 on that exact candidate returned **BLOCKED_BY_ENVIRONMENT** ([report](../reviews/g7-33fdf49-2026-11-01.md)); this review is retained as historical evidence, and the report is recorded by the current docs candidate.
 
 Review date: 2026-11-01 (Asia/Calcutta)
 Repository: `arunkumar0398/customer-support-platform`, private branch `codex/clean-candidate-b2fd369`

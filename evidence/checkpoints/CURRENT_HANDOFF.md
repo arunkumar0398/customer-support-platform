@@ -3,7 +3,7 @@
 
 ## Release and validation status — 2026-11-01
 
-**Latest docs-status candidate:** `158ddaeffd7d3e61dbc49ea79e43d7300ee10ace`; Actions [run #103](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41271082015) passed exact-SHA job `verify`. Vercel Web/API status markers are `success` but descriptions say “Canceled by Ignored Build Step”; neither is a deployment or runtime check. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74. Exact-candidate G7 returned **BLOCKED_BY_ENVIRONMENT**; see [report](../reviews/g7-158ddae-2026-11-01.md). The report predates this documentation reconciliation.
+**Prior docs-status candidate:** `33fdf49a30aee3b67dfac852ba7850f0549d9518`; Actions [run #104](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41271376080) passed exact-SHA `verify`. Vercel Web/API provider descriptions said “Deployment has completed,” which is not runtime/database/role evidence. The G7 follow-up on this exact SHA returned **BLOCKED_BY_ENVIRONMENT** ([report](../reviews/g7-33fdf49-2026-11-01.md)); this historical verdict is recorded in the current docs candidate. Preview app source remains `a5673cbcee3c6b30178404c80c1eb1bf56f963a4`; historic source-run `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74 stays distinct.
 
 ## Preview readiness refresh — 2026-11-01
 

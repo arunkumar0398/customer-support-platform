@@ -20,8 +20,9 @@ const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl,
 const organizationId = randomUUID();
 const agentIds = [randomUUID(), randomUUID()];
 const customerIds = [randomUUID(), randomUUID()];
-const userIds = [...agentIds, ...customerIds];
-const emailByUserId = new Map(userIds.map((id, index) => [id, `detail-${index}-${id}@example.test`]));
+const adminId = randomUUID();
+const userIds = [...agentIds, ...customerIds, adminId];
+const emailByUserId = new Map(userIds.map((id, index) => [id, id === adminId ? `detail-admin-${id}@example.test` : `detail-${index}-${id}@example.test`]));
 const password = 'synthetic-ticket-detail-fixture-password';
 const ticketIds = [randomUUID(), randomUUID(), randomUUID()];
 let verified = false;
@@ -45,7 +46,7 @@ test.beforeAll(async () => {
       id,
       email: emailByUserId.get(id)!,
       passwordHash,
-      memberships: { create: { organizationId, role: index < agentIds.length ? 'AGENT' : 'CUSTOMER' } },
+      memberships: { create: { organizationId, role: id === adminId ? 'ADMIN' : index < agentIds.length ? 'AGENT' : 'CUSTOMER' } },
     },
   })));
   await db.ticket.createMany({
@@ -139,6 +140,27 @@ test('customer opens an owned ticket, reads history, and adds a chronological co
   expect(result.body.error.code).toBe('FORBIDDEN');
   expect(await db.ticket.findUnique({ where: { id: ticketIds[1] }, select: { assigneeUserId: true, version: true } }))
     .toMatchObject({ assigneeUserId: null, version: 1 });
+});
+
+test('admin can open ticket detail and access staff controls', async ({ page }) => {
+  await signIn(page, adminId);
+  await page.goto(`/tickets/${ticketIds[0]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 1' })).toBeVisible();
+  await expect(page.getByLabel('Ticket status')).toBeVisible();
+  await expect(page.getByLabel('Assign to agent ID')).toBeVisible();
+  await expect(page.getByLabel('Subject')).toHaveValue('Detail fixture 1');
+});
+
+test('customer can read and reply to a ticket from a narrow viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, customerIds[0]);
+  await page.goto(`/tickets/${ticketIds[1]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 2' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await page.getByLabel('Add a reply').fill('Mobile customer detail reply.');
+  await page.getByRole('button', { name: 'Send reply' }).click();
+  await expect(page.getByText('Mobile customer detail reply.')).toBeVisible();
+  await expect.poll(() => db.comment.count({ where: { organizationId, ticketId: ticketIds[1] } })).toBe(1);
 });
 
 test('staff can edit, transition, assign, and inspect ticket history', async ({ page }) => {

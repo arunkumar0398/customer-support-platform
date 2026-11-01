@@ -13,6 +13,8 @@ export interface AuthOptions {
   sessionSecret?: string;
   production?: boolean;
   now?: () => Date;
+  /** E2E-only override; production app construction must use the secure defaults. */
+  testLoginThrottleLimits?: { ip: number; account: number };
 }
 
 export interface AuthContext {

@@ -98,6 +98,17 @@ test('admin can add an existing account and update its organization role and act
   }));
   expect(membersTable.tableWidth).toBeGreaterThan(membersTable.viewportWidth);
   await captureCheckpointScreenshot(page, '12-memberships-mobile.png');
+  const mobileAgentRow = page.getByRole('row', { name: new RegExp(emails.agent) });
+  const mobileRole = mobileAgentRow.getByLabel(`Role for ${emails.agent}`);
+  await mobileRole.focus();
+  await expect(mobileRole).toBeFocused();
+  await expect.poll(() => page.locator('.members-table-wrap').evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await mobileRole.selectOption('CUSTOMER');
+  await mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` }).click();
+  await expect(mobileAgentRow).toContainText('Customer');
+  await mobileRole.selectOption('AGENT');
+  await mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` }).click();
+  await expect(mobileAgentRow).toContainText('Agent');
   await page.setViewportSize({ width: 1280, height: 720 });
 
   await page.getByLabel('Existing account email').fill(emails.otherOrgUser);

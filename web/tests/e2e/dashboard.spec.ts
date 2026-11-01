@@ -16,17 +16,19 @@ const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
+const adminId = randomUUID();
 const agentId = randomUUID();
 const customerId = randomUUID();
 const ticketIds = [randomUUID(), randomUUID(), randomUUID()];
+const adminEmail = `dashboard-ui-${adminId}@example.test`;
 const agentEmail = `dashboard-ui-${agentId}@example.test`;
 const customerEmail = `dashboard-ui-${customerId}@example.test`;
 const password = 'synthetic-dashboard-ui-fixture-password';
 let verified = false;
 
-async function signIn(page: Page) {
+async function signIn(page: Page, email = agentEmail) {
   await page.goto('/sign-in');
-  await page.getByLabel('Email').fill(agentEmail);
+  await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL('/');
@@ -48,11 +50,13 @@ test.beforeAll(async () => {
   });
   await db.user.createMany({
     data: [
+      { id: adminId, email: adminEmail, passwordHash },
       { id: agentId, email: agentEmail, passwordHash },
       { id: customerId, email: customerEmail, passwordHash },
     ],
   });
   await db.membership.createMany({ data: [
+    { organizationId, userId: adminId, role: 'ADMIN' },
     { organizationId, userId: agentId, role: 'AGENT' },
     { organizationId, userId: customerId, role: 'CUSTOMER' },
   ] });
@@ -89,9 +93,9 @@ test.afterAll(async () => {
     await db.activityEvent.deleteMany({ where: { organizationId } });
     await db.comment.deleteMany({ where: { organizationId } });
     await db.ticket.deleteMany({ where: { organizationId } });
-    await db.session.deleteMany({ where: { userId: { in: [agentId, customerId] } } });
+    await db.session.deleteMany({ where: { userId: { in: [adminId, agentId, customerId] } } });
     await db.membership.deleteMany({ where: { organizationId } });
-    await db.user.deleteMany({ where: { id: { in: [agentId, customerId] } } });
+    await db.user.deleteMany({ where: { id: { in: [adminId, agentId, customerId] } } });
     await db.organization.deleteMany({ where: { id: organizationId } });
   }
   await db.$disconnect();
@@ -119,7 +123,7 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByText(/Metrics as of .* UTC/)).toBeVisible();
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 open');
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 in progress');
-  await expect(page.getByRole('region', { name: 'Agent workload' })).toContainText('2 assigned active tickets');
+  await expect(page.getByRole('region', { name: 'Agent workload', exact: true })).toContainText('2 assigned active tickets');
   await captureCheckpointScreenshot(page, '09-dashboard-desktop.png');
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
@@ -166,4 +170,38 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByText(`${agentEmail} · customer`)).toBeVisible();
   await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard');
   await expect(page.getByRole('region', { name: 'Support totals' })).toHaveCount(0);
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+    data: { role: 'AGENT' },
+  });
+});
+
+test('admin can open the team dashboard', async ({ page }) => {
+  await signIn(page, adminEmail);
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await expect(page).toHaveURL('/dashboard');
+  await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Support totals' })).toContainText('0');
+  await expect(page.getByRole('status')).toContainText('No tickets yet');
+});
+
+test('customer dashboard is not in navigation and direct access is denied', async ({ page }) => {
+  await signIn(page, customerEmail);
+  await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
+  await page.goto('/dashboard');
+  await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard.');
+  await expect(page.getByRole('region', { name: 'Support totals' })).toHaveCount(0);
+});
+
+test('workload table can be focused and scrolled with the keyboard on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page);
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  const workload = page.getByRole('region', { name: 'Agent workload table' });
+  await expect(workload).toHaveAttribute('tabindex', '0');
+  await expect(workload).toHaveAttribute('aria-label', 'Agent workload table');
+  await workload.focus();
+  await expect(workload).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(() => workload.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
 });

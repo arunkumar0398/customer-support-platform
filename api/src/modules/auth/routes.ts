@@ -19,10 +19,12 @@ const loginSchema = z.object({
 function loginThrottle(options: AuthOptions): RequestHandler {
   const attempts = new Map<string, { count: number; expires: number }>();
   const windowMs = 15 * 60 * 1000;
+  const ipLimit = options.testLoginThrottleLimits?.ip ?? 20;
+  const accountLimit = options.testLoginThrottleLimits?.account ?? 5;
   return (request, response, next) => {
     const time = authSettings(options).now().getTime();
     // Express trust proxy stays disabled: untrusted forwarding headers cannot evade this key.
-    const keys = [[`ip:${request.ip}`, 20], [`account:${hashToken(request.body.email)}`, 5]] as const;
+    const keys = [[`ip:${request.ip}`, ipLimit], [`account:${hashToken(request.body.email)}`, accountLimit]] as const;
     for (const [key, limit] of keys) {
       let record = attempts.get(key);
       if (record && record.expires <= time) {

@@ -47,6 +47,7 @@
 .dashboard-workload-panel .dashboard-panel-heading { margin-bottom: 7px; }
 .dashboard-workload-definition { margin: 0 0 17px; }
 .dashboard-table-wrap { overflow-x: auto; }
+.dashboard-table-wrap:focus-visible { outline: 3px solid var(--focus, #346b55); outline-offset: 3px; }
 .dashboard-workload-table { width: 100%; border-collapse: collapse; text-align: left; }
 .dashboard-workload-table th,
 .dashboard-workload-table td { padding: 12px 10px; border-bottom: 1px solid #e7ece6; color: #56675f; font-size: 11px; white-space: nowrap; }
