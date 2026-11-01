@@ -1,4 +1,12 @@
 # Current session handoff
+## Latest substantive local UI follow-up — 2026-11-01
+
+- Isolated worktree baseline: `a0d71d1b4ab6440e1b7108db590a5583854391eb`; current changes are a local working-tree layer, not committed or covered by hosted CI.
+- Focused CSS changes fix the sign-in focus ring and three contrast pairs, remove focus suppression from applicable form controls, and animate dashboard bars with transform scaling. Rendered checks at 320/375/1280/1440/1920 measured contrast 5.50:1, 5.68:1, 5.68:1 and ring 7.30:1; no document overflow. Keyboard assertions cover sign-in, queues for all roles, create controls including select/textarea, detail fields, and membership select. Dashboard animation and reduced motion were checked separately.
+- `npm run check` passed (API 392/392, Web 12/12, lint/type checks, 45 E2E discovered, builds); `npm run test:e2e` passed 45/45 in 54 seconds. All 12 tracked TK-29 screenshot files were restored from the pre-run backup; verify the final diff excludes them.
+- Evidence: [Hallmark follow-up report](../reviews/hallmark-followup-2026-11-01/REPORT.md), its computed measurements JSON, and five viewport screenshots. The automated route/role/state work is supplemental; A22/A23/A37 remain partial because remaining cells and a manual screen-reader pass are not complete.
+- A35 remains BLOCKED / NOT_RUN pending verified API-to-Neon Preview binding and safe synthetic credentials/fixtures. Cloudflare audit remains BLOCKED / NOT_RUN because the compliant offline image has no compatible preinstalled test runners; no packages were installed and no deployed endpoints were probed. A28 rehearsal and evaluator access remain unresolved. Preserve release hold; do not infer G7 readiness.
+
 ## Verified candidate evidence — 2026-11-01
 
 - Requested reconciliation candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871). Its exact-SHA Vercel API/Web contexts are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).

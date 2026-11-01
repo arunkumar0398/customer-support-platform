@@ -272,7 +272,7 @@ test('queue pagination keeps page state in the URL', async ({ page }) => {
   await expect(page.getByText('No tickets match these filters')).toBeVisible();
 });
 
-test('ticket queue fits a narrow viewport and keeps loading and error states usable', async ({ page }) => {
+test('ticket queue keeps loading, error, and retry states usable at desktop and mobile widths', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, agentEmails[3]);
 
@@ -300,9 +300,31 @@ test('ticket queue fits a narrow viewport and keeps loading and error states usa
     await page.waitForTimeout(300);
     await route.continue();
   });
-  await page.reload();
+  await page.getByRole('button', { name: 'Try again' }).click();
 
   await expect(page.getByRole('status')).toContainText('Loading tickets');
+  await expect(page.getByText('26 tickets')).toBeVisible();
+  await page.unroute('**/api/tickets?*');
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.route('**/api/tickets?*', async (route) => {
+    if (route.request().method() === 'GET') {
+      await page.waitForTimeout(250);
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'UNAVAILABLE', message: 'Queue unavailable on desktop test.' } }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+  await page.reload();
+  await expect(page.getByRole('status')).toContainText('Loading tickets');
+  await expect(page.getByRole('alert')).toContainText('We could not load tickets');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
+  await page.unroute('**/api/tickets?*');
+  await page.getByRole('button', { name: 'Try again' }).click();
   await expect(page.getByText('26 tickets')).toBeVisible();
 });
 
@@ -337,6 +359,22 @@ test('queue role controls remain correct across desktop and mobile viewports', a
       } else {
         await expect(page.getByRole('link', { name: 'Members', exact: true })).toHaveCount(0);
       }
+      const keyboardControls = await page.locator('.ticket-search input, .queue-filters select, .queue-filters input').all();
+      const focusResults = [];
+      for (const control of keyboardControls) {
+        await control.focus();
+        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
+        await expect(control).toBeFocused();
+        const outline = await control.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), color: style.outlineColor };
+        });
+        expect(outline.style, `${role.name} queue control outline at ${viewport.width}px`).toBe('solid');
+        expect(outline.width, `${role.name} queue control outline width at ${viewport.width}px`).toBeGreaterThanOrEqual(2);
+        focusResults.push({ control: await control.getAttribute('id'), ...outline });
+      }
+      console.info(`QUEUE_KEYBOARD_FOCUS ${role.name} ${viewport.width}px ${JSON.stringify(focusResults)}`);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
       await page.getByRole('button', { name: 'Sign out' }).click();
       await expect(page).toHaveURL('/sign-in');

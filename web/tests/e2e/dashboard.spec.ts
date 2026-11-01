@@ -114,6 +114,28 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
   await page.unroute('**/api/dashboard');
   const totals = page.getByRole('region', { name: 'Support totals' });
+  const openFill = page.locator('[data-testid="status-count-OPEN"] .dashboard-status-track span');
+  let openMotion = await openFill.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { transitionProperty: style.transitionProperty, scale: new DOMMatrixReadOnly(style.transform).a };
+  });
+  expect(openMotion.transitionProperty.split(',').map((property) => property.trim())).toContain('transform');
+  expect(openMotion.transitionProperty).not.toContain('width');
+  await expect.poll(async () => {
+    openMotion = await openFill.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { transitionProperty: style.transitionProperty, scale: new DOMMatrixReadOnly(style.transform).a };
+    });
+    return openMotion.scale;
+  }).toBeCloseTo(2 / 3, 2);
+  expect(openMotion.scale).toBeCloseTo(2 / 3, 2);
+  const fillLayout = await openFill.evaluate((element) => ({ width: (element as HTMLElement).offsetWidth, trackWidth: element.parentElement!.clientWidth }));
+  expect(fillLayout.width).toBe(fillLayout.trackWidth);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedMotionDuration = await openFill.evaluate((element) => getComputedStyle(element).transitionDuration);
+  expect(Number.parseFloat(reducedMotionDuration)).toBeLessThanOrEqual(0.01);
+  console.info(`DASHBOARD_STATUS_ANIMATION ${JSON.stringify({ transitionProperty: openMotion.transitionProperty, scale: openMotion.scale, layoutWidth: fillLayout.width, trackWidth: fillLayout.trackWidth, reducedMotionDuration })}`);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect(totals.getByText('3', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-OPEN').getByText('2', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-IN_PROGRESS').getByText('1', { exact: true })).toBeVisible();

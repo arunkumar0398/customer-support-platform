@@ -22,7 +22,7 @@
 .members-table select { min-height: 42px; padding: 0 10px; border: 1px solid #cbd7cd; border-radius: 5px; background: var(--white); color: var(--ink); font-size: 12px; }
 .members-add-form input:focus,
 .members-add-form select:focus,
-.members-table select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
+.members-table select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); }
 .members-add-form .button { min-height: 42px; white-space: nowrap; }
 .membership-feedback { margin: 0 0 16px; padding: 12px 14px; border-radius: 5px; font-size: 12px; line-height: 1.5; }
 .membership-error { border-left: 3px solid var(--coral); background: #fff1eb; color: #8d3429; }

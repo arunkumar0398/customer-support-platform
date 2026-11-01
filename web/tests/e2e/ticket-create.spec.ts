@@ -96,6 +96,34 @@ async function openCreateForm(page: Page) {
   await expect(page.getByRole('main')).toHaveCount(1);
 }
 
+test('keyboard focus stays clearly visible on ticket form textarea and select controls', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, adminId);
+  await openCreateForm(page);
+
+  const subject = page.getByLabel('Subject');
+  const description = page.getByLabel('Description');
+  const customer = page.getByLabel('Customer membership ID');
+  const priority = page.getByLabel('Priority');
+  const focusMeasurements = [];
+  await subject.focus();
+
+  await page.keyboard.press('Shift+Tab');
+  for (const control of [customer, subject, description, priority]) {
+    await expect(control).toBeFocused();
+    const outline = await control.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) };
+    });
+    expect(outline.style, 'keyboard focus should draw an outline').not.toBe('none');
+    expect(outline.width, 'keyboard focus should use a visible three-pixel outline').toBeGreaterThanOrEqual(2);
+    focusMeasurements.push({ control: await control.getAttribute('id'), ...outline });
+    await page.keyboard.press('Tab');
+    if (control === priority) break;
+  }
+  console.info(`TICKET_FORM_KEYBOARD_FOCUS 375px ${JSON.stringify(focusMeasurements)}`);
+});
+
 test('customer ticket form requires nonblank fields and rejects whitespace-only content', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, customerIds[0]);
@@ -120,6 +148,14 @@ test('customer ticket form requires nonblank fields and rejects whitespace-only 
   await expect(page.getByRole('alert')).toContainText('Description must contain at least one non-space character.');
   await expect(page).toHaveURL('/tickets/new');
   await expect.poll(() => db.ticket.count({ where: { organizationId } })).toBe(0);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await title.fill('');
+  await description.fill('');
+  await page.getByRole('button', { name: 'Submit ticket' }).click();
+  expect(await title.evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
+  expect(await description.evaluate((input: HTMLTextAreaElement) => input.validity.valueMissing)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
 });
 
 test('customer can create a ticket and reaches its submission confirmation', async ({ page }) => {
@@ -149,6 +185,47 @@ test('customer can create a ticket and reaches its submission confirmation', asy
   await expect(page.getByRole('row', { name: /Cannot access billing history/ })).toBeVisible();
 });
 
+test('customer create failure and retry remain usable at desktop and mobile widths', async ({ page }) => {
+  await signIn(page, customerIds[0]);
+  let failOnce = true;
+  await page.route('**/api/tickets', async (route) => {
+    if (failOnce && route.request().method() === 'POST') {
+      failOnce = false;
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'UNAVAILABLE', message: 'Ticket service temporarily unavailable.' } }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+  for (const width of [375, 1280]) {
+    failOnce = true;
+    await page.setViewportSize({ width, height: 812 });
+    if (width === 375) await openCreateForm(page);
+    else {
+      await page.getByRole('link', { name: 'Return to ticket queue' }).click();
+      await openCreateForm(page);
+    }
+    const before = await db.ticket.count({ where: { organizationId } });
+    const title = `Customer retry ticket ${width}`;
+    await page.getByLabel('Subject').fill(title);
+    await page.getByLabel('Description').fill('Synthetic ticket created after one temporary service failure.');
+
+    await page.getByRole('button', { name: 'Submit ticket' }).click();
+    await expect(page.getByRole('alert')).toContainText('Ticket service temporarily unavailable.');
+    await expect(page).toHaveURL('/tickets/new');
+    await expect.poll(() => db.ticket.count({ where: { organizationId } })).toBe(before);
+
+    await page.getByRole('button', { name: 'Submit ticket' }).click();
+    await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);
+    await expect(page.getByRole('heading', { name: 'Ticket submitted' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await expect.poll(() => db.ticket.count({ where: { organizationId, requesterUserId: customerIds[0], title } })).toBe(1);
+  }
+});
+
 test('staff can create a ticket for an active same-organization customer with selected priority', async ({ page }) => {
   await signIn(page, agentId);
   await openCreateForm(page);
@@ -165,6 +242,20 @@ test('staff can create a ticket for an active same-organization customer with se
   expect(ticket).toMatchObject({ requesterUserId: customerIds[2], priority: 'URGENT', title: 'Agent-created follow-up' });
 });
 
+test('agent can create a ticket from the narrow staff form', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, agentId);
+  await openCreateForm(page);
+  await page.getByLabel('Customer membership ID').fill(customerIds[1]);
+  await page.getByLabel('Subject').fill('Mobile agent-created ticket');
+  await page.getByLabel('Description').fill('Synthetic ticket created by a staff member on a narrow viewport.');
+  await page.getByRole('button', { name: 'Submit ticket' }).click();
+  await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);
+  await expect(page.getByRole('heading', { name: 'Ticket submitted' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await expect.poll(() => db.ticket.count({ where: { organizationId, requesterUserId: customerIds[1], title: 'Mobile agent-created ticket' } })).toBe(1);
+});
+
 test('admin can create a ticket for an active same-organization customer', async ({ page }) => {
   await signIn(page, adminId);
   await openCreateForm(page);
@@ -174,7 +265,7 @@ test('admin can create a ticket for an active same-organization customer', async
   await page.getByRole('button', { name: 'Submit ticket' }).click();
   await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);
   await expect(page.getByRole('heading', { name: 'Ticket submitted' })).toBeVisible();
-  await expect.poll(() => db.ticket.count({ where: { organizationId, requesterUserId: customerIds[0] } })).toBe(1);
+  await expect.poll(() => db.ticket.count({ where: { organizationId, requesterUserId: customerIds[0], title: 'Admin-created ticket' } })).toBe(1);
 });
 
 test('admin can complete ticket creation from a narrow viewport', async ({ page }) => {

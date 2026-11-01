@@ -123,7 +123,7 @@ function DashboardOverview({ data, refreshing, refresh }: { data: DashboardMetri
                     <span>{label}</span>
                     <strong>{count}</strong>
                   </div>
-                  <div className="dashboard-status-track" aria-hidden="true"><span style={{ width: `${share}%` }} /></div>
+                  <div className="dashboard-status-track" aria-hidden="true"><span style={{ transform: `scaleX(${share / 100})` }} /></div>
                 </div>
               );
             })}

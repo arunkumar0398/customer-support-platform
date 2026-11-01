@@ -266,8 +266,7 @@ test('stale edit shows a refresh path and allows retry with the current version'
     .toMatchObject({ description: 'Retry using the refreshed version.' });
 });
 
-test('ticket detail load failure offers retry and recovers on a narrow viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 });
+test('ticket detail load failure offers retry at desktop and mobile widths', async ({ page }) => {
   await signIn(page, adminId);
   await db.ticket.create({ data: {
     id: retryTicketId, organizationId, ticketNumber: 5, requesterUserId: customerIds[0],
@@ -277,7 +276,7 @@ test('ticket detail load failure offers retry and recovers on a narrow viewport'
   await page.route(`**/api/tickets/${retryTicketId}`, async (route) => {
     if (route.request().method() !== 'GET') return route.continue();
     detailRequests += 1;
-    if (detailRequests === 1) {
+    if (detailRequests % 2 === 1) {
       return route.fulfill({
         status: 503,
         contentType: 'application/json',
@@ -287,24 +286,27 @@ test('ticket detail load failure offers retry and recovers on a narrow viewport'
     return route.continue();
   });
 
-  const failed = page.waitForResponse((response) =>
-    response.url().includes(`/api/tickets/${retryTicketId}`) && response.request().method() === 'GET' && response.status() === 503,
-  );
-  await page.goto(`/tickets/${retryTicketId}`);
-  await failed;
-  await expect(page.getByRole('heading', { name: 'Ticket unavailable' })).toBeVisible();
-  await expect(page.getByRole('alert')).toContainText('Ticket temporarily unavailable.');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  for (const width of [375, 1280]) {
+    await page.setViewportSize({ width, height: 812 });
+    const failed = page.waitForResponse((response) =>
+      response.url().includes(`/api/tickets/${retryTicketId}`) && response.request().method() === 'GET' && response.status() === 503,
+    );
+    await page.goto(`/tickets/${retryTicketId}`);
+    await failed;
+    await expect(page.getByRole('heading', { name: 'Ticket unavailable' })).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Ticket temporarily unavailable.');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 
-  const recovered = page.waitForResponse((response) =>
-    new URL(response.url()).pathname === `/api/tickets/${retryTicketId}` && response.request().method() === 'GET',
-  );
-  await page.getByRole('button', { name: 'Try again' }).click();
-  const recoveredResponse = await recovered;
-  expect(recoveredResponse.status()).toBe(200);
-  await expect(page.getByRole('heading', { name: 'Retry fixture ticket' })).toBeVisible();
-  expect(detailRequests).toBe(2);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+    const recovered = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === `/api/tickets/${retryTicketId}` && response.request().method() === 'GET',
+    );
+    await page.getByRole('button', { name: 'Try again' }).click();
+    const recoveredResponse = await recovered;
+    expect(recoveredResponse.status()).toBe(200);
+    await expect(page.getByRole('heading', { name: 'Retry fixture ticket' })).toBeVisible();
+    expect(detailRequests).toBe(width === 375 ? 2 : 4);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
 });
 
 test('staff ticket detail controls have visible focus and keyboard order on mobile', async ({ page }) => {

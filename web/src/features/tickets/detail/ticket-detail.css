@@ -15,7 +15,7 @@
 .ticket-detail-form label { margin-top: 5px; color: #334642; font-size: 12px; font-weight: 700; }
 .ticket-detail-form input, .ticket-detail-form textarea, .ticket-detail-form select { width: 100%; min-width: 0; min-height: 43px; padding: 10px 12px; border: 1px solid #cbd7cd; border-radius: 5px; background: #fbfcf9; color: var(--ink); font: inherit; font-size: 13px; }
 .ticket-detail-form textarea { resize: vertical; line-height: 1.6; }
-.ticket-detail-form input:focus, .ticket-detail-form textarea:focus, .ticket-detail-form select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
+.ticket-detail-form input:focus, .ticket-detail-form textarea:focus, .ticket-detail-form select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); }
 .ticket-detail-form button { justify-self: start; margin-top: 5px; }
 .ticket-detail-form small { color: var(--muted); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
 .ticket-detail-readonly p { display: grid; gap: 8px; margin: 0 0 18px; color: #54645e; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -1,4 +1,11 @@
 # Acceptance Status
+## Current local UI follow-up — 2026-11-01
+
+- Sign-in rendered checks at 320, 375, 1280, 1440, and 1920 CSS px measured the three adjusted text pairs at 5.50:1, 5.68:1, and 5.68:1. The 3px focus ring measured 7.30:1 against the sign-in panel surface. Document/body widths matched each viewport; no horizontal overflow was measured.
+- Browser keyboard checks verified visible 3px focus outlines for sign-in controls, queue filters across admin/agent/customer at 375px and 1280px, ticket-create inputs/select/textarea, ticket-detail fields, and the membership role selector. Dashboard bar transform and reduced-motion duration were separately asserted.
+- Local `npm run check` passed; combined `npm run test:e2e` passed 45/45. The report at [Hallmark follow-up](../reviews/hallmark-followup-2026-11-01/REPORT.md) contains commands, measured values, and evidence limits. This is working-tree evidence, not exact-SHA CI.
+- These checks improve scoped UI evidence but do not close A22/A23/A37: the full route × role × viewport × state matrix and a manual screen-reader journey remain open. A35 and the bounded Cloudflare audit remain BLOCKED / NOT_RUN.
+
 ## Verified candidate evidence — 2026-11-01
 
 - 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871). Vercel API/Web are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).

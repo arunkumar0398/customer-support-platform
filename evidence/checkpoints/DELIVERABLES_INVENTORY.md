@@ -1,4 +1,8 @@
 # Assessment deliverables inventory
+## Latest local UI evidence — 2026-11-01
+
+The Hallmark contrast/focus follow-up and expanded browser checks are recorded in [the render report](../reviews/hallmark-followup-2026-11-01/REPORT.md). Local `npm run check` passed and the combined browser suite passed 45/45 on the uncommitted worktree. This improves the tests/results deliverable but does not establish exact-SHA CI or complete A22/A23/A37. The manual screen-reader check, Preview A35, and full offline audit remain open; do not mark those deliverables/gates complete from this work.
+
 ## Verified candidate evidence — 2026-11-01
 
 - Candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871); Vercel API/Web are provider success statuses only.

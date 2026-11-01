@@ -1,4 +1,10 @@
 # Multi-Tenant Customer Support Platform
+## Current local UI follow-up — 2026-11-01
+
+On top of the prior committed UI candidate, a focused follow-up corrected the sign-in focus indicator and three measured text contrast pairs, restored visible focus styling for form controls, and changed dashboard bar animation to use transform scaling. In this isolated worktree, `npm run check` passed (API 392/392, Web 12/12, lint/typecheck/builds) and `npm run test:e2e` passed 45/45. These are local working-tree results; they are not an Actions result or deployed runtime evidence. Rendered measurements and screenshots are in [the Hallmark follow-up report](evidence/reviews/hallmark-followup-2026-11-01/REPORT.md).
+
+The follow-up is scoped evidence only: A22/A23/A37 remain partial because route × role × viewport × state coverage is not complete and no manual screen-reader pass was performed. A35 Preview role checks and the bounded offline security audit remain BLOCKED / NOT_RUN. Keep merge/submission on hold.
+
 ## Verified candidate evidence — 2026-11-01
 
 - The candidate record requested for reconciliation is 070bf718e6a43a45d699e3b3c065b442c0db7c41; Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871) passed exact SHA. Its Vercel API and Web contexts were provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)); they are not runtime or role acceptance.

@@ -1,4 +1,10 @@
 # Testing and CI evidence
+## Current local UI follow-up — 2026-11-01
+
+In the isolated UI worktree, `npm run check` exited 0: lint, API/Web type checks, API 392/392, Web 12/12, 45 E2E tests discovered, and API/Web builds passed. `npm run test:e2e` exited 0 with 45/45 passing (54.0 seconds). See [rendered Hallmark measurements and screenshots](../evidence/reviews/hallmark-followup-2026-11-01/REPORT.md). This is uncommitted local evidence layered on the prior candidate; it is not exact-SHA CI and does not supersede any previously recorded Actions run.
+
+After the browser run, all 12 tracked `evidence/checkpoints/screenshots/TK-29/` images were restored from a pre-run copy. The final worktree check must confirm those paths are unchanged. Preview authorization and the Cloudflare audit were not run.
+
 ## Verified candidate evidence — 2026-11-01
 
 - Candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), job verify. Vercel API/Web contexts on that SHA are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).
