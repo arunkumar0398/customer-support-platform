@@ -1,5 +1,12 @@
 # Current session handoff
 
+## Exact-SHA status update — 2026-11-01
+
+- Candidate `c179180a56977cda6fe084786989ae6098afe995` on `codex/clean-candidate-b2fd369` passed Actions [#107](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41274734553), job `verify`, including disposable database setup and required gates. The commit contains only E2E assertions and evidence reconciliation; deployed application code remains `24f51c05328fc764bf7089fce8f398adad475648` / #105. Historical implementation baseline: `3e613c0…` / #74.
+- GitHub's exact-SHA Vercel API and Web status contexts for c179180 were `success`. These are provider statuses, not a runtime or authenticated acceptance test. The earlier `c30917c` readiness GETs remain scoped to that older candidate.
+- Independent read-only G7 review of c179180 returned **BLOCKED_BY_ENVIRONMENT**. A35 remains blocked pending owner-provisioned short-lived synthetic credentials and authenticated role/denial tests. The full Cloudflare audit remains blocked because the compliant no-network image lacks compatible preinstalled runners. Evaluator access and A28 rehearsal remain unverified; A22/A23/A37 remain partial; A36 remains limited to local code rollback/forward recovery, with SQL down migration and hosted PITR untested.
+- This handoff update is being recorded after the exact-SHA CI and reviewer checks. It does not represent an additional Preview test, security audit, or Production operation.
+
 ## Neon Preview recovery recheck — 2026-11-01 10:08 IST / 04:38 UTC
 
 - The authorized retry resumed Neon Preview compute: project `customer-support-platform-preview`, branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx` showed ACTIVE.
@@ -10,13 +17,13 @@
 
 ## Local UI and audit-tool readiness — 2026-11-01 10:17 IST / 04:47 UTC
 
-- Added local-only E2E assertions for keyboard Tab order and visible sign-in focus styling at 375px, and for customer dashboard route denial/no overflow at 375px. Targeted runs passed 3/3 and 10/10; full `npm run test:e2e` passed 29/29 (32.1s) with screenshot output redirected to a temp directory. `npm run check` passed: API 392/392, Web 12/12, lint, typecheck, Playwright discovery, and both builds. Test edits remain uncommitted at this handoff; they are not covered by hosted CI. A22/A23/A37 remain partial.
+- Added E2E assertions for keyboard Tab order and visible sign-in focus styling at 375px, and for customer dashboard route denial/no overflow at 375px. Targeted runs passed 3/3 and 10/10; full `npm run test:e2e` passed 29/29 (32.1s) with screenshot output redirected to a temp directory. `npm run check` passed: API 392/392, Web 12/12, lint, typecheck, Playwright discovery, and both builds. These assertions are committed at c179180 and validated by Actions #107 on exact SHA. A22/A23/A37 remain partial.
 - Docker Desktop Linux is available, but the local audit image lacks the required preinstalled runners (`vitest`, `@playwright/test`, `supertest`, `axe-core`). No dependency was installed/fetched and no audit target tests or deployed probes ran. Full audit remains BLOCKED / NOT_RUN; see [audit environment note](SECURITY-AUDIT-ENVIRONMENT-2026-11-01.md).
 - The app/test source itself is unchanged from `24f51c0` in this worktree; the new browser assertions are test-source changes. Exact commit/CI status must be recorded after committing and running hosted CI.
 
-## Latest published evidence — 2026-11-01 10:03 IST
+## Earlier published evidence — 2026-11-01 10:03 IST (superseded by c179180 / Actions #107)
 
-Docs/evidence head `c30917c021d9414f6b870419097b66d69faa4caa` on `codex/clean-candidate-b2fd369` passed Actions [#106](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41273276178), job `verify`, on the exact SHA. App/test candidate remains `24f51c05328fc764bf7089fce8f398adad475648` / #105. Vercel Web ([deployment](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/ubvjpjJAaMtcVCzbaKXjXHRoQXD5)) and API ([deployment](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/APwUMh5gSNTRW6dVDVebf84LmvHh)) are Preview/Ready on c30917c; current branch-alias readiness GETs returned `{"status":"ready"}` at about 10:03 IST. They are health checks only: no authenticated roles, API-to-Neon branch identity, or active Preview protection settings were proven.
+The earlier docs/evidence head `c30917c021d9414f6b870419097b66d69faa4caa` on `codex/clean-candidate-b2fd369` passed Actions [#106](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41273276178), job `verify`, on the exact SHA. The later app/test implementation candidate was `24f51c05328fc764bf7089fce8f398adad475648` / #105. Vercel Web/API were Preview/Ready on c30917c; branch-alias readiness GETs returned `{"status":"ready"}` at about 10:03 IST. Those are historical health checks only: no authenticated roles or API-to-Neon branch identity was established.
 
 Neon Preview branch `production` / endpoint `ep-shy-surf-b36pzssx` recovery and the one read-only discovery are reported PASS from 09:11 IST: `SELECT 1`, 15 active synthetic memberships and 15 synthetic tickets across two organizations. Compute was observed ACTIVE at 09:52; no second fixture query ran. A35 preconditions are ready, but A35 remains BLOCKED / NOT_RUN due absent safe short-lived role credentials and unverified runtime DB alignment. Local seed credentials were not tried.
 
