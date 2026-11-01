@@ -45,6 +45,10 @@ function buildTreeManifest(repoRoot,commit,tree){
  return {commit,tree,objectFormat,entries};
 }
 async function hashFile(filename){const h=createHash('sha256');for await(const chunk of createReadStream(filename))h.update(chunk);return h.digest('hex');}
+export async function verifyLauncherLocation(repoRoot){
+ const repo=await (await import('node:fs/promises')).realpath(repoRoot);const running=await (await import('node:fs/promises')).realpath(fileURLToPath(import.meta.url));let expected;try{expected=await (await import('node:fs/promises')).realpath(path.join(repo,'audit/host/launch-offline.mjs'));}catch{throw new Error('selected source repository does not contain its trusted launcher');}
+ if(running!==expected)throw new Error('trusted launcher must be loaded from the selected source repository');return running;
+}
 export async function prepareSourceSnapshot({repoRoot,commit,outputDir,toolchainDigest=IMAGE_DIGEST,lane='api',maxArchiveBytes=MAX_ARCHIVE,launcherVersion='audit-launcher-v1'}={}){
  if(!repoRoot||!commit||!outputDir) throw new Error('repoRoot, explicit commit, and outputDir are required');
  if(!/^[0-9a-f]{40}$/.test(commit)) throw new Error('explicit commit must be a full 40-character SHA');
@@ -109,7 +113,7 @@ async function launchSandbox({repoRoot,commit,lane,evidenceDir,timeoutSeconds=54
 if(process.argv[1]&&fileURLToPath(import.meta.url)===path.resolve(process.argv[1])){
  const args=process.argv.slice(2);const value=name=>{const i=args.indexOf(name);return i<0?undefined:args[i+1]};const repoRoot=value('--repo');const commit=value('--commit');const lane=value('--lane');
  try{
-  const result=args.includes('--execute')?await launchSandbox({repoRoot,commit,lane,evidenceDir:value('--evidence-dir'),timeoutSeconds:Number(value('--timeout')||5400)}):await prepareSourceSnapshot({repoRoot,commit,outputDir:value('--output'),lane,toolchainDigest:value('--image')||IMAGE_DIGEST});
+  if(repoRoot)await verifyLauncherLocation(repoRoot);const result=args.includes('--execute')?await launchSandbox({repoRoot,commit,lane,evidenceDir:value('--evidence-dir'),timeoutSeconds:Number(value('--timeout')||5400)}):await prepareSourceSnapshot({repoRoot,commit,outputDir:value('--output'),lane,toolchainDigest:value('--image')||IMAGE_DIGEST});
   process.stdout.write(JSON.stringify(result,null,2)+'\n');if(result.execution&&result.execution.exitCode!==0)process.exitCode=1;
  }catch(error){process.stderr.write('LAUNCH_REFUSED: '+error.message+'\n');process.exitCode=2;}
 }

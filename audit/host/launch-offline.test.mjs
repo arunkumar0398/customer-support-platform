@@ -2,13 +2,18 @@ import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { prepareSourceSnapshot, removePrivateInputDir } from './launch-offline.mjs';
+import { prepareSourceSnapshot, removePrivateInputDir, verifyLauncherLocation } from './launch-offline.mjs';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
  git('init','-q'); git('config','user.email','test@example.invalid'); git('config','user.name','test');
  await writeFile(path.join(root,'tracked.txt'),'trusted source\n'); await import('node:fs/promises').then(async fs=>{await fs.mkdir(path.join(root,'audit/provision'),{recursive:true}); await fs.writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:'lock',prisma_schema_sha256:'schema'}));}); git('add','.'); git('commit','-qm','source'); return {root,git};
 }
+test('requires the trusted launcher itself to come from the selected repository', async t => {
+ const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../..'); assert.match(await verifyLauncherLocation(root),/audit[\\/]host[\\/]launch-offline\.mjs$/);
+ const foreign=await mkdtemp(path.join(os.tmpdir(),'foreign-audit-repo-')); t.after(()=>rm(foreign,{recursive:true,force:true}));
+ await assert.rejects(verifyLauncherLocation(foreign),/selected source repository/);
+});
 test('removes only a real direct child of the private host temp directory', async t => {
  const input=await mkdtemp(path.join(os.tmpdir(),'csp-audit-input-test-')); await writeFile(path.join(input,'source.tar'),'synthetic source');
  await removePrivateInputDir(input); await assert.rejects(readFile(path.join(input,'source.tar')));

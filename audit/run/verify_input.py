@@ -93,6 +93,7 @@ def verify():
     if not block: break
     digest.update(block)
    return digest.hexdigest()
+  if hash_member('audit/host/launch-offline.mjs')!=trusted['launcherSha256']: fail('committed launcher digest mismatch')
   if hash_member('audit/provision/toolchain-manifest.json')!=tool['manifestSha256']: fail('toolchain manifest archive digest mismatch')
   if hash_member('package-lock.json')!=tool['lockfileSha256']: fail('package lock archive digest mismatch')
   if hash_member('api/prisma/schema.prisma')!=tool['prismaSchemaSha256']: fail('Prisma schema archive digest mismatch')
