@@ -177,6 +177,26 @@ test('admin can create a ticket for an active same-organization customer', async
   await expect.poll(() => db.ticket.count({ where: { organizationId, requesterUserId: customerIds[0] } })).toBe(1);
 });
 
+test('admin can complete ticket creation from a narrow viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, adminId);
+  await openCreateForm(page);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  await page.getByLabel('Customer membership ID').fill(customerIds[2]);
+  await page.getByLabel('Subject').fill('Mobile admin-created ticket');
+  await page.getByLabel('Description').fill('Synthetic ticket created through the narrow staff form.');
+  await page.getByRole('button', { name: 'Submit ticket' }).click();
+
+  await expect(page).toHaveURL(/\/tickets\/[0-9a-f-]+$/i);
+  await expect(page.getByRole('heading', { name: 'Ticket submitted' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Return to ticket queue' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await expect.poll(() => db.ticket.count({
+    where: { organizationId, requesterUserId: customerIds[2], title: 'Mobile admin-created ticket' },
+  })).toBe(1);
+});
+
 test('server rejects a customer requester-id field injected into the create request', async ({ page }) => {
   await signIn(page, customerIds[2]);
   await openCreateForm(page);
