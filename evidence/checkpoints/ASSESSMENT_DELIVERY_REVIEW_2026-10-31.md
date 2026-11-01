@@ -1,5 +1,13 @@
 # Assessment deliverables and review preparation
 
+## Current candidate update — 2026-11-01
+
+The reviewed application/test candidate is now `24f51c05328fc764bf7089fce8f398adad475648`, with Actions [#105](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41272626603) `verify` successful on that exact SHA. The Vercel Web and API Preview deployment records are Ready on this source SHA, and read-only readiness GETs returned `{"status":"ready"}`. This does not prove which Neon branch the API uses or authenticate a role session. `3e613c0…` / #74 is historical baseline evidence, not the current application candidate.
+
+Neon recovery and one read-only fixture discovery are **reported PASS** for Preview branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx`, at 2026-11-01 09:11 IST / 03:41 UTC: `SELECT 1` succeeded; discovery returned 15 active synthetic memberships and 15 synthetic tickets across two organizations. The compute still appeared ACTIVE at 09:52 IST; the fixture query was not repeated. A35 preconditions are READY; A35 remains BLOCKED / NOT_RUN because short-lived synthetic credentials are missing. The app has no signup, password-reset, or global provisioning endpoint; the local seed password was not tried.
+
+At exact `24f51c0`, `npm run check` passed (API 392/392, Web 12/12, 29 E2E discovered, lint/typecheck/build), and `npm run test:e2e` passed 29/29 against disposable loopback PostgreSQL. These results add scoped UI coverage; A22/A23/A37 remain incomplete. A36 remains PASS only for the documented local restore/forward-recovery and old-code compatibility criterion; SQL down-migration and hosted PITR remain untested. Full offline audit, evaluator access, and A28 rehearsal remain open; release stays on hold.
+
 **Prior docs-status candidate:** `33fdf49a30aee3b67dfac852ba7850f0549d9518`; Actions #104 `verify` passed on exact SHA. Vercel Web/API provider statuses said “Deployment has completed”; this is not runtime/database/role evidence. G7 on that exact candidate returned **BLOCKED_BY_ENVIRONMENT** ([report](../reviews/g7-33fdf49-2026-11-01.md)); this review is retained as historical evidence, and the report is recorded by the current docs candidate.
 
 Review date: 2026-11-01 (Asia/Calcutta)
@@ -14,7 +22,7 @@ Assessment basis: `reference/assessment.pdf`, implementation scope and deliverab
 
 This is a repository-content review. It does not establish that an evaluator can access the private GitHub repository, that cloud controls are configured, or that blocked Preview/audit work ran.
 
-## Preview and local gate refresh — 2026-11-01
+## Preview and local gate refresh — 2026-11-01 (earlier snapshot)
 
 Neon recovery and the one-time read-only synthetic fixture discovery are **reported PASS**: branch production, endpoint ep-shy-surf-b36pzssx; observed 2026-11-01 09:11 IST / 03:41 UTC; SELECT 1 returned 1; discovery found 15 active synthetic memberships and 15 tickets. Vercel Preview Web/API health checks passed against source a5673cbcee3c6b30178404c80c1eb1bf56f963a4. Exact API-to-Neon branch alignment is unverified. A35 preconditions are ready, but authenticated A35 role and denial acceptance remains BLOCKED / NOT_RUN because safe synthetic Preview passwords are not available. No migrations/seeding or Production checks occurred. Details: [readiness report](PREVIEW-READINESS-2026-11-01.md).
 
@@ -24,13 +32,13 @@ A36 is PASS only for the documented local disposable-DB recovery/restore-forward
 
 | # | Assessment deliverable | Result | Repository evidence | Remaining action |
 |---|---|---|---|---|
-| 1 | Source repository | **PARTIAL** | Private source: [GitHub repository](https://github.com/arunkumar0398/customer-support-platform), branch `codex/clean-candidate-b2fd369`; source implementation `3e613c0…`; current docs/test candidate `e78b19c…`. | Evaluator identity/access is not known or confirmed. Owner must grant access or provide an approved private handoff. Keep visibility private. |
+| 1 | Source repository | **PARTIAL** | Private source: [GitHub repository](https://github.com/arunkumar0398/customer-support-platform), branch `codex/clean-candidate-b2fd369`; current app/test candidate `24f51c05328fc764bf7089fce8f398adad475648` with Actions #105 passing exact SHA. `3e613c0…` / #74 is earlier baseline evidence. | Evaluator identity/access is not known or confirmed. Owner must grant access or provide an approved private handoff. Keep visibility private. |
 | 2 | README setup/run instructions | **COMPLETE** | `README.md`, `docs/operations.md`: prerequisites, environment values, guarded migrations/seed, local Docker run, checks and browser tests. | None for artifact presence; follow exact commands in the docs. |
 | 3 | Architecture diagram | **COMPLETE** | `docs/architecture.md`: Mermaid topology for local Docker, Vite proxy and Vercel web proxy/API/Neon flow. | Deployment status is optional and separately SHA-bound. |
 | 4 | Data model and key indexes | **COMPLETE** | `docs/data-model.md` against `api/prisma/schema.prisma` and the three checked-in migrations; entities, tenant composite FKs/checks, indexes, and pagination tradeoffs listed. | No schema discrepancy identified in this content review. SQL down migration remains untested. |
 | 5 | API docs/examples | **COMPLETE** | `docs/api.md`: route methods/paths, session/CSRF and organization requirements, request/response/error examples, role limits, ticket and child-resource routes. | Preview behavior remains unverified. |
 | 6 | Sample credentials or seed instructions | **COMPLETE** | `docs/demo-accounts.md`, `api/prisma/seed.ts`: synthetic local-only accounts and two-organization fixtures; seed guard is documented. | Use synthetic local fixtures only; these do not establish Preview/Production credentials. |
-| 7 | Test instructions/results | **COMPLETE** | `docs/testing.md`, `evidence/checkpoints/acceptance-status.md`, checkpoint reports; exact source and CI SHAs/runs distinguished. | Preview and the full offline security audit remain blocked/not run. |
+| 7 | Test instructions/results | **COMPLETE** | `docs/testing.md`, `evidence/checkpoints/acceptance-status.md`, checkpoint reports; current exact-candidate Actions #105 passed on `24f51c0…`; local `npm run check` and `npm run test:e2e` (29/29) also ran at that SHA against disposable PostgreSQL. | Preview role acceptance and the full offline security audit remain blocked/not run; A22/A23/A37 remain partial. |
 | 8 | Tradeoffs, limitations, next steps | **COMPLETE** | `docs/limitations.md`: process-local throttle, capped offset pagination, no public signup/password reset, ambiguous-create retry risk, missing monitoring/notifications and open release checks. | Close gates only with observed evidence. |
 
 **A26 overall: BLOCKED** until item 1 evaluator access or an approved private handoff is confirmed. Items 2–8 are present/readable in the reviewed tree; this audit does not change repository visibility.
@@ -75,4 +83,4 @@ Application implementation source under test: `3e613c0b7df5bec290553cfb7b5a9404b
 - Full check on the source worktree: `npm run check` — exit 0; lint/typecheck passed; API 391/391; web 12/12; 23 Playwright tests discovered; API and Web builds passed.
 - Assignment-atomicity addition in this candidate: `npm run test:api -- tests/tickets/assignment.test.ts` — exit 0; 14/14 passed. A disposable PostgreSQL trigger forced the `ASSIGNMENT_CHANGED` insert to fail; the HTTP response was sanitized, assignee/version and event count remained unchanged, and assignment succeeded after trigger removal. Full check with this added regression test: exit 0; API 392/392, web 12/12, 23 Playwright tests discovered, builds passed. This tests code rollback, not migration reversal.
 
-The new local full browser rerun at worktree HEAD `24f1d953ef487a42928ccc21923bf0dc3cca1dd7` used verified disposable `support_test` on loopback port 5546: `npm run test:e2e` exit 0, 23/23; focused keyboard case exit 0, 1/1. Route/role/viewport/state limits are enumerated in [the matrix](UI_A22_A23_MATRIX_2026-11-01.md); A22/A23 remain NOT_RUN as complete criteria. A36 local migration/recovery and pre-fix compatibility evidence is in [the recovery report](A36-migration-recovery-2026-11-01.md). The commands did not use Preview or Production.
+At exact candidate `24f51c05328fc764bf7089fce8f398adad475648`, `npm run check` exited 0 (API 392/392, Web 12/12, 29 E2E discovered, lint/typecheck/build) and `npm run test:e2e` exited 0 (29/29) against disposable PostgreSQL 18.6 on loopback port 55432. This run added selected admin/customer/mobile route coverage, but A22/A23/A37 remain incomplete; see [the updated UI matrix](UI_A22_A23_MATRIX_2026-11-01.md). A36 local migration/recovery and pre-fix compatibility evidence is in [the recovery report](A36-migration-recovery-2026-11-01.md). These commands did not use Preview or Production.

@@ -1,5 +1,15 @@
 # Current session handoff
 
+## Current snapshot — 2026-11-01 09:52 IST
+
+Current application/test candidate is `24f51c05328fc764bf7089fce8f398adad475648` on `codex/clean-candidate-b2fd369`. Actions [#105](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41272626603) completed with `verify` success on that exact SHA; the job includes disposable DB setup/migrations/seed and required gates. Vercel Web and API deployment records ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/GZwzX4yme3DraJgf32HNFNtWYHyA), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/AEp2x3kR68FCA6rsdchApNx8WG8U)) show Preview/Ready on the same source commit. Read-only GET `/api/health/ready` to each current deployment alias returned `{"status":"ready"}`. These responses do not verify the configured Neon branch or authenticated Vercel protection access.
+
+Neon recovery and the one authorized read-only fixture discovery remain **reported PASS**: Preview project `customer-support-platform-preview`, branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx`; 2026-11-01 09:11 IST / 03:41 UTC; `SELECT 1` succeeded, with 15 active synthetic memberships and 15 synthetic tickets across two organizations. Neon Console still showed compute ACTIVE at 09:52 IST; no repeated fixture query was run. **A35 preconditions READY; A35 BLOCKED / NOT_RUN** pending safe short-lived agent/customer credentials and authenticated role/denial checks. The app has no signup, password-reset, global provisioning, or credential-change route; local shared seed credentials were not tried in Preview.
+
+At exact `24f51c0`, local `npm run check` and `npm run test:e2e` passed against a disposable loopback PostgreSQL 18.6 database; E2E passed 29/29. A22/A23/A37 remain partial, not full passes. A36 remains PASS only for its local restore/forward-recovery and previous-code compatibility criterion; SQL down-migration and hosted PITR are untested. Full Cloudflare offline audit, evaluator access, and A28 rehearsal remain open. Keep merge/submission on hold. The earlier source `3e613c0` / #74 is historical; it does not supersede current app/test candidate `24f51c0` / #105.
+
+Current worktree is detached at `24f51c0`; docs/matrix edits and ten pre-existing modified TK-29 screenshots are unstaged. Preserve all ten screenshots and do not stage them. The original `b2fd369` dirty worktree remains separate and must not be represented as validated by #105.
+
 
 ## Release and validation status — 2026-11-01
 
