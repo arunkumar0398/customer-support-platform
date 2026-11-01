@@ -5,6 +5,8 @@ Repository: `arunkumar0398/customer-support-platform`, private branch `codex/cle
 Application implementation source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`
 Documentation candidate reviewed: `5e27f68a7f2c8aa12c502995b26c2b5063e1309b`
 
+Latest verified docs/test candidate before this review-record refresh: `224771c1515c8f39a425e5ef060eb39e0d534a04`, Actions #96 success, Vercel Web/API provider quota failures.
+
 Latest exact-CI/Vercel-verified docs/test candidate before this review refresh: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions #95, Web/API success.
 Assessment basis: `reference/assessment.pdf`, implementation scope and deliverables section.
 
@@ -61,4 +63,4 @@ Application implementation source under test: `3e613c0b7df5bec290553cfb7b5a9404b
 - Full check on the source worktree: `npm run check` — exit 0; lint/typecheck passed; API 391/391; web 12/12; 23 Playwright tests discovered; API and Web builds passed.
 - Assignment-atomicity addition in this candidate: `npm run test:api -- tests/tickets/assignment.test.ts` — exit 0; 14/14 passed. A disposable PostgreSQL trigger forced the `ASSIGNMENT_CHANGED` insert to fail; the HTTP response was sanitized, assignee/version and event count remained unchanged, and assignment succeeded after trigger removal. Full check with this added regression test: exit 0; API 392/392, web 12/12, 23 Playwright tests discovered, builds passed. This tests code rollback, not migration reversal.
 
-The commands above did not use a live service. The full required-flow and visual gaps remain visible in the acceptance ledger: A22/A23/A25 are NOT_RUN because route-wide responsive/state and seeded-account sign-in criteria are broader than the performed suites. A16 now has explicit assignment rollback evidence in addition to earlier create/update/comment rollback cases.
+The commands above did not use a live service. A25 now has a separate local result: the verified disposable `support_test` E2E setup seeds synthetic accounts and the existing browser session journey signs in as the seeded Alpha admin, reloads, and signs out (23/23 browser suite pass on loopback PostgreSQL port 5546). This closes only local A25. A22/A23 remain NOT_RUN because route-wide responsive/state criteria are broader than the performed suite. A16 has explicit assignment rollback evidence in addition to earlier create/update/comment rollback cases.

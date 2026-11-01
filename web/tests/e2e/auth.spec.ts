@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Client } from 'pg';
 import { PrismaClient } from '../../../api/src/generated/prisma/client.js';
+import { seedDatabase } from '../../../api/prisma/seed.js';
 import { assertActualTestDatabase, assertSafeTestDatabaseUrl } from '../../../scripts/database-identity.mjs';
 import { captureCheckpointScreenshot } from './capture-checkpoint-screenshot.js';
 
@@ -29,6 +30,7 @@ test.beforeAll(async () => {
   const identity = await verifier.query('SELECT current_database() AS database, current_user AS username');
   assertActualTestDatabase(identity.rows[0], expected);
   verified = true;
+  await seedDatabase(verifier);
 
   const salt = randomBytes(16);
   const digest = scryptSync(password, salt, 32, { N: 32768, r: 8, p: 1, maxmem: 128 * 1024 * 1024 });
@@ -89,17 +91,17 @@ test('shows invalid credentials without creating an authenticated session', asyn
 
 test('restores a real server session after reload and signs out', async ({ page }) => {
   await page.goto('/sign-in');
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
+  await page.getByLabel('Email').fill('admin.alpha@example.test');
+  await page.getByLabel('Password').fill('SupportDemo-Only-2026!');
   await page.getByRole('button', { name: 'Sign in' }).click();
 
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
-  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.getByText('admin.alpha@example.test')).toBeVisible();
 
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
-  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.getByText('admin.alpha@example.test')).toBeVisible();
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/sign-in$/);

@@ -3,7 +3,9 @@
 
 ## Release and validation status — 2026-10-31
 
-Latest validated docs/test candidate before this handoff refresh: `acf01641263275507f4b781bc980cf9e810c9e49`; Actions #95 `verify` and exact-SHA Vercel Web/API checks succeeded. It contains documentation plus a test-only assignment-rollback regression; implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. Baseline `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` / #94 had Vercel provider quota statuses. This handoff refresh requires its own exact-SHA CI result.
+**Candidate status update:** `224771c1515c8f39a425e5ef060eb39e0d534a04` is the latest verified docs/test candidate before this handoff refresh. Actions [run #96](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41227346950), job `verify`, passed on that exact SHA. Its exact-SHA Vercel Web/API checks are provider build-quota failures, not application failures. Application implementation remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. This handoff refresh is a new documentation-only descendant and needs its own CI evidence.
+
+The latest hosted docs/test candidate before the current worktree update is `224771c1515c8f39a425e5ef060eb39e0d534a04`; Actions #96 passed, while Web/API checks were provider build-quota failures. Current local change adds seeded-account E2E evidence for A25 and reconciles status files; its hosted exact-SHA CI result is pending. Source implementation remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / Actions #74.
 
 **Verified docs candidate at task start:** `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` on `codex/clean-candidate-b2fd369`. GitHub Actions [run #94](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223707522) completed successfully on that exact SHA; job `verify` passed, including disposable PostgreSQL setup/migrations/seed and required gates. Both exact-SHA Vercel Web/API statuses were provider build-rate-limit failures (“Deployment rate limited — retry in 24 hours”), not application failures ([checks](https://github.com/arunkumar0398/customer-support-platform/commit/5e27f68a7f2c8aa12c502995b26c2b5063e1309b/checks)).
 
