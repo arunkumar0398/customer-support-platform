@@ -68,9 +68,12 @@ cpu_quota="${cpu_limit%% *}"
 cpu_period="${cpu_limit##* }"
 (( cpu_quota > 0 && cpu_period > 0 && cpu_quota <= cpu_period )) || fail 'CPU limit is missing or exceeds 1 CPU'
 [[ "$pids_limit" =~ ^[0-9]+$ ]] || fail 'finite cgroup process limit is not visible'
-(( pids_limit > 0 && pids_limit <= 128 )) || fail 'process limit is missing or exceeds 128 PIDs'
-file_limit="$(ulimit -f)"
-[[ "$file_limit" =~ ^[0-9]+$ ]] && (( file_limit > 0 && file_limit <= 1048576 )) || fail 'file-size ulimit must be finite and no larger than 1 GiB'
+(( pids_limit > 0 && pids_limit <= 256 )) || fail 'process limit is missing or exceeds 256 PIDs'
+file_limit="$(awk '$1 == "Max" && $2 == "file" && $3 == "size" {print $4}' /proc/self/limits)"
+file_hard_limit="$(awk '$1 == "Max" && $2 == "file" && $3 == "size" {print $5}' /proc/self/limits)"
+file_units="$(awk '$1 == "Max" && $2 == "file" && $3 == "size" {print $6}' /proc/self/limits)"
+[[ "$file_limit" =~ ^[0-9]+$ && "$file_hard_limit" =~ ^[0-9]+$ && "$file_units" == bytes ]] || fail 'finite byte-based file-size ulimit is not visible'
+(( file_limit == 1073741824 && file_hard_limit == 1073741824 )) || fail 'file-size ulimit must be exactly 1 GiB (1073741824 bytes) for the bounded PostgreSQL WAL setup'
 scratch_kib="$(df -Pk /scratch | awk 'NR==2 {print $2}')"
 [[ "$scratch_kib" =~ ^[0-9]+$ ]] && (( scratch_kib <= 1150000 )) || fail 'scratch disk limit is missing or exceeds 1.1 GiB'
 
@@ -91,7 +94,7 @@ pass "non-root uid $(id -u)"
 pass 'root filesystem and target mount read-only; scratch writable'
 pass 'loopback-only network namespace with no inherited proxy'
 pass "Node $(node --version), npm $(npm --version), Vitest, Supertest, Prisma, Playwright, PostgreSQL present"
-pass "cgroup memory=${memory_limit}, cpu=${cpu_limit}, pids=${pids_limit}; file-size and scratch limits active"
+pass "cgroup memory=${memory_limit}, cpu=${cpu_limit}, pids=${pids_limit}; file-size=${file_limit}/${file_hard_limit} bytes and scratch limits active"
 pass "cgroup swap=${swap_limit} (disabled); pinned Cloudflare skill commit c1c8a8c1471069fb0e188eeaff69b8e8db6564a8"
 pass "target lockfile SHA-256 ${actual_lock} matches prepared toolchain"
 [[ -z "${AUDIT_SOURCE_SHA:-}" ]] || pass "mounted Git HEAD ${AUDIT_SOURCE_SHA} matches the selected candidate"

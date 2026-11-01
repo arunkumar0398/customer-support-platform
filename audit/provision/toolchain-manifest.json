@@ -1,7 +1,7 @@
 {
   "manifest_version": 1,
-  "bundle_status": "prepared_local_image_preflight_passed",
-  "prepared_from_source_sha": "ddf3d69b32db494e04ae36256633633bf9132583",
+  "bundle_status": "prepared_local_image_and_bounded_all_lane_passed_audit_incomplete",
+  "prepared_from_source_sha": "5671f14b106ba8898b45e7e36ee4c7670d406bda",
   "target_lockfile_sha256": "30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0",
   "prisma_schema_sha256": "5d69924bc79db63b85462f29d416f0116145c2f11c566f32a2742d97e8ff86bb",
   "platform": "linux/amd64",
@@ -22,23 +22,42 @@
     "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
     "directory_in_image": "/opt/cloudflare-security-audit-skill/skills/security-audit"
   },
-  "image_id": "sha256:dd0936da81c2bf37973a481266bff97ae97d6af0f2a44486b2cadc81734435af",
-  "image_digest_or_archive_sha256": "sha256:dd0936da81c2bf37973a481266bff97ae97d6af0f2a44486b2cadc81734435af",
+  "image_id": "sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3",
+  "image_digest_or_archive_sha256": "sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3",
   "toolchain_build_inputs": {
     "dockerfile_sha256": "e996138b10d45755a29fba9e958220b61707006f9053b51ab710d970570d018d",
-    "preflight_script_sha256": "bd024428f2d915b5b3fa199911f5500cb0017e0b2fbe92a4b89b2056fa82e34f",
-    "offline_runner_sha256": "aebbbbd34cbc6d5fa57ed135903775870072aed3bb3682044d249ebb2139eb99",
-    "worktree_state": "The image build preceded the package commit, but the recorded Dockerfile, preflight, and runner SHA-256 values match the committed bytes. The image remains local and unexported; rebuild and update this manifest if any hashed build input changes."
+    "preflight_script_sha256": "cea174da2f07b04957e796bbbcf486e080f9527dae5225e5bd9d4ff12c3aa330",
+    "offline_runner_sha256": "f15db3bdd7dd3f3ed2daf0c016bbe87c91dc5c34f464461d3dbef4d9fede0717",
+    "worktree_state": "The image was built from the listed Dockerfile, preflight, and runner hashes and tested against the committed clean source tree at prepared_from_source_sha. The image is local and unexported; rebuild and update this manifest if any hashed build input changes."
   },
-  "provenance": "Local Docker Desktop build 1rqh5muvefb4p2yqydse6eftz on 2026-11-01 from audit/provision/Dockerfile. Base image digest, target package lockfile and Prisma schema hashes, and Cloudflare audit skill commit are pinned. Image ID is local to this Docker engine and has not been exported or independently attested. A no-network preflight passed against a clean shallow clone at prepared_from_source_sha, including exact Git HEAD, lockfile and schema checks. The Dockerfile, preflight, and runner hashes identify the exact committed package bytes used in the image. No target audit tests were run.",
+  "provenance": "Local Docker Desktop build on 2026-11-01 from audit/provision/Dockerfile; image creation time 2026-11-01T13:10:04.1703745Z. Docker server 29.9.2, linux/amd64. Base image digest, target package lockfile and Prisma schema hashes, and Cloudflare audit skill commit are pinned. Image ID is local to this Docker engine and has not been exported or independently attested. The image was built from the listed Dockerfile, preflight, and runner hashes. A no-network preflight and bounded all test lane ran against a clean shallow clone at prepared_from_source_sha. This bounded test lane is not the six-phase Cloudflare security audit.",
   "preflight_verification": {
     "result": "PASS_PREFLIGHT_ONLY",
     "exit_code": 0,
-    "observed_controls": "Linux AMD64 container, non-root uid 10001, --network=none, --read-only rootfs, /target read-only, /scratch bounded tmpfs, no active interface except loopback, no inherited proxy, CPU/memory/swap/PID/file-size ceilings, toolchain versions, pinned validator commit, lockfile and Prisma schema hashes verified; mounted clean Git HEAD matched ddf3d69b32db494e04ae36256633633bf9132583.",
+      "observed_controls": "Linux AMD64 container, non-root uid 10001, --network=none, --read-only rootfs, /target and /input/source.tar read-only, /scratch bounded tmpfs, no active interface except loopback, no inherited proxy, CPU/memory/swap/PID/file-size ceilings, toolchain versions, pinned validator commit, lockfile and Prisma schema hashes verified; mounted clean Git HEAD matched 5671f14b106ba8898b45e7e36ee4c7670d406bda.",
     "negative_checks": [
       "An unallowlisted UNSAFE_TEST environment variable was refused with exit 1 before target execution.",
       "An unsupported runner lane was refused with exit 2 before target execution."
     ]
+  },
+  "bounded_test_lane_verification": {
+    "lane": "all",
+    "result": "PASS_LOCAL_BOUNDED_TEST_LANE",
+    "exit_code": 0,
+    "date": "2026-11-01",
+    "source_sha": "5671f14b106ba8898b45e7e36ee4c7670d406bda",
+    "source_archive_sha256": "007ffe506421dc99153c0091fbb8f046553e8b275e895ba5ef76a2ac954b5afd",
+    "image_id": "sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3",
+    "checks": {
+      "lint": "PASS",
+      "typecheck": "PASS",
+      "api": "419 passed",
+      "web": "12 passed",
+      "production_build": "PASS",
+      "playwright": "46 passed (2.8m)"
+    },
+    "container_limits": "--network=none --read-only --user 10001:10001 --cap-drop=ALL --security-opt=no-new-privileges --cpus=1 --memory=1536m --memory-swap=1536m --pids-limit=256 --ulimit fsize=1073741824:1073741824; /scratch tmpfs 1100 MiB; exact candidate and source archive mounted read-only",
+    "interpretation": "Local deterministic validation of the fixed all lane only. It is not the Cloudflare six-phase audit; deferred coverage, independent finding verification, official validators, and final audit report remain open."
   },
   "audit_execution_status": "NOT_RUN"
 }

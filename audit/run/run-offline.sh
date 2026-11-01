@@ -8,8 +8,9 @@ case "$lane" in
   api) ;;
   web) ;;
   browser) ;;
+  browser-smoke) ;;
   all) ;;
-  *) fail 'usage: run-offline.sh {api|web|browser|all}; no arbitrary command execution is supported' ;;
+  *) fail 'usage: run-offline.sh {api|web|browser|browser-smoke|all}; no arbitrary command execution is supported' ;;
 esac
 
 [[ -z "$(find /scratch -mindepth 1 -maxdepth 1 -print -quit)" ]] || fail '/scratch must be empty at lane start'
@@ -17,11 +18,6 @@ mkdir -p /scratch/home /scratch/tmp
 chmod 0700 /scratch/home /scratch/tmp
 
 [[ "${AUDIT_SOURCE_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || fail 'AUDIT_SOURCE_SHA must identify the reviewed source commit'
-[[ -d /scratch/source && -r /scratch/source/package-lock.json ]] || fail 'trusted parent must place the exact candidate copy in /scratch/source'
-[[ -r /scratch/source/.audit-source-sha ]] || fail 'trusted parent must write the source SHA marker into the scratch copy'
-[[ "$(cat /scratch/source/.audit-source-sha)" == "$AUDIT_SOURCE_SHA" ]] || fail 'scratch source SHA marker does not match AUDIT_SOURCE_SHA'
-[[ -L /scratch/source/node_modules ]] || fail 'scratch candidate node_modules must point to the immutable preinstalled toolchain'
-[[ "$(sha256sum /scratch/source/package-lock.json | awk '{print $1}')" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'candidate lockfile does not match the toolchain manifest'
 
 export DATABASE_URL='postgresql://support_dev:audit-only@127.0.0.1:5432/support_dev'
 export DATABASE_URL_UNPOOLED="$DATABASE_URL"
@@ -96,8 +92,23 @@ with tarfile.open('/input/source.tar', 'r:') as archive:
 
 source_sha = os.environ['AUDIT_SOURCE_SHA']
 (root / '.audit-source-sha').write_text(source_sha + '\n', encoding='ascii')
-os.symlink('/opt/toolchain/project/node_modules', root / 'node_modules')
+toolchain_modules = pathlib.Path('/opt/toolchain/project/node_modules')
+modules = root / 'node_modules'
+if modules.exists() or modules.is_symlink():
+    raise SystemExit('archive must not contain a node_modules path')
+modules.mkdir(mode=0o700)
+for item in sorted(toolchain_modules.iterdir(), key=lambda path: path.name):
+    if item.name == '.vite-temp':
+        continue
+    os.symlink(item, modules / item.name, target_is_directory=item.is_dir())
+(modules / '.vite-temp').mkdir(mode=0o700)
 PY
+
+[[ -r /scratch/source/package-lock.json ]] || fail 'archive did not contain the package lockfile'
+[[ "$(cat /scratch/source/.audit-source-sha)" == "$AUDIT_SOURCE_SHA" ]] || fail 'scratch source SHA marker does not match AUDIT_SOURCE_SHA'
+[[ -d /scratch/source/node_modules && ! -L /scratch/source/node_modules ]] || fail 'scratch candidate node_modules overlay is missing'
+[[ -L /scratch/source/node_modules/.bin && -d /scratch/source/node_modules/.vite-temp && -w /scratch/source/node_modules/.vite-temp ]] || fail 'scratch-only Vite temp path or immutable binary links are missing'
+[[ "$(sha256sum /scratch/source/package-lock.json | awk '{print $1}')" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'candidate lockfile does not match the toolchain manifest'
 
 pg_bin="$(find /usr/lib/postgresql -mindepth 2 -maxdepth 2 -type d -name bin -print -quit)"
 [[ -x "$pg_bin/initdb" && -x "$pg_bin/pg_ctl" && -x "$pg_bin/psql" ]] || fail 'PostgreSQL server/client binaries are missing from the prepared toolchain'
@@ -119,6 +130,10 @@ CREATE ROLE support_dev LOGIN PASSWORD 'audit-only';
 CREATE ROLE support_test LOGIN PASSWORD 'audit-only';
 CREATE DATABASE support_dev OWNER support_dev;
 CREATE DATABASE support_test OWNER support_test;
+REVOKE CONNECT ON DATABASE support_dev FROM PUBLIC;
+GRANT CONNECT ON DATABASE support_dev TO support_dev;
+REVOKE CONNECT ON DATABASE support_test FROM PUBLIC;
+GRANT CONNECT ON DATABASE support_test TO support_test;
 SQL
 
 cd /scratch/source
@@ -127,18 +142,33 @@ npm run db:generate --workspace api
 case "$lane" in
   api)
     npm run db:migrate:test
-    npm run test:api
+    npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
     ;;
   web)
-    npm run test:web
+    npm run test:web -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
     ;;
   browser)
     npm run db:migrate:test
-    npm run test:e2e -- --workers=1
+    npm run test:e2e -- --workers=1 --timeout=90000
+    ;;
+  browser-smoke)
+    npm run db:migrate:test
+    if DEBUG='pw:browser' NODE_OPTIONS='--report-on-fatalerror --report-directory=/scratch' npm run test:e2e -- --workers=1 --timeout=90000 --grep='redirects unauthenticated visits to the sign-in page'; then
+      browser_status=0
+    else
+      browser_status=$?
+    fi
+    python3 -c 'import glob,json; [print("NODE_FATAL_REPORT:", f, json.dumps({"header":(r:=json.load(open(f))).get("header"),"javascriptStack":r.get("javascriptStack"),"nativeStack":r.get("nativeStack")},indent=2)[:12000]) for f in glob.glob("/scratch/report.*.json")]'
+    exit "$browser_status"
     ;;
   all)
     npm run db:migrate:test
-    npm run check
-    npm run test:e2e -- --workers=1
+    npm run lint
+    npm run typecheck
+    npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
+    npm run test:web -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
+    npm run test:e2e -- --list
+    npm run build
+    npm run test:e2e -- --workers=1 --timeout=90000
     ;;
 esac
