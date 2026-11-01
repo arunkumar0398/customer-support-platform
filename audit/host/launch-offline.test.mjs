@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { prepareSourceSnapshot, removePrivateInputDir, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation } from './launch-offline.mjs';
+import { prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -14,6 +14,10 @@ test('requires the trusted launcher itself to come from the selected repository'
  const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../..'); assert.match(await verifyLauncherLocation(root),/audit[\\/]host[\\/]launch-offline\.mjs$/);
  const foreign=await mkdtemp(path.join(os.tmpdir(),'foreign-audit-repo-')); t.after(()=>rm(foreign,{recursive:true,force:true}));
  await assert.rejects(verifyLauncherLocation(foreign),/selected source repository/);
+});
+test('retains bounded promoter stderr when the trusted helper exits before readiness', () => {
+ assert.equal(promoterExitMessage(2,null,'PROMOTION_REFUSED: root open failed'),'promoter exited early: 2/null; stderr: PROMOTION_REFUSED: root open failed');
+ const long=promoterExitMessage(2,null,'x'.repeat(3000));assert.ok(long.length<=2040);assert.match(long,/^promoter exited early: 2\/null; stderr: x+$/);
 });
 test('removes only a real direct child of the private host temp directory', async t => {
  const input=await mkdtemp(path.join(os.tmpdir(),'csp-audit-input-test-')); await writeFile(path.join(input,'source.tar'),'synthetic source');
