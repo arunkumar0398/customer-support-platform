@@ -10,6 +10,8 @@ import { fileURLToPath } from 'node:url';
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const PROJECT=path.resolve(HERE,'../..');
 const IMAGE_DIGEST='sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3';
+const FIXED_LANES=Object.freeze(['api','web','browser','browser-smoke','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']);
+export function isSupportedLane(lane){return FIXED_LANES.includes(lane);}
 const MAX_ARCHIVE=600*1024*1024;
 const SENSITIVE_DIRECTORY=/^(?:credentials?|secrets?|tokens?|passwords?)$/i;
 const SENSITIVE_DATA_FILE=/^(?:credentials?|secrets?|tokens?|passwords?)(?:\..*)?$/i;
@@ -93,7 +95,7 @@ export async function prepareSourceSnapshot({repoRoot,commit,outputDir,toolchain
  if(!repoRoot||!commit||!outputDir) throw new Error('repoRoot, explicit commit, and outputDir are required');
  if(!/^[0-9a-f]{40}$/.test(commit)) throw new Error('explicit commit must be a full 40-character SHA');
  if(toolchainDigest!==IMAGE_DIGEST) throw new Error('toolchain image digest differs from the prepared immutable image');
- if(!['api','web','browser','browser-smoke','all'].includes(lane)) throw new Error('unsupported fixed audit lane');
+ if(!isSupportedLane(lane)) throw new Error('unsupported fixed audit lane');
  const actualHead=runGit(repoRoot,['rev-parse','HEAD']).trim(); if(actualHead!==commit) throw new Error('selected commit is not the current HEAD');
  const dirty=runGit(repoRoot,['status','--porcelain','--untracked-files=all']).trim(); if(dirty) throw new Error('source worktree must be clean');
  const tree=validateTrackedSourceTree(repoRoot,commit); const treeManifest=buildTreeManifest(repoRoot,commit,tree); await mkdir(outputDir,{recursive:true,mode:0o700});
@@ -150,7 +152,7 @@ function redactCapturedOutput(value){
   .replace(/[A-Za-z]:\\[^\s'"<>]+/g,'[HOST_PATH]');
 }
 export async function writePromotionInputs({directory,preflight,target,lane,commit,runId}={}){
- if(!directory||!preflight||!target||!['api','web','browser','browser-smoke','all'].includes(lane)||!/^[0-9a-f]{40}$/.test(commit||'')||!/^audit-[A-Za-z0-9._-]{1,60}$/.test(runId||''))throw new Error('invalid parent promotion input metadata');
+ if(!directory||!preflight||!target||!isSupportedLane(lane)||!/^[0-9a-f]{40}$/.test(commit||'')||!/^audit-[A-Za-z0-9._-]{1,60}$/.test(runId||''))throw new Error('invalid parent promotion input metadata');
  const requested=path.resolve(directory);const actual=await realpath(requested);const dst=await lstat(directory);if(actual!==requested||!dst.isDirectory()||dst.isSymbolicLink())throw new Error('promotion input must be an existing real directory');
  if((await (await import('node:fs/promises')).readdir(directory)).length!==0)throw new Error('promotion input directory must be empty');
  const preflightBytes=Buffer.from(redactCapturedOutput('--- stdout ---\n'+String(preflight.stdout||'')+'\n--- stderr ---\n'+String(preflight.stderr||''))+'\n');

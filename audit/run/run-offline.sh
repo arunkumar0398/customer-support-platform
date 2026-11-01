@@ -6,11 +6,14 @@ fail() { printf 'AUDIT_RUN_REFUSED: %s\n' "$1" >&2; exit 2; }
 lane="${1:-}"
 case "$lane" in
   api) ;;
+  api-provisioning-file) ;;
+  api-provisioning-clean-selected) ;;
+  api-provisioning-foreign-membership) ;;
   web) ;;
   browser) ;;
   browser-smoke) ;;
   all) ;;
-  *) fail 'usage: run-offline.sh {api|web|browser|browser-smoke|all}; no arbitrary command execution is supported' ;;
+  *) fail 'usage: run-offline.sh {api|api-provisioning-file|api-provisioning-clean-selected|api-provisioning-foreign-membership|web|browser|browser-smoke|all}; no arbitrary command execution is supported' ;;
 esac
 
 [[ -z "$(find /scratch -mindepth 1 -maxdepth 1 -print -quit)" ]] || fail '/scratch must be empty at lane start'
@@ -147,6 +150,18 @@ case "$lane" in
   api)
     npm run db:migrate:test
     npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
+    ;;
+  api-provisioning-file)
+    npm run db:migrate:test
+    npm run test:api -- tests/preview/provisioning.test.ts --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=1
+    ;;
+  api-provisioning-clean-selected)
+    npm run db:migrate:test
+    npm run test:api -- tests/preview/provisioning.test.ts --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=1 --testNamePattern='cleans only the selected run and keeps another run intact'
+    ;;
+  api-provisioning-foreign-membership)
+    npm run db:migrate:test
+    npm run test:api -- tests/preview/provisioning.test.ts --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=1 --testNamePattern='refuses cleanup when a fixture organization has a foreign membership and changes no rows'
     ;;
   web)
     npm run test:web -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2

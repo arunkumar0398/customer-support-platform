@@ -3,7 +3,7 @@ import os from 'node:os'; import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { formatPromoterDiagnostics, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
+import { formatPromoterDiagnostics, isSupportedLane, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -27,6 +27,10 @@ async function readTarMember(archivePath,name){
  }
  throw new Error('tar member not found: '+name);
 }
+test('exposes only fixed offline lanes, including bounded provisioning diagnostics', () => {
+ for (const lane of ['api','web','browser','browser-smoke','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']) assert.equal(isSupportedLane(lane),true,lane);
+ assert.equal(isSupportedLane('api arbitrary command'),false);
+});
 test('requires the trusted launcher itself to come from the selected repository', async t => {
  const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../..'); assert.match(await verifyLauncherLocation(root),/audit[\\/]host[\\/]launch-offline\.mjs$/);
  const foreign=await mkdtemp(path.join(os.tmpdir(),'foreign-audit-repo-')); t.after(()=>rm(foreign,{recursive:true,force:true}));
