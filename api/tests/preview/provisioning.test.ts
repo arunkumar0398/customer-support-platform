@@ -27,6 +27,19 @@ async function provision(id: string) {
   return result;
 }
 
+async function expectNoRunResidue(run: Awaited<ReturnType<typeof provisionFixtures>>) {
+  const organizationIds = run.manifest.organizations.map((row) => row.id);
+  const userIds = run.manifest.users.map((row) => row.id);
+  const ticketIds = run.manifest.tickets.map((row) => row.id);
+  const rows = await client.query(
+    'SELECT (SELECT count(*)::int FROM "Organization" WHERE id = ANY($1::uuid[])) AS organizations, (SELECT count(*)::int FROM "User" WHERE id = ANY($2::uuid[])) AS users, (SELECT count(*)::int FROM "Membership" WHERE "organizationId" = ANY($1::uuid[]) OR "userId" = ANY($2::uuid[])) AS memberships, (SELECT count(*)::int FROM "Ticket" WHERE id = ANY($3::uuid[])) AS tickets, (SELECT count(*)::int FROM "Comment" WHERE "ticketId" = ANY($3::uuid[])) AS comments, (SELECT count(*)::int FROM "ActivityEvent" WHERE "ticketId" = ANY($3::uuid[])) AS activity, (SELECT count(*)::int FROM "Session" WHERE "userId" = ANY($2::uuid[])) AS sessions',
+    [organizationIds, userIds, ticketIds],
+  );
+  expect(rows.rows[0]).toEqual({ organizations: 0, users: 0, memberships: 0, tickets: 0, comments: 0, activity: 0, sessions: 0 });
+  await expect(readFile(run.files.credentialsPath)).rejects.toMatchObject({ code: 'ENOENT' });
+  await expect(readFile(run.files.manifestPath)).rejects.toMatchObject({ code: 'ENOENT' });
+}
+
 beforeAll(async () => {
   expect(connectionString, 'TEST_DATABASE_URL must identify a disposable local support_test database').toBeTruthy();
   const expected = assertSafeTestDatabaseUrl(connectionString!);
@@ -264,6 +277,8 @@ describe('Preview fixture safety and lifecycle', () => {
     });
     await rm(second.files.credentialsPath, { force: true });
     await rm(second.files.manifestPath, { force: true });
+    await expectNoRunResidue(first);
+    await expectNoRunResidue(second);
   });
 
   it('refuses cleanup when a fixture organization has a foreign membership and changes no rows', async () => {
@@ -287,6 +302,8 @@ describe('Preview fixture safety and lifecycle', () => {
       await rm(run.files.credentialsPath, { force: true });
       await rm(run.files.manifestPath, { force: true });
     }
+    await expectNoRunResidue(first);
+    await expectNoRunResidue(second);
   });
 
   it('aborts cleanup before deletes if child-owner verification reports a foreign actor', async () => {
