@@ -5,7 +5,7 @@ Repository: `arunkumar0398/customer-support-platform`, private branch `codex/cle
 Application implementation source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`
 Original documentation candidate reviewed: `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` (historical)
 
-Latest reconciled docs-status candidate: `d30a24b771dc32a3b80ceffa14a15b60ea15ca69`, Actions #99 `verify` passed. Exact-SHA Vercel Web/API statuses say “Deployment has completed”; no runtime/database/role-flow smoke was run. Parent docs-status candidate `3fde220d2586cbd67935b75019e7347cf79a3a47` / #98 also passed. Latest test-bearing candidate: `e78b19c6d6aa2e02876e8444aa42413fa4159428`, Actions #97 passed, with Vercel ignored-build cancellations. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
+Latest reconciled docs-status candidate: `7ec417024dbaaf4884c0f8eaba4758deafdcc01f`, Actions #100 `verify` passed. Exact-SHA Vercel Web/API statuses say “Deployment has completed”; no runtime/database/role-flow smoke was run. Parent docs-status candidates `3fde220d2586cbd67935b75019e7347cf79a3a47` / #98 and `d30a24b771dc32a3b80ceffa14a15b60ea15ca69` / #99 also passed. Latest test-bearing candidate: `e78b19c6d6aa2e02876e8444aa42413fa4159428`, Actions #97 passed, with Vercel ignored-build cancellations. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
 
 Latest exact-CI/Vercel-verified docs/test candidate before this review refresh: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions #95, Web/API success.
 Assessment basis: `reference/assessment.pdf`, implementation scope and deliverables section.
@@ -56,7 +56,7 @@ The following answer outlines are grounded in `docs/performance.md`, `docs/data-
 
 ## Independent release review
 
-Exact docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428` received a read-only G7 review after Actions #97 completed. Verdict: **BLOCKED_BY_ENVIRONMENT**. The reviewer confirmed A25’s scoped local seed/sign-in result and CI coverage. A fresh read-only G7 review of docs-status candidate `d30a24b771dc32a3b80ceffa14a15b60ea15ca69` also returned **BLOCKED_BY_ENVIRONMENT** after Actions #99 passed. Remaining blockers include Preview role/tenant acceptance, full compliant offline security audit, evaluator access, broader A22/A23 coverage, A28 human rehearsal, and SQL migration reversal evidence. Vercel Web/API statuses on d30 say “Deployment has completed”; no runtime/database/role smoke was run.
+Exact docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428` received a read-only G7 review after Actions #97 completed. Verdict: **BLOCKED_BY_ENVIRONMENT**. Fresh read-only G7 reviews of docs-status candidates `d30a24b771dc32a3b80ceffa14a15b60ea15ca69` and `7ec417024dbaaf4884c0f8eaba4758deafdcc01f` also returned **BLOCKED_BY_ENVIRONMENT** after Actions #99 and #100 passed. Remaining blockers include Preview role/tenant acceptance, full compliant offline security audit, evaluator access, broader A22/A23 coverage, A28 human rehearsal, and SQL migration reversal evidence. Vercel Web/API statuses on 7ec say “Deployment has completed”; no runtime/database/role smoke was run.
 
 ## Exact local acceptance rerun
 
