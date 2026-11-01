@@ -48,15 +48,22 @@ def validate_execution(execution):
  if not isinstance(execution.get('environmentAllowlist'),list) or set(execution['environmentAllowlist'])!=allowed: fail('environment allowlist differs from reviewed safe configuration')
  timeout=execution.get('requestedTimeoutSeconds')
  if not isinstance(timeout,int) or timeout<1 or timeout>execution['wallClockLimitSeconds']: fail('requested wall-clock timeout is outside the enforced bound')
+ if execution.get('preflightTimeoutSeconds')!=180 or execution.get('promoterStartupTimeoutSeconds')!=60: fail('preflight timeout or promoter startup timeout differs from the reviewed bound')
  if execution.get('promoterLimits')!={'cpu':0.25,'memoryBytes':268435456,'swapBytes':0,'pids':32,'fileSizeLimitBytes':10485760}: fail('unsafe trusted promoter limits')
- target=execution.get('targetArgumentsTemplate'); promoter=execution.get('promoterArguments')
- if not isinstance(target,list) or not isinstance(promoter,list): fail('Docker argument records are missing')
- target_text='\\0'.join(target); promoter_text='\\0'.join(promoter)
+ target=execution.get('targetArgumentsTemplate'); preflight=execution.get('preflightArguments'); promoter=execution.get('promoterArguments')
+ if not isinstance(target,list) or not isinstance(preflight,list) or not isinstance(promoter,list): fail('Docker argument records are missing')
+ target_text='\0'.join(target); preflight_text='\0'.join(preflight); promoter_text='\0'.join(promoter)
  required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly']
  if any(value not in target_text for value in required_target) or 'target=/artifacts' in target_text or '/var/run/docker.sock' in target_text or '--privileged' in target_text: fail('unsafe or incomplete target Docker arguments')
  tmpfs='/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid=10001,gid=10001,mode=0700'
  tmpfs_args=[target[index+1] for index,value in enumerate(target[:-1]) if value=='--tmpfs']
  if tmpfs_args != [tmpfs] or 'target=/scratch' in target_text: fail('unsafe target scratch configuration: expected one private bounded tmpfs only')
+ required_preflight=['run','--pull=never','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','fsize=1073741824:1073741824','target=/input,readonly','target=/runner,readonly','--entrypoint','/bin/bash','/runner/preflight.sh']
+ if any(value not in preflight_text for value in required_preflight) or 'target=/artifacts' in preflight_text or '/var/run/docker.sock' in preflight_text or '--privileged' in preflight_text: fail('unsafe or incomplete preflight Docker arguments')
+ preflight_tmpfs=[preflight[index+1] for index,value in enumerate(preflight[:-1]) if value=='--tmpfs']
+ if preflight_tmpfs!=[tmpfs]: fail('unsafe preflight scratch configuration')
+ required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/runner,readonly','target=/artifacts','target=/scratch,readonly','--pids-limit=32']
+ if any(value not in promoter_text for value in required_promoter) or '/var/run/docker.sock' in promoter_text or '--privileged' in promoter_text: fail('unsafe trusted-promoter Docker arguments')
  promotion_input=execution.get('parentPromotionInputDir')
  if not isinstance(promotion_input,str) or not promotion_input or len(promotion_input)>4096 or promotion_input==execution.get('hostInputDir') or promotion_input not in promoter_text or promotion_input in target_text: fail('parent promotion input must be separate and promoter-only')
  required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/runner,readonly','target=/artifacts','target=/scratch,readonly','--pids-limit=32']
