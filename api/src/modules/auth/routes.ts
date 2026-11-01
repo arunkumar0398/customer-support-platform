@@ -16,7 +16,7 @@ const loginSchema = z.object({
   password: z.string().min(1).max(256),
 });
 
-function loginThrottle(options: AuthOptions): RequestHandler {
+export function createLoginThrottle(options: AuthOptions): RequestHandler {
   const attempts = new Map<string, { count: number; expires: number }>();
   const windowMs = 15 * 60 * 1000;
   const ipLimit = options.testLoginThrottleLimits?.ip ?? 20;
@@ -67,7 +67,7 @@ export function createAuthRouter(options: AuthOptions): Router {
       throw new ApiError(403, 'CSRF_REJECTED', 'Request origin or CSRF proof is invalid.');
     }
     next();
-  }, validateBody(loginSchema), loginThrottle(options), async (request, response) => {
+  }, validateBody(loginSchema), createLoginThrottle(options), async (request, response) => {
     const settings = authSettings(options);
     const result = await passwordLogin(settings.getClient(), request.body.email, request.body.password,
       settings.now(), readSessionToken(request));
