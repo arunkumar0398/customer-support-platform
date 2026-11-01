@@ -13,7 +13,7 @@ async function repo(t) {
  const fs=await import('node:fs/promises');for(const [name,content] of Object.entries(files)){const file=path.join(root,name);await fs.mkdir(path.dirname(file),{recursive:true});await writeFile(file,content);}
  const lock=files['package-lock.json'];const schema=files['api/prisma/schema.prisma'];const digest=value=>createHash('sha256').update(value).digest('hex');
  await fs.mkdir(path.join(root,'audit/provision'),{recursive:true});
- await writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:digest(lock),prisma_schema_sha256:digest(schema)}));
+ await writeFile(path.join(root,'audit/provision/toolchain-manifest.json'),JSON.stringify({image_id:'sha256:'+'e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3',target_lockfile_sha256:digest(lock),prepared_image_lockfile_sha256:'30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0',prisma_schema_sha256:digest(schema)}));
  git('add','.'); git('commit','-qm','source'); return {root,git};
 }
 async function readTarMember(archivePath,name){
@@ -81,6 +81,10 @@ test('keeps selected Git blob bytes when host core.autocrlf is enabled', async t
  const manifestBlob=execFileSync('git',['cat-file','blob',result.source.commit+':audit/provision/toolchain-manifest.json'],{cwd:root,encoding:null});
  assert.equal(result.trustedCode.launcherSha256,createHash('sha256').update(launcherBlob).digest('hex'));
  assert.equal(result.toolchain.manifestSha256,createHash('sha256').update(manifestBlob).digest('hex'));
+ assert.equal(result.toolchain.sourceLockfileSha256,createHash('sha256').update(execFileSync('git',['cat-file','blob',result.source.commit+':package-lock.json'],{cwd:root,encoding:null})).digest('hex'));
+ assert.equal(result.toolchain.lockfileSha256,'30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0');
+ const runnerBlob=execFileSync('git',['cat-file','blob',result.source.commit+':audit/run/run-offline.sh'],{cwd:root,encoding:null});
+ assert.equal(result.trustedCode.runnerSha256,createHash('sha256').update(runnerBlob).digest('hex'));
 });
 test('reads the Git archive commit marker without breaking a large archive stream', async t => {
  const {root,git}=await repo(t);await writeFile(path.join(root,'large-source.bin'),Buffer.alloc(8*1024*1024,0x41));git('add','large-source.bin');git('commit','-qm','large source');

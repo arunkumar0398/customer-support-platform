@@ -39,7 +39,7 @@ if env | cut -d= -f1 | grep -Eiq '^(HTTP_PROXY|HTTPS_PROXY|ALL_PROXY|NO_PROXY|ht
 fi
 while IFS= read -r variable_name; do
   case "$variable_name" in
-    AUDIT_ARCHIVE_SHA256|AUDIT_EXPECTED_IMAGE_DIGEST|AUDIT_LAUNCH_RECORD_SHA256|AUDIT_LOCK_SHA256|AUDIT_SOURCE_SHA|AUDIT_TREE_MANIFEST_SHA256|CI|DATABASE_URL|DATABASE_URL_UNPOOLED|HOME|HOSTNAME|NODE_ENV|NODE_VERSION|PATH|PLAYWRIGHT_BROWSERS_PATH|PWD|SHLVL|TEST_DATABASE_URL|TMPDIR|YARN_VERSION|_)
+    AUDIT_ARCHIVE_SHA256|AUDIT_EXPECTED_IMAGE_DIGEST|AUDIT_LAUNCH_RECORD_SHA256|AUDIT_LOCK_SHA256|AUDIT_SOURCE_LOCK_SHA256|AUDIT_SOURCE_SHA|AUDIT_TREE_MANIFEST_SHA256|CI|DATABASE_URL|DATABASE_URL_UNPOOLED|HOME|HOSTNAME|NODE_ENV|NODE_VERSION|PATH|PLAYWRIGHT_BROWSERS_PATH|PWD|SHLVL|TEST_DATABASE_URL|TMPDIR|YARN_VERSION|_)
       ;;
     *) fail "environment variable is outside the explicit allowlist: ${variable_name}" ;;
   esac
@@ -85,6 +85,8 @@ scratch_kib="$(df -Pk /scratch | awk 'NR==2 {print $2}')"
 [[ "$AUDIT_TREE_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'AUDIT_TREE_MANIFEST_SHA256 must be a Git tree-manifest digest'
 [[ "$AUDIT_EXPECTED_IMAGE_DIGEST" == 'sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3' ]] || fail 'unexpected toolchain image digest'
 [[ "$AUDIT_LOCK_SHA256" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'lockfile hash differs from prepared toolchain'
+[[ "$AUDIT_SOURCE_LOCK_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'source lockfile hash is missing or invalid'
+[[ "$(sha256sum /opt/toolchain/project/package-lock.json | awk '{print $1}')" == "$AUDIT_LOCK_SHA256" ]] || fail 'prepared image lockfile bytes do not match the pinned image lock digest'
 python3 /runner/verify_input.py || fail 'trusted source binding verification failed'
 pass "source archive, launch record, tree identity and runner hashes verified for $AUDIT_SOURCE_SHA"
 [[ -z "${DATABASE_URL:-}" || "$DATABASE_URL" == 'postgresql://support_dev:audit-only@127.0.0.1:5432/support_dev' ]] || fail 'DATABASE_URL must be the fixed loopback dummy URL'

@@ -44,7 +44,7 @@ def validate_execution(execution):
  if (execution['uid'],execution['gid'],execution['capabilities'],execution['noNewPrivileges'])!=(10001,10001,'drop-all',True): fail('unsafe identity or privilege configuration')
  if (execution['cpuLimit'],execution['memoryLimitBytes'],execution['swapLimitBytes'],execution['pidLimit'],execution['fileSizeLimitBytes'],execution['wallClockLimitSeconds'])!=(1,1610612736,0,256,1073741824,5400): fail('unsafe target resource or time limit')
  if execution['scratch']!={'mode':'tmpfs','maxBytes':1153433600}: fail('unsafe scratch configuration')
- allowed={'PATH','HOME','TMPDIR','CI','NODE_ENV','AUDIT_SOURCE_SHA','AUDIT_ARCHIVE_SHA256','AUDIT_TREE_MANIFEST_SHA256','AUDIT_EXPECTED_IMAGE_DIGEST','AUDIT_LOCK_SHA256','AUDIT_LAUNCH_RECORD_SHA256','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL'}
+ allowed={'PATH','HOME','TMPDIR','CI','NODE_ENV','AUDIT_SOURCE_SHA','AUDIT_ARCHIVE_SHA256','AUDIT_TREE_MANIFEST_SHA256','AUDIT_EXPECTED_IMAGE_DIGEST','AUDIT_LOCK_SHA256','AUDIT_SOURCE_LOCK_SHA256','AUDIT_LAUNCH_RECORD_SHA256','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL'}
  if not isinstance(execution.get('environmentAllowlist'),list) or set(execution['environmentAllowlist'])!=allowed: fail('environment allowlist differs from reviewed safe configuration')
  timeout=execution.get('requestedTimeoutSeconds')
  if not isinstance(timeout,int) or timeout<1 or timeout>execution['wallClockLimitSeconds']: fail('requested wall-clock timeout is outside the enforced bound')
@@ -81,7 +81,8 @@ def verify():
  count=verify_archive_payload(archive_path,tree)
  if count!=source['treeEntries']: fail('Git tree manifest entry count mismatch')
  if tool['imageDigest']!=os.environ.get('AUDIT_EXPECTED_IMAGE_DIGEST'): fail('toolchain image digest mismatch')
- if tool['lockfileSha256']!=os.environ.get('AUDIT_LOCK_SHA256'): fail('lockfile digest mismatch')
+ if tool['lockfileSha256']!=os.environ.get('AUDIT_LOCK_SHA256'): fail('prepared image lockfile digest mismatch')
+ if tool['sourceLockfileSha256']!=os.environ.get('AUDIT_SOURCE_LOCK_SHA256'): fail('selected source lockfile digest mismatch')
  expected={'preflight.sh':trusted['preflightSha256'],'run-offline.sh':trusted['runnerSha256'],'promote_artifacts.py':trusted['promoterSha256'],'verify_input.py':trusted['verifierSha256']}
  for name,want in expected.items():
   actual,_=digest_file('/runner/'+name,16*1024*1024)
@@ -100,10 +101,10 @@ def verify():
    return digest.hexdigest()
   if hash_member('audit/host/launch-offline.mjs')!=trusted['launcherSha256']: fail('committed launcher digest mismatch')
   if hash_member('audit/provision/toolchain-manifest.json')!=tool['manifestSha256']: fail('toolchain manifest archive digest mismatch')
-  if hash_member('package-lock.json')!=tool['lockfileSha256']: fail('package lock archive digest mismatch')
+  if hash_member('package-lock.json')!=tool['sourceLockfileSha256']: fail('source package lock archive digest mismatch')
   if hash_member('api/prisma/schema.prisma')!=tool['prismaSchemaSha256']: fail('Prisma schema archive digest mismatch')
   manifest=json.loads(archive.extractfile(members['audit/provision/toolchain-manifest.json']).read())
-  if manifest.get('image_id')!=tool['imageDigest'] or manifest.get('target_lockfile_sha256')!=tool['lockfileSha256'] or manifest.get('prisma_schema_sha256')!=tool['prismaSchemaSha256']: fail('manifest values do not match launch record')
+  if manifest.get('image_id')!=tool['imageDigest'] or manifest.get('target_lockfile_sha256')!=tool['sourceLockfileSha256'] or manifest.get('prepared_image_lockfile_sha256')!=tool['lockfileSha256'] or manifest.get('prisma_schema_sha256')!=tool['prismaSchemaSha256']: fail('manifest values do not match launch record')
  return {'commit':source['commit'],'tree':source['tree'],'treeEntries':count,'archiveSha256':archive_hash,'imageDigest':tool['imageDigest'],'runners':'bound'}
 if __name__=='__main__':
  try: print('SOURCE_BINDING_PASS '+json.dumps(verify(),sort_keys=True))

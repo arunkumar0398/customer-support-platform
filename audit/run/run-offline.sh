@@ -110,7 +110,16 @@ PY
 [[ "$(cat /scratch/source/.audit-source-sha)" == "$AUDIT_SOURCE_SHA" ]] || fail 'scratch source SHA marker does not match AUDIT_SOURCE_SHA'
 [[ -d /scratch/source/node_modules && ! -L /scratch/source/node_modules ]] || fail 'scratch candidate node_modules overlay is missing'
 [[ -L /scratch/source/node_modules/.bin && -d /scratch/source/node_modules/.vite-temp && -w /scratch/source/node_modules/.vite-temp ]] || fail 'scratch-only Vite temp path or immutable binary links are missing'
-[[ "$(sha256sum /scratch/source/package-lock.json | awk '{print $1}')" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'candidate lockfile does not match the toolchain manifest'
+[[ "$(sha256sum /scratch/source/package-lock.json | awk '{print $1}')" == "$AUDIT_SOURCE_LOCK_SHA256" ]] || fail 'source archive lockfile differs from the selected Git blob digest'
+python3 - <<'PY'
+from pathlib import Path
+source=Path('/scratch/source/package-lock.json').read_bytes()
+prepared=Path('/opt/toolchain/project/package-lock.json').read_bytes()
+if b'\r' in source.replace(b'\r\n', b'') or b'\r' in prepared.replace(b'\r\n', b''):
+    raise SystemExit('unexpected bare carriage return in package lock')
+if source.replace(b'\r\n', b'\n') != prepared.replace(b'\r\n', b'\n'):
+    raise SystemExit('selected source lockfile content differs from prepared toolchain lockfile')
+PY
 
 pg_bin="$(find /usr/lib/postgresql -mindepth 2 -maxdepth 2 -type d -name bin -print -quit)"
 [[ -x "$pg_bin/initdb" && -x "$pg_bin/pg_ctl" && -x "$pg_bin/psql" ]] || fail 'PostgreSQL server/client binaries are missing from the prepared toolchain'

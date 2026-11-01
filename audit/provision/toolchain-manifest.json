@@ -2,8 +2,9 @@
   "manifest_version": 1,
   "bundle_status": "prepared_local_image_and_bounded_all_lane_passed_audit_incomplete",
   "prepared_from_source_sha": "5671f14b106ba8898b45e7e36ee4c7670d406bda",
-  "target_lockfile_sha256": "30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0",
-  "prisma_schema_sha256": "5d69924bc79db63b85462f29d416f0116145c2f11c566f32a2742d97e8ff86bb",
+  "target_lockfile_sha256": "0ec746129cd14c11105c4e8f9762032c82d7bb4ef2336565259e2c849fb6070d",
+  "prepared_image_lockfile_sha256": "30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0",
+  "prisma_schema_sha256": "1f8ffb6acf0df5b91ee72b5dcc4ef68257fef50ae451b68253c04e2c3c4d688d",
   "platform": "linux/amd64",
   "base_image": "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c",
   "versions": {
