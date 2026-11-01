@@ -1,4 +1,10 @@
 # Acceptance Status
+## Isolated Preview fixture tooling package — 2026-11-01
+
+- On branch `codex/preview-provisioner-f55decb` based on `f55decb8368f5ea3997020845577372a8eafb6a0`, the fixture provisioner passed focused fixture/password tests (27/27), API 419/419, Web 12/12, and `npm run check` on the loopback-only disposable `support_test` database. Separate Playwright runs passed auth (8/8) and the local lifecycle (1/1), including seven 404 ownership/tenant denials with unchanged snapshots and zero residual run data after cleanup. See [local provisioner evidence](preview-fixtures-local.md) and [usage guide](../../docs/preview-validation.md).
+- This is tooling evidence only. No hosted data was written and no Preview role journey ran; the browser journey above used only the local disposable database. A35 remains `BLOCKED / NOT_RUN`; runtime API-to-Neon branch alignment and safe hosted credentials remain unverified. The bounded audit is still `BLOCKED / NOT_RUN`. A22/A23/A37 remain partial; a 46-case Playwright listing is not a full browser execution or screen-reader review; only the auth and lifecycle suites above were executed.
+- These commands ran on source changes rooted at `f55decb` before the package commit; no exact-SHA CI result is claimed. Do not apply this evidence to the separate dirty `b2fd369` checkout.
+
 ## Current local UI follow-up — 2026-11-01
 
 - Sign-in rendered checks at 320, 375, 1280, 1440, and 1920 CSS px measured the three adjusted text pairs at 5.50:1, 5.68:1, and 5.68:1. The 3px focus ring measured 7.30:1 against the sign-in panel surface. Document/body widths matched each viewport; no horizontal overflow was measured.

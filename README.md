@@ -1,4 +1,10 @@
 # Multi-Tenant Customer Support Platform
+## Isolated Preview fixture tooling work — 2026-11-01
+
+The local Preview fixture package based on `f55decb8368f5ea3997020845577372a8eafb6a0` passed focused fixture/password tests (27/27), full API/Web tests (419/419 and 12/12), and `npm run check`; the latter listed 46 browser tests but did not execute them. Separate browser runs passed authentication 8/8 and the synthetic provision/authenticate/mutate/deny/reconcile/cleanup lifecycle 1/1. See the [local evidence record](evidence/checkpoints/preview-fixtures-local.md), [operator guide](docs/preview-validation.md), and [implementation plan](docs/superpowers/plans/2026-11-01-preview-fixtures-and-release-gates.md). These are local pre-commit checks, not exact-SHA CI.
+
+No Preview/Production data writes or hosted authenticated role probes were made. A35 remains `BLOCKED / NOT_RUN` until the owner verifies API-to-Neon Preview binding and approves a specific run/credential destination. The offline Cloudflare audit, full UI/accessibility matrix, A28 rehearsal, evaluator access, and G7 remain open; release stays on hold.
+
 ## Current local UI follow-up — 2026-11-01
 
 On top of the prior committed UI candidate, a focused follow-up corrected the sign-in focus indicator and three measured text contrast pairs, restored visible focus styling for form controls, and changed dashboard bar animation to use transform scaling. In this isolated worktree, `npm run check` passed (API 392/392, Web 12/12, lint/typecheck/builds) and `npm run test:e2e` passed 45/45. These are local working-tree results; they are not an Actions result or deployed runtime evidence. Rendered measurements and screenshots are in [the Hallmark follow-up report](evidence/reviews/hallmark-followup-2026-11-01/REPORT.md).

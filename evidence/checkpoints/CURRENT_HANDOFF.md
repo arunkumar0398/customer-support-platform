@@ -1,4 +1,12 @@
 # Current session handoff
+## Isolated Preview fixture tooling package — 2026-11-01
+
+- Implementation branch `codex/preview-provisioner-f55decb` starts from `f55decb8368f5ea3997020845577372a8eafb6a0` in a separate worktree. The separate dirty checkout and its screenshot edits/output backup were not modified.
+- The package adds the shared scrypt helper, strict local/Preview target validation, transactional synthetic fixture provision/cleanup, CLI commands, tests, and [operator documentation](../../docs/preview-validation.md). Local checks were run before committing these source changes; no exact-SHA CI result exists yet. The full plan is [here](../../docs/superpowers/plans/2026-11-01-preview-fixtures-and-release-gates.md).
+- Local disposable PostgreSQL verification: focused fixture/password tests 27/27, API 419/419, Web 12/12, typecheck/lint/build passed, `npm run check` exit 0, doc contract exit 0. `npm run check` listed 46 Playwright tests but did not execute them; separate auth browser flow passed 8/8 and the lifecycle browser flow passed 1/1 with zero residual fixtures and private files removed. No screen-reader pass was done. Details and commands are in [evidence](preview-fixtures-local.md).
+- No Preview/Production writes or probes occurred. A35 remains `BLOCKED / NOT_RUN` pending owner-confirmed API/database binding and explicit approval for a named fixture run and credential destination. Offline audit remains `BLOCKED / NOT_RUN` pending a compliant preinstalled Linux bundle. UI A22/A23/A37, A28 rehearsal, evaluator access, and G7 remain open.
+- Worktree tests were run with uncommitted source changes based on `f55decb`; this is not an Actions result, a deployment validation, or evidence for the separate `b2fd369` checkout.
+
 ## Latest substantive local UI follow-up — 2026-11-01
 
 - Isolated worktree baseline: `a0d71d1b4ab6440e1b7108db590a5583854391eb`; current changes are a local working-tree layer, not committed or covered by hosted CI.

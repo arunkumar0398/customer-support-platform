@@ -1,21 +1,8 @@
-import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import type { PrismaClient } from '../../generated/prisma/client.js';
 import { ApiError } from '../../middleware/errors.js';
 import { hashToken, SESSION_DURATION_MS } from './session.js';
-
-const dummyHash = `$scrypt$32768$8$1$${'0'.repeat(32)}$${'0'.repeat(64)}`;
-
-async function verifyPassword(password: string, passwordHash: string): Promise<boolean> {
-  // Fixed parameters prevent a corrupted hash from controlling memory/CPU cost.
-  const parts = /^\$scrypt\$32768\$8\$1\$([0-9a-f]{32})\$([0-9a-f]{64})$/.exec(passwordHash);
-  const [, salt, digest] = parts ?? /^\$scrypt\$32768\$8\$1\$([0-9a-f]{32})\$([0-9a-f]{64})$/.exec(dummyHash)!;
-  const derived = await new Promise<Buffer>((resolve, reject) => {
-    scrypt(password, Buffer.from(salt, 'hex'), 32,
-      { N: 32768, r: 8, p: 1, maxmem: 128 * 1024 * 1024 },
-      (error, key) => error ? reject(error) : resolve(key));
-  });
-  return timingSafeEqual(derived, Buffer.from(digest, 'hex')) && parts !== null;
-}
+import { verifyPassword } from './password.js';
 
 export async function currentIdentity(client: PrismaClient, userId: string) {
   const identity = await client.user.findUnique({
@@ -42,7 +29,7 @@ export async function passwordLogin(
 ) {
   const user = await client.user.findUnique({ where: { email }, select: { id: true, passwordHash: true } });
   // Unknown accounts still perform the same expensive password derivation.
-  const valid = await verifyPassword(password, user?.passwordHash ?? dummyHash);
+  const valid = await verifyPassword(password, user?.passwordHash ?? '');
   if (!user || !valid) throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email or password is incorrect.');
 
   const token = randomBytes(32).toString('hex');
