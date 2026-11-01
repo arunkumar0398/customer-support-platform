@@ -15,6 +15,7 @@ let target: VerifiedTarget;
 let client: Client;
 let outputDirectory: string;
 let verified = false;
+let diagnosticApplicationName: string;
 const createdRuns: Array<Awaited<ReturnType<typeof provisionFixtures>>> = [];
 let collisionSentinelId: string | undefined;
 
@@ -37,6 +38,10 @@ beforeAll(async () => {
   });
   client = connected.client;
   target = connected.identity;
+  diagnosticApplicationName = `pv-provision-${crypto.randomUUID()}`;
+  await client.query("SELECT set_config('application_name', $1, false)", [diagnosticApplicationName]);
+  expect((await client.query('SELECT current_setting($1) AS application_name', ['application_name'])).rows[0].application_name)
+    .toBe(diagnosticApplicationName);
   const identity = await client.query('SELECT current_database() AS database, current_user AS username');
   assertActualTestDatabase(identity.rows[0], expected);
   verified = true;
