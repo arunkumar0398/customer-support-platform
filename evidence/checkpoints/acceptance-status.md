@@ -1,14 +1,12 @@
 # Acceptance Status
+## Verified candidate evidence — 2026-11-01
 
-## Current evidence snapshot — 2026-11-01
-
-- Exact committed candidate: 070bf718e6a43a45d699e3b3c065b442c0db7c41; Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), verify passed exact SHA.
-- Vercel API and Web status contexts on 070bf are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)); no runtime or authenticated Preview claim follows.
-- Application source provenance: 24f51c05328fc764bf7089fce8f398adad475648 / #105; historical baseline 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74.
-- Local pre-commit evidence on the 070bf candidate: npm run check passed and E2E 35/35 passed. Exact-commit CI evidence is Actions #114.
-- Uncommitted follow-up based on 070bf adds a retry action to ticket detail load failure. Local npm run check and E2E 36/36 passed; this does not update individual acceptance rows or constitute exact-SHA CI.
-- Hallmark report-only render: [evidence](../reviews/hallmark-2026-11-01.md), sign-in route only; it does not close A22/A23/A37.
-- A35 Preview remains BLOCKED / NOT_RUN; Cloudflare audit remains BLOCKED / NOT_RUN; A22/A23/A37 remain partial. A36 remains scoped to local code recovery/prior-code compatibility; SQL down-migration and PITR untested. A28 and evaluator access remain open. Keep release hold.
+- 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871). Vercel API/Web are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).
+- Application provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 is historical.
+- Follow-up aac66e4da3b3a52b99b6f6021601245c4f405584 passed exact-SHA Actions #115. The 36/36 suite belongs to its local pre-commit tree.
+- The additional agent membership-route denial case and 37/37 combined local suite are follow-up commit evidence beyond aac66e4; they do not change acceptance statuses unless separately reviewed and committed.
+- Hallmark’s report-only render is [recorded](../reviews/hallmark-2026-11-01.md), sign-in route only.
+- A35 Preview remains BLOCKED / NOT_RUN; Cloudflare audit remains BLOCKED / NOT_RUN; A22/A23/A37 remain partial. A36 is scoped to local code recovery/prior-version compatibility; SQL down-migration and PITR untested. A28 and evaluator access remain open.
 
 This ledger summary does not change individual A-row outcomes without additional observed evidence. In particular, the expanded local browser suite is scoped UI evidence only; it does not close full A22/A23/A37 matrices or Preview A35.
 

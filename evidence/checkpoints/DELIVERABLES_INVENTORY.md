@@ -1,12 +1,11 @@
 # Assessment deliverables inventory
+## Verified candidate evidence — 2026-11-01
 
-## Current candidate record — 2026-11-01
-
-- Exact committed candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), job verify.
-- Exact-SHA Vercel provider contexts: API success ([check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd)); Web success ([check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)). These do not prove runtime acceptance.
+- Candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871); Vercel API/Web are provider success statuses only.
 - Application source provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 is historical.
-- Pre-commit local checks on the candidate: npm run check passed and 35/35 E2E passed. The separate uncommitted retry follow-up on this worktree passes npm run check and 36/36 E2E locally.
-- Hallmark report-only render is recorded at [evidence/reviews/hallmark-2026-11-01.md](../reviews/hallmark-2026-11-01.md); only sign-in was rendered. A35, full security audit and full A22/A23/A37 remain open.
+- Follow-up aac66e4da3b3a52b99b6f6021601245c4f405584 passed Actions #115 exact SHA. The subsequent agent membership denial test is included in the follow-up commit and passed in a 37/37 local E2E run with npm run check. Its exact-SHA CI run is separate from #115.
+- Hallmark rendered report is at [evidence/reviews/hallmark-2026-11-01.md](../reviews/hallmark-2026-11-01.md); sign-in only, report-only.
+- Preview A35, full audit, and route-wide UI/accessibility completion remain open.
 
 ### Required assessment deliverables
 

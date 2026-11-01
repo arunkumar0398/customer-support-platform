@@ -1,15 +1,12 @@
 # Testing and CI evidence
+## Verified candidate evidence — 2026-11-01
 
-## Current candidate evidence — 2026-11-01
-
-- Exact committed candidate: 070bf718e6a43a45d699e3b3c065b442c0db7c41, branch codex/ui-retry-audit-070bf. GitHub Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), job verify, passed on that exact SHA.
-- Exact-SHA Vercel provider contexts on 070bf: API success ([check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd)); Web success ([check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)). Provider statuses are not runtime or role-journey evidence.
-- Application implementation provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 is historical.
-- Pre-commit local checks for the committed 070bf tree: npm run check passed; npm run test:e2e passed 35/35. These local checks are separate from exact-SHA Actions #114.
-- Follow-up change currently uncommitted on this worktree adds retry to ticket-detail initial-load errors. Its local npm run check passed (API 392/392, Web 12/12, typecheck/lint/discovery/build) and npm run test:e2e passed 36/36. This evidence is for the uncommitted worktree based on 070bf, not for 070bf or #114.
-- Screenshot evidence: the 12 tracked checkpoint PNGs in this worktree were byte-compared against saved pre-run copies after browser testing; all matched.
-- Hallmark rendered audit: see [report-only result](../evidence/reviews/hallmark-2026-11-01.md). It rendered only the sign-in route at five viewport sizes; it does not close the route/role/state matrix or A37.
-- A35 and full offline Cloudflare audit remain BLOCKED / NOT_RUN; A22/A23/A37 remain partial; A36 does not establish SQL down-migration or hosted PITR. Deployment checks are provider statuses and the deployment URL is optional under the assessment.
+- Candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), job verify. Vercel API/Web contexts on that SHA are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).
+- Source provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 is historical.
+- Follow-up aac66e4da3b3a52b99b6f6021601245c4f405584 passed exact-SHA Actions [#115](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41289821533), job verify. Its local check and 36/36 Playwright results are distinct local evidence.
+- The current local tree, with the agent membership-route denial test, passes npm run check (API 392/392, Web 12/12, typecheck/lint, 37 E2E discovered, builds) and npm run test:e2e 37/37. This local run includes changes beyond aac66e4 and is not covered by #115.
+- The 12 tracked checkpoint PNGs were restored and compared byte-for-byte after browser runs.
+- Hallmark rendered audit is report-only and limited to sign-in at five widths; see [report](../evidence/reviews/hallmark-2026-11-01.md). It does not close A22/A23/A37. A35 and full offline Cloudflare audit remain BLOCKED / NOT_RUN.
 
 For the full command history and prior SHA-specific runs below, treat all named commits and CI as historical evidence at their stated scope. The candidate’s own Actions run must be recorded separately after commit; do not attribute #113 to it.
 

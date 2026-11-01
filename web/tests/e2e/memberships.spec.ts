@@ -75,6 +75,21 @@ test.afterAll(async () => {
   await verifier.end();
 });
 
+test('agent direct access to member management shows a narrow forbidden state', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, emails.agent);
+  const denied = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === '/api/memberships' && response.request().method() === 'GET',
+  );
+  await page.goto('/admin/members');
+  const response = await denied;
+  expect(response.status()).toBe(403);
+  await expect(page.getByRole('heading', { name: 'Member management unavailable' })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveText('This action is not permitted.');
+  await expect(page.getByRole('link', { name: 'Return to ticket queue' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
 test('admin can add an existing account and update its organization role and activation', async ({ page }) => {
   await signIn(page, emails.admin);
   await expect(page.getByRole('link', { name: 'Members', exact: true })).toBeVisible();

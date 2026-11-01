@@ -1,14 +1,12 @@
 # Current session handoff
+## Verified candidate evidence — 2026-11-01
 
-## Current evidence snapshot — 2026-11-01
-
-- Exact committed candidate is 070bf718e6a43a45d699e3b3c065b442c0db7c41 on codex/ui-retry-audit-070bf. Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), job verify, passed on this exact SHA.
-- Vercel provider status contexts on that SHA are API success ([check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd)) and Web success ([check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)). These are not runtime, authentication, or database-binding checks.
-- Application source provenance remains 24f51c05328fc764bf7089fce8f398adad475648 / #105. Historical source baseline is 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74.
-- On the pre-commit candidate, local npm run check passed and E2E passed 35/35; Actions #114 independently passed on the resulting exact commit.
-- Current uncommitted follow-up adds a keyboard-operable retry action after ticket detail initial-load failure. Its local npm run check and 36/36 E2E passed on the worktree based on 070bf; it is not yet committed or CI-validated. The 12 screenshot files were restored and compared byte-for-byte after E2E.
-- Hallmark rendered report is [here](../reviews/hallmark-2026-11-01.md): report-only, 14 app source files and the sign-in route rendered at five widths. It is not broad UI acceptance.
-- A35 Preview role and tenant-denial acceptance and the bounded Cloudflare audit remain BLOCKED / NOT_RUN. A22/A23/A37 are partial; A36 is only local recovery/prior-code compatibility; A28 human rehearsal and evaluator access remain unresolved. Deployment URL/CI are optional deliverables, but cloud architecture design is required. Keep merge/submission on hold.
+- Requested reconciliation candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871). Its exact-SHA Vercel API/Web contexts are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).
+- Application source provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 remains historical.
+- Commit aac66e4da3b3a52b99b6f6021601245c4f405584 added the ticket detail retry, the Hallmark report, and evidence corrections. Actions [#115](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41289821533) passed exact SHA.
+- After that commit, the local working tree added a direct agent membership-route denial browser check. Combined npm run check and npm run test:e2e passed locally, with 37/37 browser tests; this extra test is not covered by #115, which ran on the parent commit. All 12 tracked screenshots were restored and hash-compared after browser execution.
+- Hallmark output is report-only and covers source heuristics plus the sign-in page at five viewports; it is not full route/state accessibility acceptance.
+- A35 Preview and the bounded Cloudflare audit remain BLOCKED / NOT_RUN. UI A22/A23/A37 remain partial, A36 is limited to code recovery/prior-version compatibility, and SQL down migration/PITR are untested. A28 rehearsal and evaluator access remain unresolved. Preserve the release hold.
 
 **Candidate workflow:** this package was limited to explicit intended paths and received one consolidated status reconciliation. Local documentation-contract, diff, application, and browser checks passed before commit. The subsequent commit SHA and exact-SHA Actions result must be read and linked separately; #113 remains attached to the base commit. Continue A35 only when Preview binding/credentials/fixtures are verified; run the offline audit only with a compliant preinstalled toolchain. Request G7 after substantive gates have evidence.
 

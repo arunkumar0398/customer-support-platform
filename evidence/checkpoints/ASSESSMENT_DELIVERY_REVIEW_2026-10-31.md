@@ -1,14 +1,13 @@
 # Assessment deliverables and review preparation
+## Verified candidate and assessment scope — 2026-11-01
 
-## Current candidate and assessment scope — 2026-11-01
+Requested candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed Actions #114 exact SHA; its Vercel API/Web contexts were provider success, not runtime proof. Application implementation provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0… / #74 is historical.
 
-Exact committed candidate: 070bf718e6a43a45d699e3b3c065b442c0db7c41; Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871), verify passed on exact SHA. Vercel API/Web provider status contexts are success ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)); they are not runtime tests. App source provenance remains 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0… / #74 is historical.
+The substantive follow-up aac66e4da3b3a52b99b6f6021601245c4f405584 passed exact-SHA Actions #115. It includes the ticket-detail retry and Hallmark report. A further local agent membership-denial case brings the browser suite to 37/37 and npm run check passes; that test is not in aac66e4; check the follow-up commit’s own exact-SHA workflow run separately.
 
-The 35/35 E2E and npm run check results were local pre-commit checks on the tree committed as 070bf. A separate uncommitted ticket-detail retry improvement passes npm run check and E2E 36/36 locally; it has not been committed or covered by CI. The rendered Hallmark report is [linked here](../reviews/hallmark-2026-11-01.md) and is limited to the sign-in page plus app-source heuristics.
+The rendered Hallmark report at [evidence/reviews/hallmark-2026-11-01.md](../reviews/hallmark-2026-11-01.md) is report-only and rendered sign-in at five sizes. It is not a route-wide accessibility pass. Section 8 requires the eight submission items, and explicitly makes a deployment URL and CI optional. Section 7 expects cloud deployment architecture and operational design; the architecture diagram remains required.
 
-Section 8 requires the eight submission items, including a source repository, setup README, architecture diagram, data model/indexes, API docs/examples, sample credentials or seed instructions, tests/results, and tradeoffs/limitations/next steps. It says deployment URL and CI are optional. Section 7 separately expects a cloud deployment architecture and operational design; the architecture diagram is required. Deployment architecture discussion is therefore required, while a live deployment URL is optional.
-
-Release remains on hold: Preview A35, full offline audit, full UI/A37 matrix, A28 rehearsal, evaluator access, and fresh G7 follow-up are unresolved. A36 is only local code recovery/prior-version compatibility, not SQL down migration or hosted PITR.
+A35, the complete offline audit, full A22/A23/A37 matrix, A28 rehearsal, evaluator access, and fresh G7 review remain open. A36 covers local recovery/prior-code compatibility, not SQL down migration or hosted PITR. Keep release on hold.
 
 Assessment scope reminder: the employer requires the working vertical slice and eight submission items; deployment, CI, notifications, attachments, richer analytics, and observability are optional. This candidate adds test/evidence only, not product functionality.
 
