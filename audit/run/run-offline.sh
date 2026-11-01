@@ -149,7 +149,7 @@ npm run db:generate --workspace api
 case "$lane" in
   api)
     npm run db:migrate:test
-    npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
+    npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=1
     ;;
   api-provisioning-file)
     npm run db:migrate:test
