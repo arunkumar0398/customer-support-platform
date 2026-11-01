@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+import hashlib, json, os, subprocess, sys, tarfile
+def fail(message): raise ValueError(message)
+def digest_file(path, limit=None):
+ h=hashlib.sha256(); total=0
+ with open(path,'rb') as stream:
+  while True:
+   block=stream.read(1024*1024)
+   if not block: break
+   total+=len(block)
+   if limit is not None and total>limit: fail('file exceeds verification bound')
+   h.update(block)
+ return h.hexdigest(),total
+def verify_archive_payload(archive_path,tree_manifest):
+ expected={entry['path']:entry for entry in tree_manifest['entries']}
+ if len(expected)!=len(tree_manifest['entries']): fail('duplicate Git tree manifest path')
+ actual={}
+ with tarfile.open(archive_path,'r:') as archive:
+  members=archive.getmembers()
+  if not members or len(members)>50000: fail('archive member count outside bounds')
+  for member in members:
+   name=member.name.rstrip('/') if member.isdir() else member.name
+   if name.startswith('/') or not name or any(part in ('','.','..') for part in name.split('/')): fail('unsafe path in Git archive')
+   if not (member.isdir() or member.isfile()): fail('non-regular archive entry')
+   if member.isdir(): continue
+   if member.size<0 or member.size>100*1024*1024: fail('archive member exceeds size limit')
+   if name in actual: fail('duplicate archive file path')
+   actual[name]=member
+  if set(actual)!=set(expected): fail('archive file set does not match selected Git tree')
+  for name,member in actual.items():
+   entry=expected[name]; digest=hashlib.new(tree_manifest['objectFormat'])
+   digest.update(('blob '+str(member.size)).encode('ascii')+bytes([0]))
+   source=archive.extractfile(member)
+   while True:
+    block=source.read(1024*1024)
+    if not block: break
+    digest.update(block)
+   if digest.hexdigest()!=entry['oid']: fail('archive blob does not match selected Git object: '+name)
+   executable=bool(member.mode & 0o111)
+   if executable!=(entry['mode']=='100755'): fail('archive mode differs from selected Git tree: '+name)
+ return len(actual)
+def validate_execution(execution):
+ if execution['platform']!='linux/amd64' or execution['network']!='none' or execution['rootFilesystem']!='read-only' or execution['sourceMount']!='read-only' or execution['toolchainMount']!='read-only' or execution['artifactsMount']!='promoter-only' or execution['dockerSocket']!='parent-launcher-only': fail('unsafe launch configuration record')
+ if (execution['uid'],execution['gid'],execution['capabilities'],execution['noNewPrivileges'])!=(10001,10001,'drop-all',True): fail('unsafe identity or privilege configuration')
+ if (execution['cpuLimit'],execution['memoryLimitBytes'],execution['swapLimitBytes'],execution['pidLimit'],execution['fileSizeLimitBytes'],execution['wallClockLimitSeconds'])!=(1,1610612736,0,256,1073741824,5400): fail('unsafe target resource or time limit')
+ if execution['scratch']!={'mode':'tmpfs','maxBytes':1153433600}: fail('unsafe scratch configuration')
+ allowed={'PATH','HOME','TMPDIR','CI','NODE_ENV','AUDIT_SOURCE_SHA','AUDIT_ARCHIVE_SHA256','AUDIT_TREE_MANIFEST_SHA256','AUDIT_EXPECTED_IMAGE_DIGEST','AUDIT_LOCK_SHA256','AUDIT_LAUNCH_RECORD_SHA256','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL'}
+ if not isinstance(execution.get('environmentAllowlist'),list) or set(execution['environmentAllowlist'])!=allowed: fail('environment allowlist differs from reviewed safe configuration')
+ timeout=execution.get('requestedTimeoutSeconds')
+ if not isinstance(timeout,int) or timeout<1 or timeout>execution['wallClockLimitSeconds']: fail('requested wall-clock timeout is outside the enforced bound')
+ if execution.get('promoterLimits')!={'cpu':0.25,'memoryBytes':268435456,'swapBytes':0,'pids':32,'fileSizeLimitBytes':10485760}: fail('unsafe trusted promoter limits')
+ target=execution.get('targetArgumentsTemplate'); promoter=execution.get('promoterArguments')
+ if not isinstance(target,list) or not isinstance(promoter,list): fail('Docker argument records are missing')
+ target_text='\\0'.join(target); promoter_text='\\0'.join(promoter)
+ required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly','target=/scratch']
+ if any(value not in target_text for value in required_target) or 'target=/artifacts' in target_text or '/var/run/docker.sock' in target_text or '--privileged' in target_text: fail('unsafe or incomplete target Docker arguments')
+ required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/artifacts','target=/scratch','--pids-limit=32']
+ if any(value not in promoter_text for value in required_promoter) or '/var/run/docker.sock' in promoter_text or '--privileged' in promoter_text: fail('unsafe trusted-promoter Docker arguments')
+
+def verify():
+ record_path='/input/launch-record.json'; archive_path='/input/source.tar'; tree_path='/input/source-tree-manifest.json'
+ record_hash,record_size=digest_file(record_path,1024*1024)
+ if record_size>1024*1024 or record_hash!=os.environ.get('AUDIT_LAUNCH_RECORD_SHA256'): fail('launch-record checksum mismatch')
+ with open(record_path,encoding='utf-8') as stream: record=json.load(stream)
+ source=record['source']; tool=record['toolchain']; trusted=record['trustedCode']; execution=record['execution']
+ if source['commit']!=os.environ.get('AUDIT_SOURCE_SHA') or source['archiveCommit']!=source['commit']: fail('source commit claim mismatch')
+ if source['archiveSha256']!=os.environ.get('AUDIT_ARCHIVE_SHA256'): fail('archive digest claim mismatch')
+ archive_hash,archive_size=digest_file(archive_path,600*1024*1024)
+ if archive_hash!=source['archiveSha256'] or archive_size!=source['archiveSize']: fail('archive digest or size mismatch')
+ marker=subprocess.run(['git','get-tar-commit-id'],stdin=open(archive_path,'rb'),check=True,text=True,capture_output=True).stdout.strip()
+ if marker!=source['commit']: fail('Git archive commit marker mismatch')
+ tree_hash,tree_size=digest_file(tree_path,16*1024*1024)
+ if tree_size>16*1024*1024 or tree_hash!=source['treeManifestSha256'] or tree_hash!=os.environ.get('AUDIT_TREE_MANIFEST_SHA256'): fail('Git tree manifest digest mismatch')
+ with open(tree_path,encoding='utf-8') as stream: tree=json.load(stream)
+ if tree.get('commit')!=source['commit'] or tree.get('tree')!=source['tree'] or tree.get('objectFormat')!=source['objectFormat']: fail('Git tree manifest identity mismatch')
+ count=verify_archive_payload(archive_path,tree)
+ if count!=source['treeEntries']: fail('Git tree manifest entry count mismatch')
+ if tool['imageDigest']!=os.environ.get('AUDIT_EXPECTED_IMAGE_DIGEST'): fail('toolchain image digest mismatch')
+ if tool['lockfileSha256']!=os.environ.get('AUDIT_LOCK_SHA256'): fail('lockfile digest mismatch')
+ expected={'preflight.sh':trusted['preflightSha256'],'run-offline.sh':trusted['runnerSha256'],'promote_artifacts.py':trusted['promoterSha256'],'verify_input.py':trusted['verifierSha256']}
+ for name,want in expected.items():
+  actual,_=digest_file('/runner/'+name,16*1024*1024)
+  if actual!=want: fail('trusted runner digest mismatch: '+name)
+ validate_execution(execution)
+ with tarfile.open(archive_path,'r:') as archive:
+  members={item.name:item for item in archive.getmembers()}
+  def hash_member(name):
+   item=members.get(name)
+   if item is None or not item.isfile(): fail('required source member missing: '+name)
+   source=archive.extractfile(item); digest=hashlib.sha256()
+   while True:
+    block=source.read(1024*1024)
+    if not block: break
+    digest.update(block)
+   return digest.hexdigest()
+  if hash_member('audit/provision/toolchain-manifest.json')!=tool['manifestSha256']: fail('toolchain manifest archive digest mismatch')
+  if hash_member('package-lock.json')!=tool['lockfileSha256']: fail('package lock archive digest mismatch')
+  if hash_member('api/prisma/schema.prisma')!=tool['prismaSchemaSha256']: fail('Prisma schema archive digest mismatch')
+  manifest=json.loads(archive.extractfile(members['audit/provision/toolchain-manifest.json']).read())
+  if manifest.get('image_id')!=tool['imageDigest'] or manifest.get('target_lockfile_sha256')!=tool['lockfileSha256'] or manifest.get('prisma_schema_sha256')!=tool['prismaSchemaSha256']: fail('manifest values do not match launch record')
+ return {'commit':source['commit'],'tree':source['tree'],'treeEntries':count,'archiveSha256':archive_hash,'imageDigest':tool['imageDigest'],'runners':'bound'}
+if __name__=='__main__':
+ try: print('SOURCE_BINDING_PASS '+json.dumps(verify(),sort_keys=True))
+ except Exception as error: print('SOURCE_BINDING_REFUSED: '+str(error),file=sys.stderr); raise SystemExit(2)

@@ -1,124 +1,52 @@
-# Offline Security Audit Toolchain
+# Bounded offline security validation
 
-This package prepares an immutable Linux toolchain for the bounded Cloudflare security-audit workflow. It does **not** run that audit, certify the host's isolation, or close any security acceptance item. The audit remains `NOT_RUN` until an approved runner passes the controls below and the workflow reaches one of its defined terminal states.
+## Status and evidence boundary
 
-## Separation of provisioning and audit
+This package prepares and runs fixed local validation lanes under the pinned Cloudflare security-audit skill. A successful lane is not a complete six-phase audit or release clearance.
 
-Image preparation is the only network-enabled phase. It pins the Node base image by digest, installs the repository lockfile once, installs the matching Playwright Chromium browser, installs PostgreSQL tooling, and vendors the official Cloudflare audit skill and validators at the pinned commit recorded in `audit/provision/toolchain-manifest.json`. Prisma generation runs only after preflight, from the exact scratch source copy, with the preinstalled Prisma CLI. Image preparation must record the final local image ID, platform, installed PostgreSQL server/client versions, and source hashes in that manifest.
+- Pinned skill: c1c8a8c1471069fb0e188eeaff69b8e8db6564a8; validators are present in the immutable image.
+- Prepared image: sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3, local Docker Desktop Linux AMD64, Docker Server 29.9.2. It is local and unexported.
+- Historical Run 7: candidate c79f74dd62fa11a12ac6cafe416a40c099cf9ede; application source baseline 5671f14b106ba8898b45e7e36ee4c7670d406bda; API lane source archive SHA-256 9cb30f6ae01681d9054b396707fb638d1dc942d949fab05d7aa35e7a201abcf6; 26 files / 419 tests, exit 0. The original observation says raw target output was not promoted under the required safe artifact procedure. Run 7 remains incomplete: 4 covered, 1 candidate, 9 blocked. Its validators accepted 14 coverage units and 0 findings; validator success checks structure, not coverage completion. See the external Run-7 report and observation in C:/Users/sivaa/security-audit-skill/customer-support-platform/run-7/.
+- Current launcher package replaces Run-7's parent-authored capture gap. No exact-candidate lane is claimed until a clean committed candidate is passed to audit/host/launch-offline.mjs and its promoted output is verified.
+- No Vercel, Neon, Preview, Production, or other hosted endpoint belongs in this audit. Preview acceptance is a separate workflow.
 
-Audit execution must use the resulting image by immutable image ID, with `--pull=never`; it must not run npm installation, `npx`, a package manager, browser installation, or another fetch. The source candidate is mounted read-only at `/target`. A trusted runner may make a clean archive of the exact Git commit in its private scratch area; target-controlled commands run only from that scratch copy, which is the only writable target area. Toolchain and skill files stay on the image's read-only root.
+## Trusted source binding
 
-## Required execution controls
+The host launcher requires an explicit 40-character commit that equals HEAD in a clean worktree. It uses trusted Git commands to inspect the complete recursive tree and create git archive; dirty source is refused. Tracked secret/credential/cache/output paths, symlinks, gitlinks, and unsafe path components are refused. Ignored/untracked host files are excluded because the archive is created from the selected commit, not the working directory.
 
-Use a Linux runner whose container isolation and cgroups are enabled and independently observable. Start the audit container with:
+The launcher records the commit and tree IDs, object format, recursive tree path/mode/blob manifest and digest, Git archive commit marker, archive SHA-256/size, pinned image/lock/schema/manifest digests, launcher and runner hashes, and safe execution settings. The Linux verifier checks the Git archive marker and compares every archive regular-file path, blob object ID, mode, and count with the selected Git tree manifest. An archive with a copied commit marker but altered content is rejected. Input archives and records are read-only to target code.
 
-- `--network=none` (loopback only);
-- `--read-only` and `--mount type=bind,source=<candidate>,target=/target,readonly`;
-- one bounded tmpfs at `/scratch` (maximum 1.1 GiB; no host home, socket, cache, or retained output mount);
-- `--user 10001:10001`, `--cap-drop=ALL`, `--security-opt=no-new-privileges`;
-- explicit CPU, memory, swap, and PID ceilings (`1 CPU`, `1536 MiB`, no swap allowance, `256 PIDs`; Docker uses `--memory-swap` equal to `--memory`, which the cgroup reports as `memory.swap.max=0`);
-- a byte-based 1 GiB file-size ulimit and an outer wall-clock timeout (maximum 90 minutes per lane);
-- explicit `--env` values only for safe `PATH`, `HOME`, `TMPDIR`, `CI`, `NODE_ENV`, `AUDIT_SOURCE_SHA`, `AUDIT_LOCK_SHA256`, and dummy loopback database values where required. The image and Docker add a small set of expected runtime variables which the preflight allowlist accepts. Never pass host variables with bare `-e`.
+Run only after all intended source and documentation changes are committed:
 
-Run `/opt/audit-runner/preflight.sh` before any target-controlled build, test, server, browser, or fixture command. It checks the container-visible controls, tool versions, pinned lockfile, and absence of external routes and proxy variables. Capture the `docker run` arguments and the preflight output. If a control is absent or cannot be demonstrated, stop; record the missing capability as `needs_validation` and do not execute target code.
+    $repo = (Resolve-Path .).Path
+    $sha = & 'C:\Program Files\Git\cmd\git.exe' -C $repo rev-parse HEAD
+    & node audit/host/launch-offline.mjs --execute --repo $repo --commit $sha --lane api --evidence-dir C:\Users\sivaa\security-audit-skill\customer-support-platform\run-8 --timeout 5400
 
-The package's `run-offline.sh` accepts only fixed lanes (`api`, `web`, `browser`, `all`) and rejects arbitrary command strings. It runs the preflight and requires its exit code to be zero before touching the source archive, then checks the exact candidate copy in `/scratch/source`. The current `all` lane is a convenience for local checks; it is not itself the six-phase Cloudflare audit or proof of audit completion.
+Use a new empty evidence root per run; the launcher creates a unique child directory. It refuses a dirty/non-HEAD source, a non-local Docker engine, non-Linux/non-AMD64 server, unexpected image digest, existing output collision, or unsupported lane. The record contains the sanitized host Docker context/server, host OS/architecture, actual target/helper argument arrays (with only the self-referential launch-record hash represented by an explicit placeholder), mounts, UID/capabilities, environment allowlist, resource ceilings, timeout, volume/container names, and helper limits. Do not put credentials or database URLs in the evidence record.
 
-## Build and record the bundle
+## Isolation and artifact promotion
 
-From the repository root, after reviewing the lockfile and package inputs:
+The parent creates distinct bounded tmpfs volumes. A trusted Linux promotion helper starts first, opens directory descriptors for scratch and artifact roots with no-follow flags, and waits. The target runs with --pull=never --network=none --read-only --user 10001:10001 --cap-drop=ALL --security-opt=no-new-privileges, 1 CPU, 1536 MiB memory, zero swap, 256 PIDs, 1 GiB file-size limit, 1.1 GiB scratch and a maximum 90-minute timeout. Only the committed source archive and runner copies are mounted read-only; target has no artifact mount, Docker socket, host home, cache, or external output path. Only explicit allowlisted environment variables are supplied. The preflight checks mount modes, network routes/interfaces, proxy absence, versions, UID, cgroups, swap, PID/file/disk limits, safe dummy DB URLs, and all source/toolchain hashes before target-controlled tests begin.
 
-```sh
-docker build --pull --platform linux/amd64 -f audit/provision/Dockerfile -t csp-offline-audit:5671f14 .
-docker image inspect csp-offline-audit:5671f14 --format '{{.Id}} {{.Os}}/{{.Architecture}}'
-```
+After the target exits, the parent confirms Docker state is stopped and removes the target container. Only then does it ask the helper to promote the fixed bounded allowlist preflight.out, lane.log, and lane-result.json. Promotion uses descriptor-relative no-follow file opens, rejects traversal/special files/symlinks/hard links, verifies regular-file identity and link count before/after bounded reads, detects file changes and size growth, writes into a fresh private staging directory, and atomically renames it. The parent copies only those exact promoted files and checks their hashes. It never recursively copies target scratch. On uncertainty, it keeps named Docker volumes and writes a recovery record; reconcile those exact objects before retrying. The target cannot access the artifact volume or Docker socket.
 
-Record the returned immutable image ID and actual PostgreSQL server/client versions in the manifest. Use the image ID (not the mutable tag) for all later runs. Keep any exported image archive and its SHA-256 outside the repository; do not commit it. The current local bundle is `sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3`; it has not been exported or independently attested.
+Host output is retained under the external evidence root, not in the source tree. Sanitize before sharing. Do not promote screenshots, credentials, environment files, browser profiles, arbitrary logs, or unallowlisted files. The helper's unit tests cover symlink, hard-link, FIFO/directory/socket, traversal, oversized and changing files, duplicate/overwrite refusal, and file-set bounds; source-verifier tests cover forged archive payloads with a claimed commit marker and launch-configuration tampering.
 
-The build context honors the repository `.dockerignore`, which excludes `evidence/`, screenshots, test results, credentials, and local `node_modules/`. The Dockerfile copies package manifests, the lockfile, and the two runner scripts needed to prepare the image. Candidate source, including Prisma schema/config, is supplied later through the read-only `/target` mount and copied from an exact Git archive into scratch.
+## Fixed lane commands
 
-## Run a preflight-only control check
+The launcher supports only api, web, browser, browser-smoke, and all; there is no arbitrary command string. The API lane runs disposable PostgreSQL migrations and npm run test:api; Web runs the Web suite; browser runs the local synthetic browser suite; all additionally runs lint, typecheck, build, and browser discovery/execution. Each lane starts local loopback-only dummy PostgreSQL inside the target sandbox. No dependencies are installed or fetched during audit execution.
 
-Use an empty scratch directory outside the target, a clean candidate worktree at the exact SHA, and the immutable local image ID. The runner must not mount the Docker socket inside the container. Example control invocation (adapt only host paths and recorded SHA):
+Use one lane per evidence record where an invariant needs a distinct result. A successful API lane proves only the assertions actually present in that exact source and run. Map each audit coverage unit to a specific assertion and evidence type; do not mark a unit covered because an aggregate command exited zero.
 
-```sh
-timeout --signal=TERM --kill-after=10s 5m docker run --rm --pull=never \
-  --network=none --read-only --user 10001:10001 --cap-drop=ALL \
-  --security-opt=no-new-privileges --cpus=1 --memory=1536m --memory-swap=1536m \
-  --pids-limit=256 --ulimit fsize=1073741824:1073741824 \
-  --tmpfs /scratch:rw,nosuid,nodev,size=1100m,mode=0700,uid=10001,gid=10001 \
-  --mount type=bind,source="$PWD",target=/target,readonly \
-  --env PATH=/opt/toolchain/project/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-  --env HOME=/scratch/home --env TMPDIR=/scratch/tmp --env CI=1 --env NODE_ENV=test \
-  --env AUDIT_SOURCE_SHA=<40-hex-commit> \
-  --env AUDIT_LOCK_SHA256=30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0 \
-  <immutable-image-id>
-```
+## Existing scoped evidence to reuse
 
-This invocation is only a control preflight. A separate recorded run is required for each test lane. It must run against a clean checkout whose `git rev-parse HEAD` equals `AUDIT_SOURCE_SHA`; modified screenshot files in another checkout must never be included in the source archive. The original linked Windows worktree could not provide Git metadata to the Linux container, so I created a clean shallow clone of the approved source at `5671f14b106ba8898b45e7e36ee4c7670d406bda` inside the workspace and mounted that clone read-only. The run verified its exact Git HEAD as well as container controls, tools, lockfile and schema. Do not send audit traffic to Preview, Production, Vercel, Neon, or any shared service.
+- API: Run-7 scoped result as recorded above; it is not formal retained output and is historical to its exact candidate/source archive.
+- Query plans (A38): docs/performance.md records a rollback-only 50,000-row synthetic PostgreSQL assessment with first page, deep page, status filter, count and substring search plans. It is scoped historical evidence; verify the indexed query/schema files are unchanged before carrying it forward. It is not load or production latency evidence.
+- Recovery (A36): evidence/checkpoints/A36-migration-recovery-2026-11-01.md records a disposable PostgreSQL logical backup restore, forward migration check, and prior-code compatibility. Current three migrations/schema must be compared before reuse. It is not SQL down migration or hosted PITR.
+- UI/Hallmark: evidence/checkpoints/UI_A22_A23_MATRIX_2026-11-01.md and the linked Hallmark reports describe measured sign-in contrast/focus and scoped journeys. Current web changes must be compared to that candidate. A22/A23/A37 are partial, and manual screen-reader review is not performed by an automated lane.
 
-The initial preflight-only run at `5671f14b106ba8898b45e7e36ee4c7670d406bda` exited `0` on 2026-11-01 with image `sha256:6d3fb5e6ec38f855b725b613f4c6b08f6979328615a1a66a257e693801a6cb95`; it used a clean checkout at the exact candidate SHA. A subsequent first `all` lane attempt stopped before target tests: Docker interpreted `fsize=1048576` as a 1 MiB byte limit, and PostgreSQL `initdb` failed writing its initial WAL file. This was a runner-limit configuration error, not an application test failure. The corrected preflight reads byte limits from `/proc/self/limits`, and the rerun uses `fsize=1073741824` (1 GiB). A 256-PID ceiling was necessary for the bundled headless Chromium process tree; earlier 128-PID browser smoke ended with worker `SIGABRT`, with Docker `OOMKilled=false`. The runner caps Vitest at two workers because host CPU count otherwise caused oversubscription at the 1-CPU limit. The production-like runner uses a scratch-only Vite temp directory and Vitest cache. These are test-harness adjustments, not application changes.
+## Incomplete audit requirements
 
-### Bounded all-lane result (not a completed security audit)
+Run 7 remains incomplete and needs a fresh coverage ledger/report on the selected candidate. Remaining local lanes include the throttle capacity test, session/CSRF and revocation mapping, object/child/dashboard authorization, membership mutation and concurrency, transaction rollback/stale versions, query-plan scope confirmation, API proxy stub boundaries, supply-chain/workflow review, and finite client/UI states. The throttle test is local process behavior only; it cannot establish Vercel multi-instance or deployed behavior. Do not label that as confirmed vulnerability solely from the map-capacity policy. Independently verify any retained candidate and use both pinned validators on the new run's ledger/findings. A reviewer must separately state whether its review is independent and name the exact source SHA.
 
-On 2026-11-01, the fixed `all` lane exited `0` against the clean source archive for exact source SHA `5671f14b106ba8898b45e7e36ee4c7670d406bda` (archive SHA-256 `007ffe506421dc99153c0091fbb8f046553e8b275e895ba5ef76a2ac954b5afd`) using local image `sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3`. The run used Linux AMD64, Docker 29.9.2, no network, a read-only root filesystem and target/archive mounts, non-root uid 10001, no capabilities, no-new-privileges, 1 CPU, 1536 MiB memory with swap disabled, 256 PIDs, 1 GiB byte-based file-size limit, and a 1100 MiB scratch tmpfs. The container reported `OOMKilled=false`.
-
-Observed checks: lint and typecheck passed; API Vitest passed 419/419 across 26 files; Web Vitest passed 12/12 across 2 files; production build passed; Playwright passed 46/46 in 2.8 minutes. The local acceptance fixture lifecycle also cleaned up its run-owned organizations, users, and tickets, and removed private credential/manifest files. Browser measurements included three sign-in contrast ratios of 5.50, 5.68, and 5.68, a 7.30 focus-ring ratio at the tested widths, and no horizontal overflow at widths 320, 375, 1280, 1440, and 1920. These results are scoped to local dummy data and this source SHA.
-
-This is **not** the six-phase Cloudflare security audit: the audit report/coverage package is not yet complete, retained findings have not received independent verification, and both official validators have not yet been run. The separate `api`, `web`, browser, and full `all` checks do not establish deployed Preview/Production behavior, multi-instance throttle behavior, or SQL down-migration/PITR. Full audit status remains `NOT_RUN` / incomplete.
-
-## Run one bounded offline lane
-
-The candidate archive is produced by Git from the committed tree, not by archiving the working directory. Keep the archive in a private host scratch directory outside the repository. The following Linux example runs the API lane. Select the image by the recorded immutable image ID and substitute the actual candidate SHA and image ID from the manifest/run record:
-
-```sh
-set -eu
-CANDIDATE="$PWD"
-SOURCE_SHA="$(git -C "$CANDIDATE" rev-parse HEAD)"
-test -z "$(git -C "$CANDIDATE" status --porcelain)"
-AUDIT_SCRATCH="$(mktemp -d)"
-chmod 700 "$AUDIT_SCRATCH"
-git -C "$CANDIDATE" archive --format=tar --output="$AUDIT_SCRATCH/source.tar" "$SOURCE_SHA"
-ARCHIVE_SHA="$(sha256sum "$AUDIT_SCRATCH/source.tar" | awk '{print $1}')"
-IMAGE_ID='sha256:REPLACE_WITH_RECORDED_IMAGE_ID'
-
-timeout --signal=TERM --kill-after=10s 90m docker run --name "csp-audit-${SOURCE_SHA:0:12}" \
-  --pull=never --entrypoint /opt/audit-runner/run-offline.sh \
-  --network=none --read-only --user 10001:10001 --cap-drop=ALL \
-  --security-opt=no-new-privileges --cpus=1 --memory=1536m --memory-swap=1536m \
-  --pids-limit=256 --ulimit fsize=1073741824:1073741824 \
-  --tmpfs /scratch:rw,nosuid,nodev,size=1100m,mode=0700,uid=10001,gid=10001 \
-  --mount "type=bind,source=$CANDIDATE,target=/target,readonly" \
-  --mount "type=bind,source=$AUDIT_SCRATCH/source.tar,target=/input/source.tar,readonly" \
-  --env PATH=/opt/toolchain/project/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-  --env HOME=/scratch/home --env TMPDIR=/scratch/tmp --env CI=1 --env NODE_ENV=test \
-  --env AUDIT_SOURCE_SHA="$SOURCE_SHA" \
-  --env AUDIT_ARCHIVE_SHA256="$ARCHIVE_SHA" \
-  --env AUDIT_LOCK_SHA256=30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0 \
-  "$IMAGE_ID" api
-```
-
-The fixed runner accepts only `api`, `web`, `browser`, or `all`; it refuses arbitrary commands, a non-empty `/scratch`, source/archive hash mismatch, and a candidate HEAD mismatch. Capture the exact command, container output and exit code. If artifacts must be retained, first review them in the isolated parent context and promote only bounded, sanitized files using the Cloudflare skill's write-isolation procedure. Do not mount a host output directory or Docker socket into the audit container. Remove the stopped named container and private source archive only after recording the evidence and confirming artifact promotion; do not use broad Docker prune commands.
-
-The `all` lane runs repository lint, typecheck, API and Web suites, production build, and browser suite. It is only a bounded local verification lane. It does not itself perform the Cloudflare six-phase audit, validate findings/coverage artifacts, or establish audit completion.
-
-## Evidence required before an audit result
-
-Record the candidate SHA and dirty state, lockfile and schema hashes, image ID/provenance, Linux kernel and architecture, Docker/cgroup versions, exact container flags, safe environment-variable names, preflight output, and lane command/exit code. Use dummy identities and loopback-only local services. Keep outputs in a new audit run directory outside the target and use the Cloudflare skill's parent-only artifact promotion procedure before retaining bounded results.
-
-The report must distinguish `confirmed`, `needs_validation`, `rejected`, `deferred`, and `out_of_scope` coverage, and must keep deployed throttle behavior unresolved unless supported by permitted owner-side configuration evidence. Never treat a toolchain build or successful preflight as a security audit.
-
-
-### Bounded browser process ceiling
-
-The first browser smoke reached 119 PIDs under the 128-PID cap and Playwright reported worker `SIGABRT`; sampled memory stayed below 900 MiB and Docker reported `OOMKilled=false`. This supports, but does not by itself prove, PID exhaustion as the cause. The bounded ceiling is raised to 256 PIDs; the next exact isolated browser smoke is the confirming check. Keep this as runner-environment evidence, not an application finding.
-
-
-### Vitest worker bound
-
-The API lane spawned 26 workers during a 1-CPU run and hit a 10-second setup-hook timeout in a 357-second ticket-creation file. The offline runner now caps Vitest at two workers using the supported `--maxWorkers=2` option, keeping the suite bounded while avoiding host CPU-count oversubscription. The application test code is unchanged.
-
-
-### Playwright timeout in the constrained runner
-
-The E2E lane keeps Playwright at one worker and uses a 90-second per-test timeout inside the outer 90-minute lane timeout. The 30-second default expired during the local synthetic lifecycle on the 1-CPU container after setup/sign-in; this is a runner-specific allowance, not a change to application behavior or the regular test configuration.
+Full audit status remains INCOMPLETE until all applicable phases/coverage have a defensible disposition, findings and coverage validators pass, retained findings are independently verified, and the report states exact SHA, methods, commands, exit codes, environment, artifacts and limits. If an execution control is not demonstrable, stop the affected lane and record its exact blocker.

@@ -12,8 +12,8 @@ done
 
 [[ "$(id -u)" != "0" ]] || fail 'container must run as a non-root uid'
 [[ -d /scratch && -w /scratch ]] || fail '/scratch is missing or not writable'
-[[ -r /target/package-lock.json ]] || fail 'read-only candidate mount /target is missing'
-[[ -x /opt/audit-runner/run-offline.sh ]] || fail 'immutable runner is missing'
+[[ -r /input/source.tar && -r /input/launch-record.json ]] || fail 'read-only source archive or launch record is missing'
+[[ -r /runner/run-offline.sh && -r /runner/promote_artifacts.py && -r /runner/verify_input.py ]] || fail 'read-only trusted runner scripts are missing'
 [[ -x /opt/cloudflare-security-audit-skill/skills/security-audit/validate-findings.cjs ]] || fail 'pinned Cloudflare findings validator is missing'
 [[ -x /opt/cloudflare-security-audit-skill/skills/security-audit/validate-coverage-ledger.cjs ]] || fail 'pinned Cloudflare coverage validator is missing'
 [[ "$(cat /opt/cloudflare-security-audit-skill/.git/HEAD 2>/dev/null || true)" == 'c1c8a8c1471069fb0e188eeaff69b8e8db6564a8' ]] || fail 'Cloudflare skill checkout does not match the pinned commit'
@@ -21,8 +21,10 @@ done
 
 root_options="$(findmnt -n -o OPTIONS /)"
 [[ ",$root_options," == *,ro,* ]] || fail 'container root filesystem is not read-only'
-target_options="$(findmnt -n -o OPTIONS /target)"
-[[ ",$target_options," == *,ro,* ]] || fail 'target mount is not read-only'
+input_options="$(findmnt -n -o OPTIONS /input)"
+[[ ",$input_options," == *,ro,* ]] || fail 'source archive mount is not read-only'
+runner_options="$(findmnt -n -o OPTIONS /runner)"
+[[ ",$runner_options," == *,ro,* ]] || fail 'trusted runner mount is not read-only'
 scratch_options="$(findmnt -n -o OPTIONS /scratch)"
 [[ ",$scratch_options," == *,rw,* ]] || fail 'scratch mount is not writable'
 
@@ -37,7 +39,7 @@ if env | cut -d= -f1 | grep -Eiq '^(HTTP_PROXY|HTTPS_PROXY|ALL_PROXY|NO_PROXY|ht
 fi
 while IFS= read -r variable_name; do
   case "$variable_name" in
-    AUDIT_ARCHIVE_SHA256|AUDIT_LOCK_SHA256|AUDIT_SOURCE_SHA|CI|DATABASE_URL|DATABASE_URL_UNPOOLED|HOME|HOSTNAME|NODE_ENV|NODE_VERSION|PATH|PLAYWRIGHT_BROWSERS_PATH|PWD|SHLVL|TEST_DATABASE_URL|TMPDIR|YARN_VERSION|_)
+    AUDIT_ARCHIVE_SHA256|AUDIT_EXPECTED_IMAGE_DIGEST|AUDIT_LAUNCH_RECORD_SHA256|AUDIT_LOCK_SHA256|AUDIT_SOURCE_SHA|AUDIT_TREE_MANIFEST_SHA256|CI|DATABASE_URL|DATABASE_URL_UNPOOLED|HOME|HOSTNAME|NODE_ENV|NODE_VERSION|PATH|PLAYWRIGHT_BROWSERS_PATH|PWD|SHLVL|TEST_DATABASE_URL|TMPDIR|YARN_VERSION|_)
       ;;
     *) fail "environment variable is outside the explicit allowlist: ${variable_name}" ;;
   esac
@@ -77,26 +79,22 @@ file_units="$(awk '$1 == "Max" && $2 == "file" && $3 == "size" {print $6}' /proc
 scratch_kib="$(df -Pk /scratch | awk 'NR==2 {print $2}')"
 [[ "$scratch_kib" =~ ^[0-9]+$ ]] && (( scratch_kib <= 1150000 )) || fail 'scratch disk limit is missing or exceeds 1.1 GiB'
 
-[[ -z "${AUDIT_SOURCE_SHA:-}" ]] || [[ "$AUDIT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || fail 'AUDIT_SOURCE_SHA must be an exact 40-character commit id'
-if [[ -n "${AUDIT_SOURCE_SHA:-}" ]]; then
-  [[ "$(git -c safe.directory=/target -C /target rev-parse HEAD 2>/dev/null || true)" == "$AUDIT_SOURCE_SHA" ]] || fail 'mounted candidate HEAD does not match AUDIT_SOURCE_SHA'
-fi
-[[ -z "${AUDIT_LOCK_SHA256:-}" ]] || [[ "$AUDIT_LOCK_SHA256" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'lockfile hash differs from the prepared toolchain'
-actual_lock="$(sha256sum /target/package-lock.json | awk '{print $1}')"
-[[ "$actual_lock" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'candidate lockfile differs from the prepared toolchain'
-actual_schema="$(sha256sum /target/api/prisma/schema.prisma | awk '{print $1}')"
-[[ "$actual_schema" == '5d69924bc79db63b85462f29d416f0116145c2f11c566f32a2742d97e8ff86bb' ]] || fail 'candidate Prisma schema differs from the recorded toolchain baseline'
+[[ "$AUDIT_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || fail 'AUDIT_SOURCE_SHA must be a full commit id'
+[[ "$AUDIT_ARCHIVE_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'AUDIT_ARCHIVE_SHA256 must be a source digest'
+[[ "$AUDIT_LAUNCH_RECORD_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'AUDIT_LAUNCH_RECORD_SHA256 must be a launch-record digest'
+[[ "$AUDIT_TREE_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail 'AUDIT_TREE_MANIFEST_SHA256 must be a Git tree-manifest digest'
+[[ "$AUDIT_EXPECTED_IMAGE_DIGEST" == 'sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3' ]] || fail 'unexpected toolchain image digest'
+[[ "$AUDIT_LOCK_SHA256" == '30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0' ]] || fail 'lockfile hash differs from prepared toolchain'
+python3 /runner/verify_input.py || fail 'trusted source binding verification failed'
+pass "source archive, launch record, tree identity and runner hashes verified for $AUDIT_SOURCE_SHA"
 [[ -z "${DATABASE_URL:-}" || "$DATABASE_URL" == 'postgresql://support_dev:audit-only@127.0.0.1:5432/support_dev' ]] || fail 'DATABASE_URL must be the fixed loopback dummy URL'
 [[ -z "${DATABASE_URL_UNPOOLED:-}" || "$DATABASE_URL_UNPOOLED" == 'postgresql://support_dev:audit-only@127.0.0.1:5432/support_dev' ]] || fail 'DATABASE_URL_UNPOOLED must be the fixed loopback dummy URL'
 [[ -z "${TEST_DATABASE_URL:-}" || "$TEST_DATABASE_URL" == 'postgresql://support_test:audit-only@127.0.0.1:5432/support_test' ]] || fail 'TEST_DATABASE_URL must be the fixed loopback dummy URL'
 
 pass "non-root uid $(id -u)"
-pass 'root filesystem and target mount read-only; scratch writable'
+pass 'root filesystem, source archive and runner mounts read-only; scratch writable'
 pass 'loopback-only network namespace with no inherited proxy'
 pass "Node $(node --version), npm $(npm --version), Vitest, Supertest, Prisma, Playwright, PostgreSQL present"
 pass "cgroup memory=${memory_limit}, cpu=${cpu_limit}, pids=${pids_limit}; file-size=${file_limit}/${file_hard_limit} bytes and scratch limits active"
 pass "cgroup swap=${swap_limit} (disabled); pinned Cloudflare skill commit c1c8a8c1471069fb0e188eeaff69b8e8db6564a8"
-pass "target lockfile SHA-256 ${actual_lock} matches prepared toolchain"
-[[ -z "${AUDIT_SOURCE_SHA:-}" ]] || pass "mounted Git HEAD ${AUDIT_SOURCE_SHA} matches the selected candidate"
-pass "Prisma schema SHA-256 ${actual_schema} matches the recorded candidate baseline"
-printf 'PREFLIGHT_COMPLETE: control checks passed; the lane runner must additionally verify candidate SHA and archive provenance before target execution.\n'
+printf 'PREFLIGHT_COMPLETE: source binding and sandbox controls passed before target execution.\n'

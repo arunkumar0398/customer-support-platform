@@ -16,6 +16,9 @@ esac
 [[ -z "$(find /scratch -mindepth 1 -maxdepth 1 -print -quit)" ]] || fail '/scratch must be empty at lane start'
 mkdir -p /scratch/home /scratch/tmp
 chmod 0700 /scratch/home /scratch/tmp
+exec > /scratch/lane.log 2>&1
+finish() { status=$?; trap - EXIT; if [[ -d /scratch/pgdata ]] && pg_ctl -D /scratch/pgdata status >/dev/null 2>&1; then pg_ctl -D /scratch/pgdata stop -m fast >/dev/null 2>&1 || true; fi; printf '{"lane":"%s","exitCode":%s}\n' "$lane" "$status" > /scratch/lane-result.json; exit "$status"; }
+trap finish EXIT
 
 [[ "${AUDIT_SOURCE_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || fail 'AUDIT_SOURCE_SHA must identify the reviewed source commit'
 
@@ -24,7 +27,7 @@ export DATABASE_URL_UNPOOLED="$DATABASE_URL"
 export TEST_DATABASE_URL='postgresql://support_test:audit-only@127.0.0.1:5432/support_test'
 export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
 
-"/opt/audit-runner/preflight.sh" >/scratch/preflight.out || { cat /scratch/preflight.out >&2; fail 'sandbox preflight did not pass'; }
+/bin/bash /runner/preflight.sh >/scratch/preflight.out || { cat /scratch/preflight.out >&2; fail 'sandbox preflight did not pass'; }
 cat /scratch/preflight.out
 
 [[ -r /input/source.tar ]] || fail 'trusted parent must mount the exact source archive read-only at /input/source.tar'
@@ -32,6 +35,7 @@ input_options="$(findmnt -n -o OPTIONS -T /input/source.tar 2>/dev/null || true)
 [[ ",$input_options," == *,ro,* ]] || fail 'source archive mount must be read-only'
 [[ "${AUDIT_ARCHIVE_SHA256:-}" =~ ^[0-9a-f]{64}$ ]] || fail 'AUDIT_ARCHIVE_SHA256 must identify the source archive'
 [[ "$(sha256sum /input/source.tar | awk '{print $1}')" == "$AUDIT_ARCHIVE_SHA256" ]] || fail 'source archive checksum mismatch'
+[[ "$(git get-tar-commit-id < /input/source.tar)" == "$AUDIT_SOURCE_SHA" ]] || fail 'Git archive commit marker mismatch'
 mkdir -p /scratch/source
 archive_size="$(stat -c '%s' /input/source.tar)"
 [[ "$archive_size" =~ ^[0-9]+$ ]] && (( archive_size <= 600 * 1024 * 1024 )) || fail 'source archive exceeds the 600 MiB compressed input bound'
@@ -114,13 +118,6 @@ pg_bin="$(find /usr/lib/postgresql -mindepth 2 -maxdepth 2 -type d -name bin -pr
 [[ -x "$pg_bin/initdb" && -x "$pg_bin/pg_ctl" && -x "$pg_bin/psql" ]] || fail 'PostgreSQL server/client binaries are missing from the prepared toolchain'
 export PATH="$pg_bin:$PATH"
 initdb -D /scratch/pgdata --username=audit --auth-local=trust --auth-host=trust >/scratch/initdb.out
-cleanup() {
-  trap - EXIT INT TERM
-  if pg_ctl -D /scratch/pgdata status >/dev/null 2>&1; then
-    pg_ctl -D /scratch/pgdata stop -m fast >/dev/null 2>&1 || true
-  fi
-}
-trap cleanup EXIT
 trap 'exit 143' TERM
 trap 'exit 130' INT
 mkdir -p /scratch/pgsocket
