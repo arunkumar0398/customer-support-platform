@@ -47,9 +47,11 @@ test('refuses tracked secret and cache paths', async t => {
   await assert.rejects(prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir:path.join(os.tmpdir(),'unused-output')}),/secret|credential|cache|node_modules|unsafe|excluded/i,entry);
  }
 });
-test('allows source modules that implement password handling', async t => {
- const {root,git}=await repo(t);const source=path.join(root,'api/src/modules/auth/password.ts');await (await import('node:fs/promises')).mkdir(path.dirname(source),{recursive:true});await writeFile(source,'export function verifyPassword() {}\n');git('add','api/src/modules/auth/password.ts');git('commit','-qm','password source module');
+test('allows only reviewed password implementation and its focused auth test paths', async t => {
+ const {root,git}=await repo(t);for(const [name,content] of [['api/src/modules/auth/password.ts','export function verifyPassword() {}\n'],['api/tests/auth/password.test.ts','import { test } from \'node:test\';\ntest(\'password verifier\',()=>{});\n']]){const source=path.join(root,name);await (await import('node:fs/promises')).mkdir(path.dirname(source),{recursive:true});await writeFile(source,content);git('add',name);}git('commit','-qm','reviewed password paths');
  assert.doesNotThrow(()=>validateTrackedSourceTree(root,git('rev-parse','HEAD')));
+ const extra='api/tests/credentials/password.test.ts';await (await import('node:fs/promises')).mkdir(path.dirname(path.join(root,extra)),{recursive:true});await writeFile(path.join(root,extra),'sensitive');git('add',extra);git('commit','-qm','unreviewed password test path');
+ assert.throws(()=>validateTrackedSourceTree(root,git('rev-parse','HEAD')),/secret or credential path refused/i);
 });
 test('accepts only the sanitized root environment template', async t => {
  const actualTemplate=await readFile(new URL('../../.env.example',import.meta.url),'utf8');assert.doesNotThrow(()=>validateEnvExample(actualTemplate));

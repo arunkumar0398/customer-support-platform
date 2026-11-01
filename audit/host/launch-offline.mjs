@@ -13,7 +13,7 @@ const IMAGE_DIGEST='sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fad
 const MAX_ARCHIVE=600*1024*1024;
 const SENSITIVE_DIRECTORY=/^(?:credentials?|secrets?|tokens?|passwords?)$/i;
 const SENSITIVE_DATA_FILE=/^(?:credentials?|secrets?|tokens?|passwords?)(?:\..*)?$/i;
-const REVIEWED_SENSITIVE_SOURCE_PATHS=new Set(['api/src/modules/auth/password.ts']);
+const REVIEWED_SENSITIVE_SOURCE_PATHS=new Set(['api/src/modules/auth/password.ts','api/tests/auth/password.test.ts']);
 function isSecretPath(name){
  const parts=name.split('/');const file=parts.at(-1)||'';
  if(parts.some(part=>/^\.env(?:$|\.)/i.test(part)))return name!=='.env.example';
