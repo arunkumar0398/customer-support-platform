@@ -19,9 +19,13 @@ npm run test:e2e
 
 ## Exact recorded CI evidence
 
+**Latest docs/evidence head:** `4b404f77a65bc4bb0251f218a75832a12fae090d`, Actions [#108](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41275153551), job `verify`, passed on the exact SHA. Exact-SHA Vercel Web/API provider status contexts are success ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/LDbGGVkHFHWFDWNrSe3mURcxvBji), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/At2y2GqWdhYNfhbsfMrJK13GEfXX)); these statuses do not prove runtime behavior. The tested browser changes are on c179180 / #107, and application implementation remains 24f51c0 / #105.
+
 **Latest application-test candidate:** `c179180a56977cda6fe084786989ae6098afe995`, Actions [#107](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41274734553), `verify` passed on the exact SHA with the disposable database and required gates. It adds E2E assertions only; application implementation remains `24f51c05328fc764bf7089fce8f398adad475648` / #105. Exact-SHA Vercel API and Web status contexts returned `success` (API [check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/7y7Rd9UXf1gX624wgzhhaMjq8d9S), Web [check](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/CBYdHnBPY2iYT2HcDCmRavTSVqPn)); these provider results are not authenticated runtime acceptance. The implementation baseline `3e613c0…` / #74 is historical.
 
 Fresh independent G7 review of `c179180a56977cda6fe084786989ae6098afe995` returned `BLOCKED_BY_ENVIRONMENT`; see [the review report](../evidence/reviews/g7-c179180-2026-11-01.md). Do not infer release readiness from green CI or provider status contexts.
+
+The focused G7 follow-up on docs/evidence head `4b404f77a65bc4bb0251f218a75832a12fae090d` also returned `BLOCKED_BY_ENVIRONMENT`; see [the exact-head report](../evidence/reviews/g7-4b404f7-2026-11-01.md). It identified stale docs-head provenance at review time; the follow-up edits now record #108 separately from #107 and #105.
 
 **Historical docs candidate:** `c30917c021d9414f6b870419097b66d69faa4caa`, Actions #106 passed on exact SHA. Its Web/API records showed Ready and the branch-alias readiness GETs returned `{"status":"ready"}` at approximately 10:03 IST. This was a health smoke only; no authenticated role test or Neon-branch identity was established.
 
