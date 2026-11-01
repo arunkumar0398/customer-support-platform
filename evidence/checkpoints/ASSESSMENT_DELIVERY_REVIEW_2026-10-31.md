@@ -5,7 +5,7 @@ Repository: `arunkumar0398/customer-support-platform`, private branch `codex/cle
 Application implementation source: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`
 Documentation candidate reviewed: `5e27f68a7f2c8aa12c502995b26c2b5063e1309b`
 
-Latest verified docs/test candidate before this review-record refresh: `224771c1515c8f39a425e5ef060eb39e0d534a04`, Actions #96 success, Vercel Web/API provider quota failures.
+Current docs/test candidate: `e78b19c6d6aa2e02876e8444aa42413fa4159428`, Actions #97 `verify` passed. Vercel Web/API status contexts say success but descriptions show “Canceled by Ignored Build Step”; no deployment validation occurred. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74.
 
 Latest exact-CI/Vercel-verified docs/test candidate before this review refresh: `acf01641263275507f4b781bc980cf9e810c9e49`, Actions #95, Web/API success.
 Assessment basis: `reference/assessment.pdf`, implementation scope and deliverables section.
@@ -16,7 +16,7 @@ This is a repository-content review. It does not establish that an evaluator can
 
 | # | Assessment deliverable | Result | Repository evidence | Remaining action |
 |---|---|---|---|---|
-| 1 | Source repository | **PARTIAL** | Private source: [GitHub repository](https://github.com/arunkumar0398/customer-support-platform), branch `codex/clean-candidate-b2fd369`; source implementation `3e613c0…`; docs candidate `5e27f68…`. | Evaluator identity/access is not known or confirmed. Owner must grant access or provide an approved private handoff. Keep visibility private. |
+| 1 | Source repository | **PARTIAL** | Private source: [GitHub repository](https://github.com/arunkumar0398/customer-support-platform), branch `codex/clean-candidate-b2fd369`; source implementation `3e613c0…`; current docs/test candidate `e78b19c…`. | Evaluator identity/access is not known or confirmed. Owner must grant access or provide an approved private handoff. Keep visibility private. |
 | 2 | README setup/run instructions | **COMPLETE** | `README.md`, `docs/operations.md`: prerequisites, environment values, guarded migrations/seed, local Docker run, checks and browser tests. | None for artifact presence; follow exact commands in the docs. |
 | 3 | Architecture diagram | **COMPLETE** | `docs/architecture.md`: Mermaid topology for local Docker, Vite proxy and Vercel web proxy/API/Neon flow. | Deployment status is optional and separately SHA-bound. |
 | 4 | Data model and key indexes | **COMPLETE** | `docs/data-model.md` against `api/prisma/schema.prisma` and the three checked-in migrations; entities, tenant composite FKs/checks, indexes, and pagination tradeoffs listed. | No schema discrepancy identified in this content review. SQL down migration remains untested. |
@@ -54,6 +54,10 @@ The following answer outlines are grounded in `docs/performance.md`, `docs/data-
 
 **A28: NOT_RUN.** The written prompts/answers are ready for a human practice session; no live owner/reviewer rehearsal was observed.
 
+## Independent release review
+
+Exact docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428` received a read-only G7 review after Actions #97 completed. Verdict: **BLOCKED_BY_ENVIRONMENT**. The reviewer confirmed A25’s scoped local seed/sign-in result and CI coverage; remaining blockers include Preview role/tenant acceptance, full compliant offline security audit, evaluator access, broader A22/A23 coverage, A28 human rehearsal, and a focused review of the final status-document SHA. Vercel Web/API “success” contexts on e78 are ignored-build cancellations and provide no deployment validation.
+
 ## Exact local acceptance rerun
 
 Application implementation source under test: `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. Environment: Windows local checkout, Node 24.22.1, npm 11.19.1, Vitest 5.0.5, Playwright 1.64.1, disposable PostgreSQL 18.6 container bound only to loopback port 5544. `npm run db:verify-test` reported `support_test / support_test`; no Preview or Production database was used.
@@ -63,4 +67,4 @@ Application implementation source under test: `3e613c0b7df5bec290553cfb7b5a9404b
 - Full check on the source worktree: `npm run check` — exit 0; lint/typecheck passed; API 391/391; web 12/12; 23 Playwright tests discovered; API and Web builds passed.
 - Assignment-atomicity addition in this candidate: `npm run test:api -- tests/tickets/assignment.test.ts` — exit 0; 14/14 passed. A disposable PostgreSQL trigger forced the `ASSIGNMENT_CHANGED` insert to fail; the HTTP response was sanitized, assignee/version and event count remained unchanged, and assignment succeeded after trigger removal. Full check with this added regression test: exit 0; API 392/392, web 12/12, 23 Playwright tests discovered, builds passed. This tests code rollback, not migration reversal.
 
-The commands above did not use a live service. A25 now has a separate local result: the verified disposable `support_test` E2E setup seeds synthetic accounts and the existing browser session journey signs in as the seeded Alpha admin, reloads, and signs out (23/23 browser suite pass on loopback PostgreSQL port 5546). This closes only local A25. A22/A23 remain NOT_RUN because route-wide responsive/state criteria are broader than the performed suite. A16 has explicit assignment rollback evidence in addition to earlier create/update/comment rollback cases.
+The commands above did not use a live service. At exact docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428`, A25 has a local result: the verified disposable `support_test` E2E setup seeds synthetic accounts and the browser session journey signs in as the seeded Alpha admin, reloads, and signs out (23/23 browser suite pass on loopback PostgreSQL port 5546). Actions #97 passed on the same candidate. This closes only local A25. A22/A23 remain NOT_RUN because route-wide responsive/state criteria are broader than the performed suite. A16 has explicit assignment rollback evidence in addition to earlier create/update/comment rollback cases.

@@ -19,7 +19,7 @@ npm run test:e2e
 
 ## Exact recorded CI evidence
 
-Latest hosted evidence before this test/evidence update: docs/test commit `224771c1515c8f39a425e5ef060eb39e0d534a04`, Actions [run #96](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41227346950), job `verify` passed. Exact-SHA Vercel Web/API checks were provider build-quota failures. The source implementation remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; the current worktree contains the A25 E2E update and needs its own exact-SHA CI run.
+Current docs/test candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428`: Actions [run #97](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41264291754), `verify`, completed successfully on the exact SHA. Its Vercel Web/API commit statuses say success with description “Canceled by Ignored Build Step”; these are skipped builds, not deployment validation. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; #96 on `224771c…` had provider build-quota failures.
 
 Historical candidate `acf01641263275507f4b781bc980cf9e810c9e49`, Actions [run #95](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41226730675), job `verify` passed. Exact-SHA Vercel Web and API statuses both succeeded ([checks](https://github.com/arunkumar0398/customer-support-platform/commit/acf01641263275507f4b781bc980cf9e810c9e49/checks)). Runs #90–#95 remain historical SHA-specific records.
 
@@ -35,8 +35,9 @@ The CI workflow `.github/workflows/ci.yml` creates fresh synthetic credentials, 
 | [Actions #94](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223707522) | `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` docs-only baseline | `verify` passed. Both exact-SHA Vercel Web/API statuses were provider build-rate-limit failures. |
 | [Actions #95](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41226730675) | `acf01641263275507f4b781bc980cf9e810c9e49` docs + test-only assignment regression | `verify` passed on the exact candidate. Exact-SHA Vercel Web and API checks both report success. |
 | [Actions #96](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41227346950) | `224771c1515c8f39a425e5ef060eb39e0d534a04` docs/test evidence update | `verify` passed. Exact-SHA Vercel Web/API statuses were provider build-quota failures, not application failures. |
+| [Actions #97](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41264291754) | `e78b19c6d6aa2e02876e8444aa42413fa4159428` seeded-account E2E and status reconciliation | `verify` passed. Vercel Web/API statuses report success but state “Canceled by Ignored Build Step”; neither app was rebuilt/deployed. |
 
-The reviewed application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; #90–#96 are later docs/test snapshots and do not change that source lineage. #95 passed exact-SHA CI and Vercel checks. #96 passed exact-SHA CI; its Web/API statuses are provider quota failures, not application build failures.
+The reviewed application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; #90–#97 are later docs/test snapshots and do not change that source lineage. #95 passed exact-SHA CI and Vercel checks. #96 passed exact-SHA CI; its Web/API statuses were provider quota failures. #97 passed exact-SHA CI, while its Web/API builds were skipped by the ignored-build step.
 
 ## Local acceptance evidence (2026-10-31)
 
@@ -51,7 +52,7 @@ These are local disposable-DB/browser results, not GitHub Actions results; no Pr
 
 ### Seeded demo-account sign-in (A25)
 
-In the isolated documentation/test worktree based on `224771c1515c8f39a425e5ef060eb39e0d534a04`, `npm run test:e2e` exited 0 with 23/23 browser tests passed. The auth fixture first verified `current_database() = support_test` and `current_user = support_test`, then ran the repository's synthetic seed helper against that disposable database. The existing server-session journey signed in as `admin.alpha@example.test` using the documented synthetic demo password, reloaded with the session intact, and signed out. The run used the local Compose test database on loopback port 5546; no hosted data was accessed. This closes the local A25 seed/sign-in criterion, not Preview account acceptance or the broader A22/A23 route/viewport matrix. The change is a local worktree result until its commit SHA and hosted CI result are recorded below.
+At exact candidate `e78b19c6d6aa2e02876e8444aa42413fa4159428`, `npm run test:e2e` exited 0 with 23/23 browser tests passed. The auth fixture first verified `current_database() = support_test` and `current_user = support_test`, then ran the repository's synthetic seed helper against that disposable database. The existing server-session journey signed in as `admin.alpha@example.test` using the documented synthetic demo password, reloaded with the session intact, and signed out. The run used the local Compose test database on loopback port 5546; no hosted data was accessed. This closes the local A25 seed/sign-in criterion, not Preview account acceptance or the broader A22/A23 route/viewport matrix. Hosted Actions #97 on the same SHA also passed its full verify job.
 
 ## Security and acceptance work not run
 
@@ -59,6 +60,6 @@ In the isolated documentation/test worktree based on `224771c1515c8f39a425e5ef06
 - No new full security audit ran here. The compliant sandbox has a local Docker engine and Node 24 image, but the available Linux audit image has no preinstalled Vitest, Supertest, Playwright, or Prisma runner. The WSL Ubuntu/Kali environments also have no Node/npm test toolchain. Host `node_modules` is Windows-built and not a compatible preinstalled Linux test toolchain. Per the audit skill, no dependency was installed/fetched and target tests were not run in an unsuitable environment.
 - Preview agent/customer journeys, cross-tenant and same-tenant-other-customer denials, and before/after ticket/comment/activity checks remain **BLOCKED / NOT_RUN**. They require Neon owner-confirmed compute readiness, safe synthetic role credentials, and a verified second-tenant fixture.
 - SQL migration reversal is **NOT_RUN**. Existing code rollback/schema-compatibility evidence must not be described as an actual down-migration test.
-- Historical status records and their SHA-specific Actions/Vercel outcomes are retained above. The latest hosted result currently recorded is `224771c1515c8f39a425e5ef060eb39e0d534a04` / Actions #96 success, with Vercel Web/API provider quota failures. The A25 test/evidence changes are not yet represented by a hosted run; record the new candidate only after its exact-SHA Actions result is observed.
+- Historical status records and their SHA-specific Actions/Vercel outcomes are retained above. Current candidate e78b19c / Actions #97 passed; Vercel Web/API builds were skipped by the ignored-build step. Deployment remains optional and no provider build retry is needed for the assessment.
 
 No Production or Preview requests/writes, or deployed throttle probes, are part of the evidence above. Database writes occurred only in the verified disposable loopback test database.
