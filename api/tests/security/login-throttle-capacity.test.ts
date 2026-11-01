@@ -9,32 +9,38 @@ function invoke(middleware,ip,email){const headers={};let called=false;let error
 describe('login throttle capacity policy',()=>{
  it('enforces the 4096-entry ceiling through an Express login route without entering the login handler',async()=>{
   let now=Date.UTC(2026,10,1);let loginHandlerCalls=0;
+  const throttle=createLoginThrottle({...options(now),now:()=>new Date(now),testLoginThrottleLimits:{ip:5000,account:5000}});
+  let routeIp='';
   const app=express();app.use(express.json());app.disable('trust proxy');
-  app.post('/api/auth/login',createLoginThrottle({...options(now),now:()=>new Date(now),testLoginThrottleLimits:{ip:5000,account:5000}}),(_request,response)=>{
+  app.post('/api/auth/login',throttle,(request,response)=>{
+   routeIp=request.ip;
    loginHandlerCalls++;response.status(204).end();
   });app.use(errorHandler);
 
-  for(let index=0;index<4095;index++){
-   const response=await request(app).post('/api/auth/login').send({email:`capacity-${index}@example.test`,password:'dummy-only'});
-   expect(response.status,`initial account key ${index}`).toBe(204);
+  const seededRouteKey=await request(app).post('/api/auth/login').send({email:'capacity-0@example.test',password:'dummy-only'});
+  expect(seededRouteKey.status).toBe(204);
+  for(let index=1;index<4095;index++){
+   const result=invoke(throttle,routeIp,`capacity-${index}@example.test`);
+   expect(result.called,`seed account key ${index}`).toBe(true);
+   expect(result.error,`seed account key ${index}`).toBeUndefined();
   }
-  expect(loginHandlerCalls).toBe(4095);
+  expect(loginHandlerCalls).toBe(1);
 
   const existing=await request(app).post('/api/auth/login').send({email:'capacity-0@example.test',password:'dummy-only'});
   expect(existing.status).toBe(204);
-  expect(loginHandlerCalls).toBe(4096);
+  expect(loginHandlerCalls).toBe(2);
 
   const atCapacity=await request(app).post('/api/auth/login').send({email:'capacity-new@example.test',password:'dummy-only'});
   expect(atCapacity.status).toBe(429);
   expect(atCapacity.headers['retry-after']).toBe('900');
   expect(atCapacity.headers['set-cookie']).toBeUndefined();
-  expect(loginHandlerCalls).toBe(4096);
+  expect(loginHandlerCalls).toBe(2);
 
   now+=15*60*1000+1;
   const recovered=await request(app).post('/api/auth/login').send({email:'capacity-after-expiry@example.test',password:'dummy-only'});
   expect(recovered.status).toBe(204);
   expect(recovered.headers['retry-after']).toBeUndefined();
-  expect(loginHandlerCalls).toBe(4097);
+  expect(loginHandlerCalls).toBe(3);
  });
 
  it('allows existing keys at capacity and rejects a new key while all 4096 entries are live',()=>{
