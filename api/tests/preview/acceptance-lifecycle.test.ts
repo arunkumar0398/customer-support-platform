@@ -220,7 +220,7 @@ describe('local acceptance-shaped Preview fixture lifecycle', () => {
       expect(await snapshot(ticket.id), label + ' update side effects').toEqual(before);
       const assignment = await authenticated('patch', '/api/tickets/' + ticket.id + '/assignment', identity, alpha.id)
         .set('X-Ticket-Version', String(before.ticket.version)).send({ assigneeUserId: alphaAgent.id });
-      expect(assignment.status, label + ' assignment').toBe(404);
+      expect(assignment.status, label + ' assignment').toBe(label === 'same-tenant other customer' ? 403 : 404);
       expect(await snapshot(ticket.id), label + ' assignment side effects').toEqual(before);
       const comment = await authenticated('post', '/api/tickets/' + ticket.id + '/comments', identity, alpha.id)
         .send({ body: 'Denied unauthorized comment.' });
