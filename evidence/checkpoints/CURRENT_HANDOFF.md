@@ -3,6 +3,8 @@
 
 ## Release and validation status — 2026-11-01
 
+**Latest docs-status candidate:** `158ddaeffd7d3e61dbc49ea79e43d7300ee10ace`; Actions [run #103](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41271082015) passed exact-SHA job `verify`. Vercel Web/API status markers are `success` but descriptions say “Canceled by Ignored Build Step”; neither is a deployment or runtime check. Application implementation source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74. Exact-candidate G7 returned **BLOCKED_BY_ENVIRONMENT**; see [report](../reviews/g7-158ddae-2026-11-01.md). The report predates this documentation reconciliation.
+
 ## Preview readiness refresh — 2026-11-01
 
 Neon recovery and one read-only fixture discovery are **reported PASS** in the authorized owner browser session: Preview project customer-support-platform-preview, branch production, database neondb, endpoint ep-shy-surf-b36pzssx; observed 2026-11-01 09:11 IST / 03:41 UTC. SELECT 1 returned 1; one discovery query returned 15 active synthetic memberships and 15 tickets across two organizations. Sanitized details: [Preview readiness report](PREVIEW-READINESS-2026-11-01.md).
