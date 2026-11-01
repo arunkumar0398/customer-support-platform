@@ -163,3 +163,51 @@ test('admin can add an existing account and update its organization role and act
     where: { organizationId_userId: { organizationId, userId: adminId } },
   })).toMatchObject({ role: 'ADMIN', isActive: true });
 });
+
+test('membership route shows a narrow loading and failure state, then recovers on retry', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, emails.admin);
+
+  let markRequestArrived!: () => void;
+  let releaseFailedResponse!: () => void;
+  const requestArrived = new Promise<void>((resolve) => { markRequestArrived = resolve; });
+  const failedResponseGate = new Promise<void>((resolve) => { releaseFailedResponse = resolve; });
+  let membershipRequests = 0;
+  const observedStatuses: number[] = [];
+  await page.route('**/api/memberships?*', async (route) => {
+    if (route.request().method() !== 'GET') return route.continue();
+    membershipRequests += 1;
+    if (membershipRequests === 1) {
+      markRequestArrived();
+      await failedResponseGate;
+      observedStatuses.push(503);
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'UNAVAILABLE', message: 'Members temporarily unavailable.' } }),
+      });
+      return;
+    }
+    const response = await route.fetch();
+    observedStatuses.push(response.status());
+    await route.fulfill({ response });
+  });
+
+  await page.getByRole('link', { name: 'Members', exact: true }).click();
+  await expect(page).toHaveURL('/admin/members');
+  await expect(page.getByRole('status')).toContainText('Loading organization members');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await requestArrived;
+  releaseFailedResponse();
+
+  await expect(page.getByRole('heading', { name: 'Members could not load' })).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('Members temporarily unavailable.');
+  await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  await page.getByRole('button', { name: 'Try again' }).click();
+  await expect(page.getByRole('heading', { name: 'Organization members' })).toBeVisible();
+  await expect(page.getByRole('row', { name: new RegExp(emails.admin) })).toBeVisible();
+  expect(observedStatuses).toEqual([503, 200]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
