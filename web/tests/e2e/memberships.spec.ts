@@ -158,10 +158,17 @@ test('admin can add an existing account and update its organization role and act
   await expect.poll(() => page.locator('.members-table-wrap').evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
   await mobileRole.selectOption('CUSTOMER');
   await mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` }).click();
-  await expect(mobileAgentRow).toContainText('Customer');
+  await expect(mobileAgentRow.locator('td').nth(0)).toHaveText('Customer');
+  await expect.poll(() => db.membership.findUniqueOrThrow({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+  })).toMatchObject({ role: 'CUSTOMER' });
   await mobileRole.selectOption('AGENT');
+  await expect(mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` })).toBeEnabled();
   await mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` }).click();
-  await expect(mobileAgentRow).toContainText('Agent');
+  await expect(mobileAgentRow.locator('td').nth(0)).toHaveText('Agent');
+  await expect.poll(() => db.membership.findUniqueOrThrow({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+  })).toMatchObject({ role: 'AGENT' });
   await page.setViewportSize({ width: 1280, height: 720 });
 
   const emailInput = page.getByLabel('Existing account email');
