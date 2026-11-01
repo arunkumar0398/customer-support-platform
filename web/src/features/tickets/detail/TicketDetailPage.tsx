@@ -177,7 +177,8 @@ export function TicketDetailPage({
         <p className="eyebrow">SUPPORT DESK · TICKET</p>
         <h1>Ticket unavailable</h1>
         <p role="alert">{ticketQuery.error ? getErrorMessage(ticketQuery.error) : 'The ticket could not be loaded.'}</p>
-        <Link className="button button-primary" to="/">Return to ticket queue</Link>
+        <button className="button button-primary" type="button" onClick={() => void ticketQuery.refetch()}>Try again</button>
+        <Link className="button button-quiet" to="/">Return to ticket queue</Link>
       </main>
     );
   }
