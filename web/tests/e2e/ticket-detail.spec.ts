@@ -249,6 +249,9 @@ test('staff must provide a reason when reopening a resolved ticket', async ({ pa
   await expect(reopenReason).toHaveCount(0);
   await status.selectOption('IN_PROGRESS');
   await expect(reopenReason).toHaveValue('');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(reopenReason).toBeFocused();
+  expect(updates).toBe(1);
   await reopenReason.fill('  Customer confirmed the issue is still occurring.  ');
   await page.getByRole('button', { name: 'Save changes' }).click();
 
