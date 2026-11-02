@@ -164,7 +164,38 @@ export async function writePromotionInputs({directory,preflight,target,lane,comm
 }
 function nextLine(rl,child,timeoutMs,stderr=()=> ''){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('timed out waiting for trusted promoter')),timeoutMs);const onLine=line=>{clearTimeout(timer);rl.off('line',onLine);resolve(line);};rl.once('line',onLine);child.once('close',(code,signal)=>{clearTimeout(timer);rl.off('line',onLine);reject(new Error(promoterExitMessage(code,signal,stderr())));});});}
 async function runDockerTarget(args,name,timeoutMs){const child=spawn('docker',args,{windowsHide:true,stdio:['ignore','pipe','pipe']});const limit=2*1024*1024;let out=[],err=[],outKept=0,errKept=0,outSeen=0,errSeen=0,timedOut=false,truncated=false;for(const pair of [[child.stdout,'out'],[child.stderr,'err']])pair[0].on('data',chunk=>{const data=Buffer.from(chunk);if(pair[1]==='out'){outSeen+=data.length;const keep=Math.min(data.length,Math.max(0,limit-outKept));if(keep)out.push(data.subarray(0,keep));outKept+=keep;if(outSeen>limit)truncated=true;}else{errSeen+=data.length;const keep=Math.min(data.length,Math.max(0,limit-errKept));if(keep)err.push(data.subarray(0,keep));errKept+=keep;if(errSeen>limit)truncated=true;}});const timer=setTimeout(()=>{timedOut=true;try{spawnSync('docker',['kill','--signal','KILL',name],{windowsHide:true,timeout:15000});}catch{}},timeoutMs);const end=await closeCode(child);clearTimeout(timer);return {exitCode:end.code,signal:end.signal,timedOut,stdout:Buffer.concat(out).toString('utf8'),stderr:Buffer.concat(err).toString('utf8'),stdoutObservedBytes:outSeen,stderrObservedBytes:errSeen,truncated};}
-async function makeEvidenceRun(repoRoot,evidenceDir,runId){await mkdir(evidenceDir,{recursive:true});const requested=path.resolve(evidenceDir);const actual=await (await import('node:fs/promises')).realpath(requested);if(actual!==requested)throw new Error('evidence destination must not traverse a symlink');const repo=await (await import('node:fs/promises')).realpath(repoRoot);const rel=path.relative(repo,actual);if(rel===''||(!rel.startsWith('..'+path.sep)&&rel!=='..'&&!path.isAbsolute(rel)))throw new Error('audit evidence must be outside the repository');const out=path.join(actual,runId);await mkdir(out,{mode:0o700});return out;}
+export async function makeEvidenceRun(repoRoot,evidenceDir,runId){
+ const fs=await import('node:fs/promises');
+ const requested=path.resolve(evidenceDir);
+ const repo=await fs.realpath(repoRoot);
+ const isWithin=(parent,candidate)=>{const rel=path.relative(parent,candidate);return rel===''||(!rel.startsWith('..'+path.sep)&&rel!=='..'&&!path.isAbsolute(rel));};
+ if(isWithin(repo,requested))throw new Error('audit evidence must be outside the repository');
+
+ let existing=requested;
+ while(true){
+  try{await fs.lstat(existing);break;}
+  catch(error){if(error.code!=='ENOENT')throw error;const parent=path.dirname(existing);if(parent===existing)throw error;existing=parent;}
+ }
+ const existingStat=await fs.lstat(existing);
+ if(!existingStat.isDirectory())throw new Error('evidence destination parent must be a directory');
+ const realExisting=await fs.realpath(existing);
+ if(path.relative(realExisting,existing)===''||path.relative(existing,realExisting)===''){
+  // Equivalent paths are accepted; use the canonical ancestor for containment checks.
+ }else{
+  throw new Error('evidence destination must not traverse a symlink');
+ }
+ const missing=path.relative(existing,requested);
+ const canonicalRequested=path.resolve(realExisting,missing);
+ if(isWithin(repo,canonicalRequested))throw new Error('audit evidence must be outside the repository');
+
+ await mkdir(requested,{recursive:true});
+ const actual=await fs.realpath(requested);
+ if(path.relative(actual,requested)!==''&&path.relative(requested,actual)!=='')throw new Error('evidence destination must not traverse a symlink');
+ if(isWithin(repo,actual))throw new Error('audit evidence must be outside the repository');
+ const out=path.join(actual,runId);
+ await mkdir(out,{mode:0o700});
+ return out;
+}
 export async function removePrivateInputDir(inputDir){
  const root=await realpath(os.tmpdir());const actual=await realpath(inputDir);const st=await lstat(inputDir);
  if(!st.isDirectory()||st.isSymbolicLink()||path.dirname(actual)!==root||!path.basename(actual).startsWith('csp-audit-input-'))throw new Error('refusing to remove an unverified audit input directory');

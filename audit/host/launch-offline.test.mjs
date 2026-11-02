@@ -1,9 +1,9 @@
-import { mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
+import { lstat, mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import os from 'node:os'; import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { formatPromoterDiagnostics, isSupportedLane, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
+import { formatPromoterDiagnostics, isSupportedLane, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -163,4 +163,25 @@ test('does not accept an arbitrary archive or stale commit claim', async t => {
  await writeFile(path.join(root,'unrelated.tmp'),'untracked'); assert.equal(git('status','--porcelain'), '?? unrelated.tmp'); await (await import('node:fs/promises')).rm(path.join(root,'unrelated.tmp'));
  const outputDir=await mkdtemp(path.join(os.tmpdir(),'audit-out-')); t.after(()=>rm(outputDir,{recursive:true,force:true})); const result=await prepareSourceSnapshot({repoRoot:root,commit:git('rev-parse','HEAD'),outputDir});
  const entries=execFileSync('tar',['-tf',result.archivePath],{encoding:'utf8'}); assert.doesNotMatch(entries,/^\.env$|^\.cache|^node_modules|unrelated/sm); assert.match(entries,/tracked.txt/);
+});
+
+test('rejects an in-repository evidence destination before creating it', async t => {
+ const {root}=await repo(t);
+ const evidenceParent=path.join(root,'evidence');
+ const evidenceDir=path.join(evidenceParent,'nested');
+ await assert.rejects(makeEvidenceRun(root,evidenceDir,'run-1'),/outside the repository/);
+ await assert.rejects(lstat(evidenceParent),{code:'ENOENT'});
+});
+
+test('creates evidence outside the repository and refuses symlink destinations', async t => {
+ const {root}=await repo(t);
+ const outside=await mkdtemp(path.join(os.tmpdir(),'audit-evidence-outside-'));
+ t.after(()=>rm(outside,{recursive:true,force:true}));
+ const evidenceDir=path.join(outside,'runs');
+ const runDir=await makeEvidenceRun(root,evidenceDir,'run-2');
+ assert.equal(runDir,path.join(evidenceDir,'run-2'));
+ const link=path.join(outside,'linked-runs');
+ await symlink(evidenceDir,link,'junction');
+ await assert.rejects(makeEvidenceRun(root,link,'run-3'),/directory|symlink/i);
+ await assert.rejects(lstat(path.join(link,'run-3')),{code:'ENOENT'});
 });
