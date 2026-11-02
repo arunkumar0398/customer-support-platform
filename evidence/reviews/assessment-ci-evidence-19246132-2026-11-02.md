@@ -1,8 +1,16 @@
 # Exact-SHA assessment test evidence — `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`
 
-This record summarizes output observed in GitHub Actions run [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, for the exact source SHA above. The run completed successfully. It is CI evidence, not a local clean-checkout rehearsal.
+This record summarizes GitHub Actions [run #130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, for the exact source SHA above. The run completed successfully.
 
-The job's [sanitized gate-log artifact](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826/artifacts/13147913558) is named `ci-gate-logs`; artifact metadata reported SHA-256 `2dcad7d62b90a2b2a25240bcfb945a69bc7a8669e16cc2ecdace0ea06f621e60` and expiry `2026-11-09`. The job log, which prints the sanitized gate outputs before upload, and the artifact metadata were inspected on 2026-11-02. The artifact remains subject to GitHub's expiry; this committed summary preserves the observed gate commands and outcomes.
+These results are CI evidence. They do not represent a local clean-checkout rehearsal.
+
+The job’s [sanitized gate-log artifact](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826/artifacts/13147913558) is named `ci-gate-logs`.
+
+- SHA-256: `2dcad7d62b90a2b2a25240bcfb945a69bc7a8669e16cc2ecdace0ea06f621e60`
+- Expiry: `2026-11-09`
+- Inspected: 2026-11-02, including the job log and artifact metadata
+
+The artifact expires under GitHub’s retention policy. This committed summary preserves the observed commands and outcomes.
 
 | Gate command | Observed result |
 |---|---|
@@ -16,8 +24,12 @@ The job's [sanitized gate-log artifact](https://github.com/arunkumar0398/custome
 | `npm run test:e2e` | 47 tests passed. |
 | `npm run build` | Passed. |
 
-The workflow completed with conclusion `success`. These gates establish the commands and results above on `19246132…`; they do not establish Preview authorization, Production user flows, manual accessibility, or a separate local `npm run check` invocation.
+The workflow concluded `success`. These gates establish the listed commands and results on `19246132…`.
+
+They do not establish Preview authorization, Production user flows, manual accessibility, or a separate local `npm run check` invocation.
 
 ## Rehearsal artifact limitation
 
-The separately cited `assessment-rehearsal-19246132-2026-11-02.md` and its local output files were not present in the PR branch or available project worktrees when checked, and the path returned 404 from GitHub at this SHA. Therefore this PR does not claim the previously summarized local `npm run check`, Playwright, or `support_test` migration rehearsal as independently inspectable local evidence. Use Actions #130 and its recorded CI gates above for test-results evidence; local Compose startup/migration/seed evidence remains in the exact-SHA readiness report.
+The separately cited `assessment-rehearsal-19246132-2026-11-02.md` and its local output files were not present in the PR branch or available project worktrees when checked. The path also returned 404 from GitHub at this SHA.
+
+This PR therefore does not claim the prior local `npm run check`, Playwright, or `support_test` migration rehearsal as inspectable evidence. Use Actions #130 above for test-results evidence. The exact-SHA readiness report contains the separate local Compose startup, migration, and seed results.

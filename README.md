@@ -2,11 +2,27 @@
 
 ## Current assessment status — default `19246132f22bd0e37b6a6a0b9286bb1621d3bad1` (2026-11-02)
 
-The live default is `codex/assessment-mvp` at this exact SHA. GitHub Actions [run #130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed on it. Exact-SHA Vercel Web/API status contexts are provider success; they are not Docker or authenticated-flow evidence. A separate read-only GET to the production API health and readiness endpoints returned `ok` and `ready`; no user flow or Production write was performed.
+### Candidate and hosted checks
 
-On a new clean worktree at this SHA, host and Linux-container npm registry pings succeeded. The first API/Web BuildKit attempt ended at Dockerfile `RUN npm ci` with `ECONNRESET`; its retained log shows a transient registry connection reset. A single retry on the unchanged candidate completed the dependency install and both image builds. The isolated Compose database became healthy, all three migrations and the synthetic local seed succeeded, and API/Web both reached Compose `healthy`; the API readiness endpoint and Web root each returned HTTP 200. The unique Compose project, volume, images, and temporary `.env` were removed afterward. See the [current readiness report](evidence/reviews/assessment-readiness-19246132-2026-11-02.md) for exact commands and output.
+- The live default is `codex/assessment-mvp` at this exact SHA.
+- GitHub Actions [run #130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed on this SHA.
+- Exact-SHA Vercel Web/API statuses are provider success. They do not establish Docker startup or authenticated user flows.
+- Separate read-only GETs to the Production API health and readiness endpoints returned `ok` and `ready`. No user flow or Production write was performed.
 
-The lockfile audit reported 10 moderate entries, all in the development toolchain; the production-only lockfile audit reported zero. No dependency changes were made. The Section 8 inventory records source access as **PARTIAL** pending owner verification and the other seven deliverables as **PASS**. Exact-SHA Actions #130 test commands and counts are summarized in the [inspectable CI evidence record](evidence/reviews/assessment-ci-evidence-19246132-2026-11-02.md). The separately cited local rehearsal file was not found, and its local results are not claimed. Evaluator read access remains an owner action because no evaluator identity was supplied. A35 remains **BLOCKED / NOT_RUN**: the linked Preview package says **NOT APPROVED**, and this PR contains no separate approved run record supporting the claimed role journeys/mutations. The incomplete security audit, A22/A23/A37, manual screen-reader review, and A28 remain separate open internal gates. Historical status snapshots below stay tied to their stated SHAs.
+### Local Docker rehearsal
+
+On a new clean worktree at this SHA, host and Linux-container npm registry pings succeeded. The first API/Web BuildKit attempt failed at Dockerfile `RUN npm ci` with `ECONNRESET`; the retained log shows a transient registry connection reset. One retry on the unchanged candidate completed the install and built both images.
+
+The isolated Compose database became healthy. All three migrations and the synthetic local seed succeeded. API and Web both reached Compose `healthy`; API readiness and the Web root each returned HTTP 200. The unique Compose project, volume, images, and temporary `.env` were removed afterward. See the [current readiness report](evidence/reviews/assessment-readiness-19246132-2026-11-02.md) for exact commands and output.
+
+### Deliverables and remaining gates
+
+- The lockfile audit found 10 moderate entries in the development toolchain and zero in the production-only audit. No dependencies were changed.
+- The [Section 8 inventory](evidence/checkpoints/DELIVERABLES_INVENTORY.md) marks source access **PARTIAL**, pending owner verification; the other seven deliverables are **PASS**.
+- Exact-SHA Actions #130 commands and counts are summarized in the [CI evidence record](evidence/reviews/assessment-ci-evidence-19246132-2026-11-02.md). The separately cited local rehearsal file was not found, so its local results are not claimed.
+- Evaluator read access remains an owner action because no evaluator identity was supplied.
+- A35 is **BLOCKED / NOT_RUN**. The linked Preview package says **NOT APPROVED**, and this PR contains no separate approved run record supporting the claimed role journeys or mutations.
+- The incomplete security audit, A22/A23/A37, manual screen-reader review, and A28 remain open internal gates. Historical status snapshots below stay tied to their stated SHAs.
 
 ## Isolated Preview fixture tooling work — 2026-11-01
 

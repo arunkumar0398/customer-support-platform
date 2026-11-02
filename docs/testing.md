@@ -2,19 +2,40 @@
 
 ## Current default assessment recheck — 2026-11-02
 
-Exact live default `codex/assessment-mvp` SHA: `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`. Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed on this SHA. Exact-SHA Vercel Web/API contexts reported provider success; they are not application tests. Read-only Production API GETs to `/api/health` and `/api/health/ready` returned `ok` and `ready`; no user flows or writes ran.
+**Candidate:** `codex/assessment-mvp` at `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`.
 
-On a separate clean worktree, host and Linux-container `npm ping --registry=https://registry.npmjs.org/` succeeded. The first Compose build’s retained BuildKit logs show API and Web both reset during `RUN npm ci` after 156.1 seconds. With no persistent DNS/proxy fault found and registry pings succeeding on both paths, one retry was run on the unchanged SHA. `docker compose -p csp-assess-current-1924613 up -d --build --wait api web` exited 0; both images built, API and Web containers reported `healthy`, the API readiness endpoint returned HTTP 200 from inside the API container, and the Web root returned HTTP 200 on loopback. The local PostgreSQL container became healthy, `npm run db:migrate` applied all three migrations, and `npm run db:seed` applied synthetic fixtures before the app build. The unique project, volume, images, and local `.env` were removed after verification. See the [detailed recheck report](../evidence/reviews/assessment-readiness-19246132-2026-11-02.md).
+**Hosted checks:** Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed on this SHA. Vercel Web/API contexts reported provider success; these are not application tests. Read-only Production API GETs to `/api/health` and `/api/health/ready` returned `ok` and `ready`. No user flows or writes ran.
 
-The lockfile audit showed 10 moderate npm entries, all dev-only, with zero findings from `npm audit --omit=dev --json --package-lock-only`. The shared underlying package is `minimatch@10.2.6`; no dependencies were changed. Exact-SHA Actions #130 ran `npm run test:api` (431/431), `npm run test:web` (17/17), `npm run test:e2e` (47 passed), lint, typecheck, database verification/migrations/seed, and build; see the [sanitized command/result summary](../evidence/reviews/assessment-ci-evidence-19246132-2026-11-02.md) and the linked Actions artifact. A separately cited local clean-checkout rehearsal report and local output files were not found, so the prior summary of a local `npm run check`, Playwright 47/47, and `support_test` migration is not claimed as inspectable evidence.
+### Local Docker rehearsal
+
+On a separate clean worktree, host and Linux-container `npm ping --registry=https://registry.npmjs.org/` succeeded. The first Compose build’s retained BuildKit logs show API and Web both reset during `RUN npm ci` after 156.1 seconds. Registry pings succeeded on both paths, and no persistent DNS/proxy fault was found. One retry was run on the unchanged SHA.
+
+The retry command, `docker compose -p csp-assess-current-1924613 up -d --build --wait api web`, exited 0. Both images built and both app containers reported `healthy`. API readiness returned HTTP 200 inside the API container; the Web root returned HTTP 200 on loopback. The local PostgreSQL container became healthy, all three migrations applied, and the synthetic fixtures seeded before the app build. The unique project, volume, images, and local `.env` were removed after verification. See the [detailed recheck report](../evidence/reviews/assessment-readiness-19246132-2026-11-02.md).
+
+### Dependency and test evidence
+
+The lockfile audit found 10 moderate development-only npm entries and zero findings from `npm audit --omit=dev --json --package-lock-only`. The shared underlying package is `minimatch@10.2.6`. No dependencies were changed.
+
+Exact-SHA Actions #130 ran:
+
+- `npm run test:api`: 431/431 passed.
+- `npm run test:web`: 17/17 passed.
+- `npm run test:e2e`: 47 passed.
+- Lint, typecheck, database verification/migrations/seed, and build: passed.
+
+See the [sanitized command/result summary](../evidence/reviews/assessment-ci-evidence-19246132-2026-11-02.md) and linked Actions artifact. The separately cited local clean-checkout rehearsal report and its output files were not found. Therefore, the prior summary of a local `npm run check`, Playwright 47/47, and `support_test` migration is not claimed as inspectable evidence.
 
 ## Run 22 bounded offline continuation — 2026-11-02
 
 Exact source `080d883029e6e68619c34e8dc4d055d03b4dcbb7`, tree `75094b514a6d404765b45625de542aeb4d11a476`: `api-provisioning-file` passed **21/21** and the API lane passed **425/425 across 28 files**, both exit 0 in the pinned no-network Linux image. Promoted logs, launch records, source binding, hashes, limitations, and the API assertion map are in [the continuation report](../evidence/reviews/audit-continuation-2026-11-02-080d883.md). This is local exact-source evidence, not GitHub CI and not a complete Cloudflare audit.
 
-The five throttle tests in that API lane confirm local map-capacity/expiry behavior; an independent focused verifier found no vulnerability established by this fail-closed policy. Vercel multi-instance behavior remains unknown. The follow-up worker-cap edit changes only the offline runner (`all` API to one worker; Web remains two); its focused host regression passed 1/1, but the pinned Linux `all` lane has not been rerun after that edit. Current run-22 output does not validate the uncommitted runner edit.
+The five throttle tests in that API lane confirm local map-capacity/expiry behavior. An independent focused verifier found no vulnerability established by this fail-closed policy. Vercel multi-instance behavior remains unknown.
 
-Preview compute is currently active, but A35 is **BLOCKED / NOT_RUN** on the evidence in this branch. The linked [Preview execution package](../evidence/checkpoints/PREVIEW-EXECUTION-APPROVAL-2026-11-02.md) is marked **NOT APPROVED** and says no hosted write, authenticated role request, or deployment was authorized. No separate approved execution record supporting the claimed role journeys/mutations is included in this PR. The package records a Web `API_ORIGIN` destination mismatch and unverified API-to-Neon runtime binding; no authenticated denial/no-write evidence or cleanup proof is available here.
+The follow-up worker-cap edit changes only the offline runner: API uses one worker for `all`, while Web remains at two. Its focused host regression passed 1/1, but the pinned Linux `all` lane has not been rerun after the edit. Run 22 does not validate that runner change.
+
+A35 is **BLOCKED / NOT_RUN** on the evidence in this branch. The linked [Preview execution package](../evidence/checkpoints/PREVIEW-EXECUTION-APPROVAL-2026-11-02.md) is marked **NOT APPROVED**. It records no authorization for hosted writes, authenticated role requests, or deployment.
+
+No separate approved execution record supporting the claimed role journeys or mutations is included in this PR. The package records a Web `API_ORIGIN` destination mismatch and unverified API-to-Neon runtime binding. Authenticated denial/no-write evidence and cleanup proof are also unavailable here.
 
 ## Current local UI follow-up — 2026-11-01
 

@@ -1,10 +1,28 @@
 # Acceptance Status
 ## Current default assessment recheck — `19246132f22bd0e37b6a6a0b9286bb1621d3bad1` (2026-11-02)
 
-- Live GitHub default is `codex/assessment-mvp` at this SHA. Exact-SHA Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed. Exact-SHA Vercel Web/API statuses are provider success; they are not application test results. Read-only Production API health/readiness GETs returned `ok` and `ready` with no user flow or write.
-- On a separate clean worktree at this SHA, `npm ping` and `npm ci` succeeded; the isolated Compose database became healthy, all three migrations and the synthetic seed succeeded. The full API/Web `docker compose ... up -d --build --wait api web` attempt failed at Dockerfile `RUN npm ci` with container-network `ECONNRESET`; neither app container started and neither health check ran. This current attempt is environmental; the historical A24 result on another SHA remains separately labeled.
-- Lockfile audit at this SHA reported 10 moderate, dev-only entries rooted in `minimatch@10.2.6`; the production-only audit reported zero. No dependency changes were made. Exact-SHA Actions #130 logs show API 431/431, Web 17/17, and Playwright 47 passed; the summarized commands and outputs are preserved in [the CI evidence record](../reviews/assessment-ci-evidence-19246132-2026-11-02.md). The separately cited local rehearsal report was not found and is not claimed.
-- Section 8 deliverable status is in the [current inventory](DELIVERABLES_INVENTORY.md): source access is PARTIAL pending evaluator permission verification; README setup/run and the other six items PASS. The clean current-SHA Docker rehearsal built and health-checked both app containers after one transient BuildKit network reset. CI/deployment are optional deliverables. Preview A35, the incomplete security audit, A22/A23/A37 and manual screen-reader review, evaluator access, and A28 remain separate open gates.
+### CI and hosted checks
+
+- Live GitHub default: `codex/assessment-mvp` at this SHA.
+- Exact-SHA Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed.
+- Exact-SHA Vercel Web/API statuses are provider success, not application test results.
+- Read-only Production API health/readiness GETs returned `ok` and `ready`. No user flow or Production write was performed.
+
+### Docker evidence
+
+- An initial clean-worktree Compose attempt failed at Dockerfile `RUN npm ci` with container-network `ECONNRESET`. Neither app container started, and neither health check ran. This attempt was environmental; the historical A24 result on another SHA remains separate.
+- In a later clean current-SHA rehearsal, a single retry built both app containers and both passed health checks after the transient BuildKit reset. The isolated database became healthy; all three migrations and synthetic seed succeeded. See the [readiness report](../reviews/assessment-readiness-19246132-2026-11-02.md) for commands and cleanup.
+
+### Tests, dependencies, and deliverables
+
+- Actions #130 logs show API 431/431, Web 17/17, and Playwright 47 passed. Commands and outputs are in the [CI evidence record](../reviews/assessment-ci-evidence-19246132-2026-11-02.md).
+- The separately cited local rehearsal report was not found; its results are not claimed.
+- The lockfile audit found 10 moderate development-only entries rooted in `minimatch@10.2.6`; the production-only audit found zero. No dependencies were changed.
+- Section 8 statuses are in the [current inventory](DELIVERABLES_INVENTORY.md): source access is **PARTIAL**, pending evaluator permission verification; README setup/run and the other six items are **PASS**. CI and deployment are optional deliverables.
+
+### Separate internal gates
+
+Preview A35, the incomplete security audit, A22/A23/A37 and manual screen-reader review, evaluator access, and A28 remain open.
 
 ## Historical continuation — 2026-11-02, local candidate `080d883`
 
@@ -129,7 +147,7 @@ See [DELIVERABLES_INVENTORY.md](DELIVERABLES_INVENTORY.md) for each required ite
 | A32 | NOT_RUN | [TK-30](TK-30.md): guarded API matrix covers missing CSRF and hostile Origin on seven cookie-authenticated write routes; cookie evidence exists in [TK-08](TK-08.md), but full production/proxy/browser acceptance remains pending. |
 | A33 | NOT_RUN | [TK-30](TK-30.md): guarded replay includes throttling, safe error/request ID, and secret-redaction suites; [OPEN P2 capacity concern](../reviews/security-foundation-2026-10-26-2f95a1a.md) still needs exhaustion/recovery evidence and disposition. |
 | A34 | PASS | Current default `19246132f22bd0e37b6a6a0b9286bb1621d3bad1` passed exact-SHA Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`. Exact-SHA Vercel Web/API contexts are provider success only; current read-only API health GETs are separate and do not establish authenticated flows. Prior #74/#105/#107 records remain tied to their own SHAs. |
-| A35 | BLOCKED | Execution disposition: **NOT_RUN**. The linked Preview package is **NOT APPROVED** and explicitly records no authorized hosted writes, authenticated role requests, or deployments. No separate approved execution record is present in this PR to support the earlier customer/agent/admin journey-and-mutation claim; that claim is withdrawn. Authenticated denial responses, before/after no-write comparisons, and cleanup/zero-residual proof are absent. No Preview action occurred in this exact-SHA recheck. |
+| A35 | BLOCKED | **NOT_RUN.** The linked Preview package is **NOT APPROVED**. This PR has no separate approved run record supporting the earlier journey/mutation claim; that claim is withdrawn. Authenticated denials, before/after no-write comparisons, and cleanup/zero-residual proof are absent. No Preview action occurred in this recheck. |
 | A36 | PASS | **Scope is limited to the TK-35 stated local rollout/code-rollback criterion:** disposable-PostgreSQL schema restore/forward-recovery and previous-code compatibility passed; see [A36 report](A36-migration-recovery-2026-11-01.md). SQL down-migration and hosted Neon PITR remain untested. |
 | A37 | NOT_RUN | **Partial evidence only, not a full pass:** E2E passed 29/29 at `24f51c0`; the added 375px sign-in Tab order/visible-focus and customer mobile dashboard denial assertions are committed and validated by exact-SHA #107 on `c179180`. Existing evidence includes named labels, validation/error alerts, mobile navigation, and keyboard-scrollable dashboard table. Full route-wide keyboard/focus review, axe scans, and assistive-technology review remain incomplete. See [UI matrix](UI_A22_A23_MATRIX_2026-11-01.md). |
 | A38 | PASS | Source `a74ee31f3198425f9afed8dda58b63cdb3eddb9c`; guarded PostgreSQL 18.6 EXPLAIN ANALYZE assessed tenant/status list query on 50,000 rollback-only synthetic tickets and selected `Ticket_org_status_created_id_idx` for first page. Scoped to the required representative list/filter plan; this is not a load/SLO claim. See [TK-31](TK-31.md), [review](../reviews/tk31-2026-10-27-a74ee31.md), and [performance note](../../docs/performance.md). |
