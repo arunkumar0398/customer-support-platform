@@ -1,9 +1,25 @@
 # Assessment deliverables inventory
-## Latest local UI evidence — 2026-11-01
+
+## Current Section 8 assessment — default `19246132f22bd0e37b6a6a0b9286bb1621d3bad1` (2026-11-02)
+
+The live default is `codex/assessment-mvp` at this SHA. See the [exact-SHA readiness report](../reviews/assessment-readiness-19246132-2026-11-02.md) for Actions #130, Vercel provider statuses, read-only health results, Docker Compose retry, npm advisory review, and limitations. Deployment and CI are optional Section 8 work. This inventory separates those provider checks from runtime evidence and from additional internal release gates.
+
+| Required Section 8 item | Path | Status | Evidence / owner action |
+|---|---|---|---|
+| 1. Source repository | Private GitHub repository; `codex/assessment-mvp` | **PARTIAL** | Repository and exact SHA are confirmed. Owner must confirm read access for the named evaluator or prepare an approved private handoff; evaluator identity/access is unverified. |
+| 2. README setup/run | `README.md`, `docs/operations.md` | **PASS** | On a clean worktree at the live SHA, `npm ci`, isolated Compose database startup, all three migrations, synthetic seed, and one successful API/Web image build completed. Both containers reported `healthy`; API readiness and Web root returned HTTP 200. A first transient BuildKit `ECONNRESET` is retained in the report; the unchanged-candidate retry passed. |
+| 3. Architecture diagram | `docs/architecture.md` | **PASS** | Components, request/data flow, persistence, and hosted topology are documented. |
+| 4. Data model and key indexes | `docs/data-model.md` | **PASS** | Entities, tenant relationships, constraints, and indexes are documented. |
+| 5. API documentation/examples | `docs/api.md` | **PASS** | Routes, authentication expectations, and request/response examples are documented. |
+| 6. Sample credentials or seed instructions | `docs/demo-accounts.md`, `api/prisma/seed.ts` | **PASS** | Synthetic local-only accounts and guarded seed instructions are documented; no hosted credentials are included. |
+| 7. Test instructions/results | `docs/testing.md`, acceptance ledger, current readiness report | **PASS** | Exact-SHA Actions, local API/Web and 47/47 Playwright results, database setup, the initial transient Docker failure plus successful same-SHA retry, and npm audit scope are recorded without treating provider success as app testing. |
+| 8. Tradeoffs/limitations/next steps | `docs/limitations.md` | **PASS** | Known limits and future work are documented. |
+
+## Historical local UI evidence — 2026-11-01
 
 The Hallmark contrast/focus follow-up and expanded browser checks are recorded in [the render report](../reviews/hallmark-followup-2026-11-01/REPORT.md). Local `npm run check` passed and the combined browser suite passed 45/45 on the uncommitted worktree. This improves the tests/results deliverable but does not establish exact-SHA CI or complete A22/A23/A37. The manual screen-reader check, Preview A35, and full offline audit remain open; do not mark those deliverables/gates complete from this work.
 
-## Verified candidate evidence — 2026-11-01
+## Historical verified candidate evidence — 2026-11-01
 
 - Candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871); Vercel API/Web are provider success statuses only.
 - Application source provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 is historical.
@@ -80,7 +96,7 @@ Neon recovery and one read-only fixture discovery are reported PASS (15 active s
 - Full bounded offline audit: **BLOCKED / INCOMPLETE** because the available Docker Linux images lack compatible preinstalled test runners. The repo-contained report documents only bounded pure-helper tests; route, database, proxy, throttle, UI, and supply-chain audit lanes remain unverified. No deployed probes or dependency installation/fetch occurred. See [environment readiness record](SECURITY-AUDIT-ENVIRONMENT-2026-11-01.md).
 - Fresh G7 on exact candidate c179180 and docs head 4b404f7 returned **BLOCKED_BY_ENVIRONMENT**; see the [c179180 review](../reviews/g7-c179180-2026-11-01.md) and [4b404f7 review](../reviews/g7-4b404f7-2026-11-01.md). Release remains blocked by Preview credentials/authorization evidence, the full audit, evaluator access, A28 rehearsal, and broader UI evidence.
 - Deployment URL: **OPTIONAL** under the assessment. Current Vercel API rate-limit results do not require a paid-plan upgrade.
-# Assessment deliverables inventory — current local continuation 2026-11-02
+# Historical audit continuation inventory — candidate `080d883029e6e68619c34e8dc4d055d03b4dcbb7`
 
 Candidate `080d883029e6e68619c34e8dc4d055d03b4dcbb7` (`codex/provisioning-timeout-diagnostics-44042`) is local/unpushed. Run 22 provides local evidence on this exact source; it is not Actions CI or G7. Application-source/deployment evidence remains SHA-specific and must not be attributed to the local candidate. The assessment requires the eight Section 8 deliverables below; deployment and CI are optional. Separate internal gates A35, complete bounded audit, full UI/accessibility, evaluator access, and A28 remain open.
 

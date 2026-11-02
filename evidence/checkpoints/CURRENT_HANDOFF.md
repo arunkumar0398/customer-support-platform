@@ -1,4 +1,20 @@
-# Current session handoff
+# Current session handoff — default assessment recheck (2026-11-02)
+
+## Exact source and current results
+
+- Live default: `codex/assessment-mvp` at `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`. Exact-SHA Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed. Vercel Web/API statuses are provider success only; separate read-only API health/readiness GETs returned `ok` / `ready`. No user flow or Production write was run.
+- A clean detached worktree at the same SHA reused prior `npm run check` (API 431/431, Web 17/17, lint/typecheck/build), Playwright 47/47, and test-database migration evidence. Those unchanged tests were not rerun.
+- Fresh Compose setup: host and Linux-container `npm ping`, host `npm ci`, isolated PostgreSQL, all three migrations, and synthetic seed passed. The first API/Web image build hit transient `ECONNRESET` at `RUN npm ci`; one retry on the same SHA built both images and both containers became healthy. API readiness and Web root returned HTTP 200. The unique project, volume, images, and ignored `.env` were removed.
+- Lockfile audit: 10 moderate dev-only entries rooted in `minimatch@10.2.6`; production-only audit had zero. No dependencies changed. See [the exact-SHA report](../reviews/assessment-readiness-19246132-2026-11-02.md).
+
+## Assessment and open acceptance
+
+- Section 8 inventory: source access is PARTIAL pending evaluator permission verification; README setup/run and the other six deliverables PASS. CI and hosted deployment are optional under Section 8. The private repository owner must confirm the evaluator identity and read permission; no identity was supplied and no invitation or visibility change was made.
+- At exact default SHA `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`, one retry of `docker compose -p csp-assess-current-1924613 up -d --build --wait api web` passed after transient BuildKit `ECONNRESET`: both containers were healthy; API readiness and Web root returned HTTP 200. Migrations/seed passed, and the isolated project, images, volume, and temporary `.env` were removed. Details: [readiness report](../reviews/assessment-readiness-19246132-2026-11-02.md).
+- A35 Preview denial/no-write evidence and fixture cleanup remain incomplete; audit remains incomplete with native-Linux proof outstanding; A22/A23/A37 remain partial; manual screen-reader review and A28 human rehearsal remain unrun.
+- This detached assessment worktree contains uncommitted documentation/evidence changes only. No commit, push, merge, deployment, or submission was performed.
+
+# Historical handoff snapshots
 ## Isolated Preview fixture tooling package — 2026-11-01
 
 - Implementation branch `codex/preview-provisioner-f55decb` starts from `f55decb8368f5ea3997020845577372a8eafb6a0` in a separate worktree. The separate dirty checkout and its screenshot edits/output backup were not modified.
@@ -277,7 +293,7 @@ TK-33 remains IN_PROGRESS; A24 and G5 remain NOT_RUN. Restart from the current r
 - Candidate 58ca5df340e4de1d089f3753acd4aea2c3568765 passed hosted GitHub Actions run [#1](https://github.com/arunkumar0398/customer-support-platform/actions/runs/40644651623), including disposable PostgreSQL, migrations/seed, API/web tests, Playwright, lint/typecheck, and production build. Sanitized logs uploaded. A34 PASS.
 - G5 PASS for that candidate based on hosted CI, fresh Windows Docker checkout/runtime proof in TK-33, and exact-SHA reviews with no P0/P1. Keep the known login limiter capacity/recovery P2 disclosed; A33 and broad unverified acceptance checks remain NOT_RUN.
 - TK-34 is now unblocked by G5 and is the next task. Only local configuration/build/dry-run validation is in scope until provider resource provisioning or actual deployment is explicitly authorized. Production publish and production migrations remain separate approvals.
-# Current handoff — fresh continuation 2026-11-02
+# Historical handoff — local audit continuation `080d883` (2026-11-02)
 
 ## Exact local candidate and observed work
 

@@ -1,5 +1,13 @@
 # Testing and CI evidence
 
+## Current default assessment recheck — 2026-11-02
+
+Exact live default `codex/assessment-mvp` SHA: `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`. Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed on this SHA. Exact-SHA Vercel Web/API contexts reported provider success; they are not application tests. Read-only Production API GETs to `/api/health` and `/api/health/ready` returned `ok` and `ready`; no user flows or writes ran.
+
+On a separate clean worktree, host and Linux-container `npm ping --registry=https://registry.npmjs.org/` succeeded. The first Compose build’s retained BuildKit logs show API and Web both reset during `RUN npm ci` after 156.1 seconds. With no persistent DNS/proxy fault found and registry pings succeeding on both paths, one retry was run on the unchanged SHA. `docker compose -p csp-assess-current-1924613 up -d --build --wait api web` exited 0; both images built, API and Web containers reported `healthy`, the API readiness endpoint returned HTTP 200 from inside the API container, and the Web root returned HTTP 200 on loopback. The local PostgreSQL container became healthy, `npm run db:migrate` applied all three migrations, and `npm run db:seed` applied synthetic fixtures before the app build. The unique project, volume, images, and local `.env` were removed after verification. See the [detailed recheck report](../evidence/reviews/assessment-readiness-19246132-2026-11-02.md).
+
+The lockfile audit showed 10 moderate npm entries, all dev-only, with zero findings from `npm audit --omit=dev --json --package-lock-only`. The shared underlying package is `minimatch@10.2.6`; no dependencies were changed. The previous clean-checkout `npm run check` (API 431/431, Web 17/17, lint/typecheck/build), Playwright 47/47, and disposable test-database migration results are reused because the live default remains the same SHA. They were not rerun.
+
 ## Run 22 bounded offline continuation — 2026-11-02
 
 Exact source `080d883029e6e68619c34e8dc4d055d03b4dcbb7`, tree `75094b514a6d404765b45625de542aeb4d11a476`: `api-provisioning-file` passed **21/21** and the API lane passed **425/425 across 28 files**, both exit 0 in the pinned no-network Linux image. Promoted logs, launch records, source binding, hashes, limitations, and the API assertion map are in [the continuation report](../evidence/reviews/audit-continuation-2026-11-02-080d883.md). This is local exact-source evidence, not GitHub CI and not a complete Cloudflare audit.
