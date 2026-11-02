@@ -165,6 +165,7 @@ export async function writePromotionInputs({directory,preflight,target,lane,comm
 function nextLine(rl,child,timeoutMs,stderr=()=> ''){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('timed out waiting for trusted promoter')),timeoutMs);const onLine=line=>{clearTimeout(timer);rl.off('line',onLine);resolve(line);};rl.once('line',onLine);child.once('close',(code,signal)=>{clearTimeout(timer);rl.off('line',onLine);reject(new Error(promoterExitMessage(code,signal,stderr())));});});}
 async function runDockerTarget(args,name,timeoutMs){const child=spawn('docker',args,{windowsHide:true,stdio:['ignore','pipe','pipe']});const limit=2*1024*1024;let out=[],err=[],outKept=0,errKept=0,outSeen=0,errSeen=0,timedOut=false,truncated=false;for(const pair of [[child.stdout,'out'],[child.stderr,'err']])pair[0].on('data',chunk=>{const data=Buffer.from(chunk);if(pair[1]==='out'){outSeen+=data.length;const keep=Math.min(data.length,Math.max(0,limit-outKept));if(keep)out.push(data.subarray(0,keep));outKept+=keep;if(outSeen>limit)truncated=true;}else{errSeen+=data.length;const keep=Math.min(data.length,Math.max(0,limit-errKept));if(keep)err.push(data.subarray(0,keep));errKept+=keep;if(errSeen>limit)truncated=true;}});const timer=setTimeout(()=>{timedOut=true;try{spawnSync('docker',['kill','--signal','KILL',name],{windowsHide:true,timeout:15000});}catch{}},timeoutMs);const end=await closeCode(child);clearTimeout(timer);return {exitCode:end.code,signal:end.signal,timedOut,stdout:Buffer.concat(out).toString('utf8'),stderr:Buffer.concat(err).toString('utf8'),stdoutObservedBytes:outSeen,stderrObservedBytes:errSeen,truncated};}
 export async function makeEvidenceRun(repoRoot,evidenceDir,runId){
+ if(typeof runId!=='string'||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(runId)||runId==='.'||runId==='..')throw new Error('run ID must be a safe path component');
  const fs=await import('node:fs/promises');
  const requested=path.resolve(evidenceDir);
  const repo=await fs.realpath(repoRoot);
@@ -196,6 +197,14 @@ export async function makeEvidenceRun(repoRoot,evidenceDir,runId){
  await mkdir(out,{mode:0o700});
  return out;
 }
+function verifyLaunchSource(repoRoot,commit){
+ if(typeof commit!=='string'||! /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(commit))throw new Error('commit must be a full object ID');
+ const git=(args)=>{const result=spawnSync('git',args,{cwd:repoRoot,encoding:'utf8',windowsHide:true,timeout:10000});if(result.error||result.status!==0)throw new Error('could not verify the selected source commit');return result.stdout.trim();};
+ const resolved=git(['rev-parse','--verify',commit+'^{commit}']);
+ const head=git(['rev-parse','HEAD']);
+ if(resolved.toLowerCase()!==commit.toLowerCase()||head.toLowerCase()!==commit.toLowerCase())throw new Error('selected commit must be the current HEAD');
+ if(git(['status','--porcelain','--untracked-files=all']))throw new Error('selected source checkout must be clean');
+}
 export async function removePrivateInputDir(inputDir){
  const root=await realpath(os.tmpdir());const actual=await realpath(inputDir);const st=await lstat(inputDir);
  if(!st.isDirectory()||st.isSymbolicLink()||path.dirname(actual)!==root||!path.basename(actual).startsWith('csp-audit-input-'))throw new Error('refusing to remove an unverified audit input directory');
@@ -208,6 +217,7 @@ async function removePrivatePromotionDir(directory){
 }
 export async function launchSandbox({repoRoot,commit,lane,evidenceDir,timeoutSeconds=5400}){
  if(!evidenceDir)throw new Error('external evidence directory is required');if(timeoutSeconds<1||timeoutSeconds>5400)throw new Error('timeout must be 1..5400 seconds');
+ verifyLaunchSource(repoRoot,commit);
  const nonce=randomUUID().replaceAll('-','');const runId='audit-'+commit.slice(0,12)+'-'+Date.now()+'-'+nonce.slice(0,8);const runDir=await makeEvidenceRun(repoRoot,evidenceDir,runId);
  const inputDir=await (await import('node:fs/promises')).mkdtemp(path.join(os.tmpdir(),'csp-audit-input-'));const promotionDir=await (await import('node:fs/promises')).mkdtemp(path.join(os.tmpdir(),'csp-audit-promote-'));const artifactVolume='csp-artifacts-'+nonce;const preflightName='csp-preflight-'+nonce;const targetName='csp-target-'+nonce;const helperName='csp-promoter-'+nonce;
  let helper=null,helperDone=null,createdArtifacts=false,completed=false,targetOutcome=null,targetDiagnostic='target stderr: unavailable',preflightOutcome=null,preflightDiagnostic='preflight stderr: unavailable';
