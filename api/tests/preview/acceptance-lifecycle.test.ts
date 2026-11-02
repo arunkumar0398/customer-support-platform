@@ -149,7 +149,6 @@ describe('local acceptance-shaped Preview fixture lifecycle', () => {
     const alphaCustomerOne = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.label === 'customer-one')!;
     const alphaCustomerTwo = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.label === 'customer-two')!;
     const alphaAgent = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.role === 'AGENT')!;
-    const alphaAdmin = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.role === 'ADMIN')!;
     const betaCustomer = fixture.manifest.users.find((row) => row.organizationId === beta.id && row.label === 'customer-one')!;
     const ownFixtureTicket = ticketFor(alphaCustomerOne.id);
     const otherCustomerTicket = ticketFor(alphaCustomerTwo.id);
