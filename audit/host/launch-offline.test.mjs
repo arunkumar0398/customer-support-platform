@@ -3,7 +3,7 @@ import os from 'node:os'; import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { formatPromoterDiagnostics, isSupportedLane, launchSandbox, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
+import { createPrivateHostDirectory, formatPromoterDiagnostics, isSupportedLane, launchSandbox, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, sandboxIdentity, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -51,6 +51,25 @@ test('retains bounded promoter stderr when the trusted helper exits before readi
 test('normalizes and bounds retained promoter container output', () => {
  assert.equal(formatPromoterDiagnostics('ready\r\n','PROMOTION_REFUSED: bad root'),'ready PROMOTION_REFUSED: bad root');
  const long=formatPromoterDiagnostics('x'.repeat(3000),'');assert.equal(long.length,2000);assert.match(long,/^x+$/);
+});
+
+test('uses the host owner for Unix bind mounts and refuses a root-owned target identity', () => {
+ assert.deepEqual(sandboxIdentity('linux',2345,3456),{uid:2345,gid:3456});
+ assert.deepEqual(sandboxIdentity('darwin',501,20),{uid:501,gid:20});
+ assert.deepEqual(sandboxIdentity('win32'),{uid:10001,gid:10001});
+ assert.throws(()=>sandboxIdentity('linux',0,0),/non-root host UID\/GID/);
+});
+
+test('restricts Windows private bind directories and inherited files to owner and system principals', async t => {
+ if(process.platform!=='win32')return t.skip('Windows ACL behavior is platform-specific');
+ const directory=await createPrivateHostDirectory('csp-audit-input-acl-test-');
+ t.after(()=>removePrivateInputDir(directory));
+ const file=path.join(directory,'runner.txt');await writeFile(file,'synthetic runner',{mode:0o400});
+ const inspect=(target)=>execFileSync('icacls',[target],{encoding:'utf8',windowsHide:true});
+ const directoryAcl=inspect(directory),fileAcl=inspect(file);
+ assert.doesNotMatch(directoryAcl,/\(I\)|CodexSandboxUsers|S-1-5-11|S-1-1-0|S-1-5-32-545|BUILTIN\\Users/i);
+ assert.doesNotMatch(fileAcl,/CodexSandboxUsers|S-1-5-11|S-1-1-0|S-1-5-32-545|BUILTIN\\Users/i);
+ for(const acl of [directoryAcl,fileAcl]){assert.match(acl,/SYSTEM/i);assert.match(acl,/Administrators/i);}
 });
 test('summarizes target failure without retaining target-controlled output text', () => {
  const summary=summarizeTargetOutcome({exitCode:125,signal:null,timedOut:false,truncated:false,stdout:'possibly-sensitive stdout',stderr:'docker startup error'});

@@ -1,6 +1,6 @@
 import { randomBytes, randomInt, randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, realpath, rm, stat } from 'node:fs/promises';
-import { isAbsolute, relative, resolve } from 'node:path';
+import { isAbsolute, relative, resolve, sep } from 'node:path';
 import type { Client } from 'pg';
 import { hashPassword } from '../../api/src/modules/auth/password.js';
 import { assertVerifiedTargetClient, type VerifiedTarget } from './target.js';
@@ -27,21 +27,23 @@ function assertRunId(runId: string): void {
 
 function assertOutsideRepository(candidate: string, repositoryRoot: string): void {
   const relativePath = relative(resolve(repositoryRoot), resolve(candidate));
-  if (!relativePath.startsWith('..') && relativePath !== '..' && !isAbsolute(relativePath)) {
+  const isOutside = relativePath === '..' || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath);
+  if (!isOutside) {
     throw new Error('Credentials and manifest must be written outside the repository.');
   }
 }
 
 async function createPrivateOutputFiles(outputDirectory: string, repositoryRoot: string, runId: string) {
   if (!isAbsolute(outputDirectory)) throw new Error('Output directory must be an absolute path.');
+  const canonicalRepositoryRoot = await realpath(resolve(repositoryRoot));
   const resolved = await realpath(outputDirectory);
-  assertOutsideRepository(resolved, repositoryRoot);
+  assertOutsideRepository(resolved, canonicalRepositoryRoot);
   const info = await stat(resolved);
   if (!info.isDirectory()) throw new Error('Output path must be a directory.');
   const credentialsPath = resolve(resolved, `preview-credentials-${runId}.json`);
   const manifestPath = resolve(resolved, `preview-fixtures-${runId}.json`);
-  assertOutsideRepository(credentialsPath, repositoryRoot);
-  assertOutsideRepository(manifestPath, repositoryRoot);
+  assertOutsideRepository(credentialsPath, canonicalRepositoryRoot);
+  assertOutsideRepository(manifestPath, canonicalRepositoryRoot);
   return { credentialsPath, manifestPath } satisfies PrivateFilePaths;
 }
 
@@ -262,9 +264,10 @@ export async function cleanupFixtures(options: {
   if (!options.confirm) throw new Error('Cleanup requires the explicit --confirm-cleanup acknowledgement.');
   assertVerifiedTargetClient(options.client, options.target, true);
   if (!isAbsolute(options.manifestPath)) throw new Error('Manifest path must be absolute.');
-  assertOutsideRepository(options.manifestPath, options.repositoryRoot);
+  const canonicalRepositoryRoot = await realpath(resolve(options.repositoryRoot));
+  assertOutsideRepository(options.manifestPath, canonicalRepositoryRoot);
   const resolvedManifestPath = await realpath(options.manifestPath);
-  assertOutsideRepository(resolvedManifestPath, options.repositoryRoot);
+  assertOutsideRepository(resolvedManifestPath, canonicalRepositoryRoot);
   if (resolvedManifestPath.split(/[\\/]/).at(-1) !== `preview-fixtures-${options.runId}.json`) {
     throw new Error('Manifest filename does not match the requested run ID; no cleanup was performed.');
   }
@@ -272,7 +275,7 @@ export async function cleanupFixtures(options: {
     manifestPath: resolvedManifestPath,
     credentialsPath: resolve(resolve(resolvedManifestPath, '..'), `preview-credentials-${options.runId}.json`),
   };
-  assertOutsideRepository(files.credentialsPath, options.repositoryRoot);
+  assertOutsideRepository(files.credentialsPath, canonicalRepositoryRoot);
   const manifest = parseManifest(JSON.parse(await readFile(resolvedManifestPath, 'utf8')));
   if (manifest.runId !== options.runId || JSON.stringify(manifest.target) !== JSON.stringify(options.target)) {
     throw new Error('Manifest run or verified database target does not match; no cleanup was performed.');

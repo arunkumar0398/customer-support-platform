@@ -1,6 +1,6 @@
-import { access, mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { access, copyFile, mkdir, mkdtemp, readFile, readdir, rename, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Client, type QueryResult } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -38,6 +38,20 @@ async function expectNoRunResidue(run: Awaited<ReturnType<typeof provisionFixtur
   expect(rows.rows[0]).toEqual({ organizations: 0, users: 0, memberships: 0, tickets: 0, comments: 0, activity: 0, sessions: 0 });
   await expect(readFile(run.files.credentialsPath)).rejects.toMatchObject({ code: 'ENOENT' });
   await expect(readFile(run.files.manifestPath)).rejects.toMatchObject({ code: 'ENOENT' });
+}
+
+async function cleanupUnexpectedProvision(run: Awaited<ReturnType<typeof provisionFixtures>>) {
+  const recoveryDirectory = await mkdtemp(resolve(tmpdir(), 'preview-guard-recovery-'));
+  const credentialsPath = resolve(recoveryDirectory, basename(run.files.credentialsPath));
+  const manifestPath = resolve(recoveryDirectory, basename(run.files.manifestPath));
+  try {
+    await rename(run.files.credentialsPath, credentialsPath);
+    await rename(run.files.manifestPath, manifestPath);
+    await cleanupFixtures({ client, target, runId: run.manifest.runId, manifestPath, repositoryRoot: repoRoot, confirm: true });
+    await rm(credentialsPath, { force: true });
+    await rm(manifestPath, { force: true });
+    await expectNoRunResidue({ ...run, files: { credentialsPath, manifestPath } });
+  } finally { await rm(recoveryDirectory, { recursive: true, force: true }); }
 }
 
 beforeAll(async () => {
@@ -141,10 +155,93 @@ describe('Preview fixture safety and lifecycle', () => {
     })).rejects.toThrow(/explicit --confirm-preview-write/);
   });
 
-  it('refuses to put credentials or manifests under the repository root', async () => {
-    await expect(provisionFixtures({
-      client, target, runId: runId(), outputDirectory: repoRoot, repositoryRoot: repoRoot,
-    })).rejects.toThrow(/outside the repository/);
+  it.each([
+    ['repository root', () => repoRoot],
+    ['ordinary nested directory', () => resolve(repoRoot, 'evidence')],
+    ['a child whose name starts with two dots', () => resolve(repoRoot, '..private')],
+    ['a nested child whose name starts with two dots', () => resolve(repoRoot, 'evidence', '..private')],
+  ])('refuses credentials under %s before writing files or fixture rows', async (_label, pathForTest) => {
+    const output = pathForTest();
+    const fs = await import('node:fs/promises');
+    const existedBefore = await fs.stat(output).then(() => true, () => false);
+    if (!existedBefore) await fs.mkdir(output, { recursive: true });
+    const id = runId();
+    const before = await client.query('SELECT count(*)::int AS n FROM "Organization" WHERE slug LIKE $1', [`pv-${id}-%`]);
+    let unexpectedRun: Awaited<ReturnType<typeof provisionFixtures>> | undefined;
+    try {
+      await expect(provisionFixtures({
+        client, target, runId: id, outputDirectory: output, repositoryRoot: repoRoot,
+      }).then((run) => { unexpectedRun = run; return run; })).rejects.toThrow(/outside the repository/);
+      await expect(access(resolve(output, `preview-credentials-${id}.json`))).rejects.toMatchObject({ code: 'ENOENT' });
+      await expect(access(resolve(output, `preview-fixtures-${id}.json`))).rejects.toMatchObject({ code: 'ENOENT' });
+      const after = await client.query('SELECT count(*)::int AS n FROM "Organization" WHERE slug LIKE $1', [`pv-${id}-%`]);
+      expect(after.rows[0].n).toBe(before.rows[0].n);
+    } finally {
+      if (unexpectedRun) await cleanupUnexpectedProvision(unexpectedRun);
+      if (!existedBefore) await rm(output, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts a sibling output directory outside the repository', async () => {
+    const sibling = await mkdtemp(resolve(repoRoot, '..', 'preview-private-sibling-'));
+    try {
+      const result = await provisionFixtures({
+        client, target, runId: runId(), outputDirectory: sibling, repositoryRoot: repoRoot,
+      });
+      expect(result.files.credentialsPath.startsWith(sibling)).toBe(true);
+      expect(result.files.manifestPath.startsWith(sibling)).toBe(true);
+      await cleanupFixtures({ client, target, runId: result.manifest.runId, manifestPath: result.files.manifestPath, repositoryRoot: repoRoot, confirm: true });
+      await rm(result.files.credentialsPath, { force: true });
+      await rm(result.files.manifestPath, { force: true });
+      await expectNoRunResidue(result);
+    } finally { await rm(sibling, { recursive: true, force: true }); }
+  });
+
+  it('refuses a symlinked output directory that resolves inside the repository', async () => {
+    const fs = await import('node:fs/promises');
+    const internal = resolve(repoRoot, `..private-link-target-${crypto.randomUUID()}`);
+    const link = resolve(tmpdir(), `preview-output-link-${crypto.randomUUID()}`);
+    await fs.mkdir(internal);
+    let unexpectedRun: Awaited<ReturnType<typeof provisionFixtures>> | undefined;
+    try {
+      await fs.symlink(internal, link, process.platform === 'win32' ? 'junction' : 'dir');
+      await expect(provisionFixtures({
+        client, target, runId: runId(), outputDirectory: link, repositoryRoot: repoRoot,
+      }).then((run) => { unexpectedRun = run; return run; })).rejects.toThrow(/outside the repository/);
+      expect(await readdir(internal)).toEqual([]);
+    } finally {
+      if (unexpectedRun) await cleanupUnexpectedProvision(unexpectedRun);
+      await rm(link, { recursive: true, force: true });
+      await rm(internal, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects direct and symlinked in-repository manifest paths before cleanup deletes rows', async () => {
+    const run = await provision(runId());
+    const inside = resolve(repoRoot, `..private-cleanup-${run.manifest.runId}`);
+    const linked = resolve(tmpdir(), `preview-cleanup-link-${run.manifest.runId}`);
+    await mkdir(inside);
+    const insideManifest = resolve(inside, `preview-fixtures-${run.manifest.runId}.json`);
+    await copyFile(run.files.manifestPath, insideManifest);
+    try {
+      await expect(cleanupFixtures({
+        client, target, runId: run.manifest.runId, manifestPath: insideManifest, repositoryRoot: repoRoot, confirm: true,
+      })).rejects.toThrow(/outside the repository/);
+      await symlink(inside, linked, process.platform === 'win32' ? 'junction' : 'dir');
+      await expect(cleanupFixtures({
+        client, target, runId: run.manifest.runId,
+        manifestPath: resolve(linked, basename(insideManifest)), repositoryRoot: repoRoot, confirm: true,
+      })).rejects.toThrow(/outside the repository/);
+      expect((await client.query('SELECT count(*)::int AS n FROM "Organization" WHERE id = ANY($1::uuid[])',
+        [run.manifest.organizations.map((row) => row.id)])).rows[0].n).toBe(2);
+    } finally {
+      await rm(linked, { recursive: true, force: true });
+      await rm(inside, { recursive: true, force: true });
+      await cleanupFixtures({ client, target, runId: run.manifest.runId, manifestPath: run.files.manifestPath, repositoryRoot: repoRoot, confirm: true });
+      await rm(run.files.credentialsPath, { force: true });
+      await rm(run.files.manifestPath, { force: true });
+      await expectNoRunResidue(run);
+    }
   });
 
   it('refuses a database client that bypassed the target verifier', async () => {
