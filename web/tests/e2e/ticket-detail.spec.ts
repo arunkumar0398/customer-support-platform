@@ -206,6 +206,29 @@ test('staff can edit, transition, assign, and inspect ticket history', async ({ 
   expect(ticket).toMatchObject({ title: 'Updated detail fixture', status: 'IN_PROGRESS', priority: 'HIGH', assigneeUserId: agentIds[1] });
 });
 
+test('staff must provide a reason when reopening a resolved ticket', async ({ page }) => {
+  await signIn(page, agentIds[0]);
+  await db.ticket.update({ where: { id: ticketIds[3] }, data: { status: 'RESOLVED' } });
+  await page.goto(`/tickets/${ticketIds[3]}`);
+  await expect(page.getByRole('heading', { name: 'Detail fixture 4' })).toBeVisible();
+
+  await page.getByLabel('Ticket status').selectOption('IN_PROGRESS');
+  const reopenReason = page.getByLabel('Reason for reopening');
+  await expect(reopenReason).toBeVisible();
+  await reopenReason.fill('Customer confirmed the issue is still occurring.');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+
+  await expect(page.getByRole('status')).toContainText('Ticket updated');
+  await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[3] }, select: { status: true } }))
+    .toMatchObject({ status: 'IN_PROGRESS' });
+  await expect(page.getByText('Ticket reopened')).toBeVisible();
+  const reopenEvent = await db.activityEvent.findFirst({
+    where: { organizationId, ticketId: ticketIds[3], type: 'STATUS_CHANGED' },
+    orderBy: { createdAt: 'desc' },
+  });
+  expect(reopenEvent?.newValue).toMatchObject({ reason: 'Customer confirmed the issue is still occurring.' });
+});
+
 test('invalid staff transition is shown as a server denial without hiding the current state', async ({ page }) => {
   await signIn(page, agentIds[0]);
   await page.goto(`/tickets/${ticketIds[1]}`);
