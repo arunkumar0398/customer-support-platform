@@ -104,6 +104,7 @@ export interface UpdateTicketPayload {
   description?: string;
   status?: TicketListItem['status'];
   priority?: TicketListItem['priority'];
+  reopenReason?: string;
 }
 
 export interface CreateTicketPayload {

@@ -224,12 +224,13 @@ test('staff must provide a reason when reopening a resolved ticket', async ({ pa
   await expect(page.getByRole('status')).toContainText('Ticket updated');
   await expect.poll(() => db.ticket.findUnique({ where: { id: ticketIds[3] }, select: { status: true } }))
     .toMatchObject({ status: 'IN_PROGRESS' });
-  await expect(page.getByText('Ticket reopened')).toBeVisible();
+  await expect(page.getByText('Status changed')).toBeVisible();
   const reopenEvent = await db.activityEvent.findFirst({
     where: { organizationId, ticketId: ticketIds[3], type: 'STATUS_CHANGED' },
     orderBy: { createdAt: 'desc' },
   });
-  expect(reopenEvent?.newValue).toMatchObject({ reason: 'Customer confirmed the issue is still occurring.' });
+  expect(reopenEvent?.reason).toBe('Customer confirmed the issue is still occurring.');
+  await expect(page.getByText('Customer confirmed the issue is still occurring.')).toBeVisible();
 });
 
 test('invalid staff transition is shown as a server denial without hiding the current state', async ({ page }) => {
