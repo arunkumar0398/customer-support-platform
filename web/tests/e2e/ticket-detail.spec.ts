@@ -208,9 +208,12 @@ test('staff can edit, transition, assign, and inspect ticket history', async ({ 
 
 test('staff must provide a reason when reopening a resolved ticket', async ({ page }) => {
   await signIn(page, agentIds[0]);
-  await db.ticket.update({ where: { id: ticketIds[3] }, data: { status: 'RESOLVED' } });
+  await db.ticket.update({
+    where: { id: ticketIds[3] },
+    data: { title: 'Resolved reopen fixture', status: 'RESOLVED' },
+  });
   await page.goto(`/tickets/${ticketIds[3]}`);
-  await expect(page.getByRole('heading', { name: 'Detail fixture 4' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Resolved reopen fixture' })).toBeVisible();
 
   await page.getByLabel('Ticket status').selectOption('IN_PROGRESS');
   const reopenReason = page.getByLabel('Reason for reopening');
