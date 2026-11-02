@@ -36,7 +36,12 @@ async function signIn(page: Page, email: string) {
   await page.goto('/sign-in');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
+  const loginResponse = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === '/api/auth/login' && response.request().method() === 'POST',
+  );
   await page.getByRole('button', { name: 'Sign in' }).click();
+  const response = await loginResponse;
+  expect(response.status(), 'synthetic sign-in API status').toBe(200);
   await expect(page).toHaveURL('/');
 }
 

@@ -36,7 +36,7 @@ test('keeps API lane concurrency within the prepared one-CPU sandbox', async () 
  assert.match(allLane,/npm run test:web -- --fsModuleCachePath=\/scratch\/vitest-cache --maxWorkers=2/);
 });
 test('exposes only fixed offline lanes, including bounded provisioning diagnostics', () => {
- for (const lane of ['api','web','browser','browser-smoke','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']) assert.equal(isSupportedLane(lane),true,lane);
+ for (const lane of ['api','web','browser','browser-smoke','browser-memberships','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']) assert.equal(isSupportedLane(lane),true,lane);
  assert.equal(isSupportedLane('api arbitrary command'),false);
 });
 test('requires the trusted launcher itself to come from the selected repository', async t => {

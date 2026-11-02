@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const PROJECT=path.resolve(HERE,'../..');
 const IMAGE_DIGEST='sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3';
-const FIXED_LANES=Object.freeze(['api','web','browser','browser-smoke','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']);
+const FIXED_LANES=Object.freeze(['api','web','browser','browser-smoke','browser-memberships','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']);
 export function isSupportedLane(lane){return FIXED_LANES.includes(lane);}
 const MAX_ARCHIVE=600*1024*1024;
 const SENSITIVE_DIRECTORY=/^(?:credentials?|secrets?|tokens?|passwords?)$/i;

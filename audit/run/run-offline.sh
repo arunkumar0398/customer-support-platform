@@ -12,8 +12,9 @@ case "$lane" in
   web) ;;
   browser) ;;
   browser-smoke) ;;
+  browser-memberships) ;;
   all) ;;
-  *) fail 'usage: run-offline.sh {api|api-provisioning-file|api-provisioning-clean-selected|api-provisioning-foreign-membership|web|browser|browser-smoke|all}; no arbitrary command execution is supported' ;;
+  *) fail 'usage: run-offline.sh {api|api-provisioning-file|api-provisioning-clean-selected|api-provisioning-foreign-membership|web|browser|browser-smoke|browser-memberships|all}; no arbitrary command execution is supported' ;;
 esac
 
 [[ -z "$(find /scratch -mindepth 1 -maxdepth 1 -print -quit)" ]] || fail '/scratch must be empty at lane start'
@@ -179,6 +180,10 @@ case "$lane" in
     fi
     python3 -c 'import glob,json; [print("NODE_FATAL_REPORT:", f, json.dumps({"header":(r:=json.load(open(f))).get("header"),"javascriptStack":r.get("javascriptStack"),"nativeStack":r.get("nativeStack")},indent=2)[:12000]) for f in glob.glob("/scratch/report.*.json")]'
     exit "$browser_status"
+    ;;
+  browser-memberships)
+    npm run db:migrate:test
+    npm run test:e2e -- --workers=1 --timeout=90000 web/tests/e2e/memberships.spec.ts
     ;;
   all)
     npm run db:migrate:test
