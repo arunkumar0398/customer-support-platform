@@ -94,6 +94,9 @@ pass "source archive, launch record, tree identity and runner hashes verified fo
 [[ -z "${TEST_DATABASE_URL:-}" || "$TEST_DATABASE_URL" == 'postgresql://support_test:audit-only@127.0.0.1:5432/support_test' ]] || fail 'TEST_DATABASE_URL must be the fixed loopback dummy URL'
 
 pass "non-root uid $(id -u)"
+getent passwd "$(id -u)" | awk -F: -v uid="$(id -u)" '$3 == uid {found=1} END {exit !found}' || fail 'selected non-root UID has no passwd entry'
+getent group "$(id -g)" | awk -F: -v gid="$(id -g)" '$3 == gid {found=1} END {exit !found}' || fail 'selected non-root GID has no group entry'
+pass 'selected non-root UID/GID resolve to the intended system account'
 pass 'root filesystem, source archive and runner mounts read-only; scratch writable'
 pass 'loopback-only network namespace with no inherited proxy'
 pass "Node $(node --version), npm $(npm --version), Vitest, Supertest, Prisma, Playwright, PostgreSQL present"

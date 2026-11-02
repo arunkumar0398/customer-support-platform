@@ -3,7 +3,7 @@ import os from 'node:os'; import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { createPrivateHostDirectory, formatPromoterDiagnostics, isSupportedLane, launchSandbox, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, sandboxIdentity, sandboxIdentityContract, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
+import { createPrivateHostDirectory, createSystemUserMapping, formatPromoterDiagnostics, isSupportedLane, launchSandbox, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, sandboxIdentity, sandboxIdentityContract, summarizeTargetOutcome, systemUserMappingMounts, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -225,4 +225,17 @@ test('creates evidence outside the repository and refuses symlink destinations',
  await symlink(evidenceDir,link,'junction');
  await assert.rejects(makeEvidenceRun(root,link,'run-3'),/directory|symlink/i);
  await assert.rejects(lstat(path.join(link,'run-3')),{code:'ENOENT'});
+});
+
+test('creates private passwd/group mapping and binds it read-only for the selected non-10001 identity', async t=>{
+ const directory=await createPrivateHostDirectory('csp-user-map-test-');t.after(()=>rm(directory,{recursive:true,force:true}));
+ const mapping=await createSystemUserMapping(directory,{uid:2345,gid:3456});
+ assert.equal(await readFile(mapping.passwdPath,'utf8'),'audit-runner:x:2345:3456:Offline audit runner:/scratch/home:/bin/sh\n');
+ assert.equal(await readFile(mapping.groupPath,'utf8'),'audit-runner:x:3456:\n');
+ if(process.platform!=='win32'){
+  assert.equal((await lstat(mapping.passwdPath)).mode&0o777,0o400);
+  assert.equal((await lstat(mapping.groupPath)).mode&0o777,0o400);
+ }
+ assert.deepEqual(systemUserMappingMounts(mapping),['--mount','type=bind,source='+mapping.passwdPath+',target=/etc/passwd,readonly','--mount','type=bind,source='+mapping.groupPath+',target=/etc/group,readonly']);
+ assert.deepEqual(systemUserMappingMounts(null),[]);
 });

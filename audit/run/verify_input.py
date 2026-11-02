@@ -39,6 +39,14 @@ def verify_archive_payload(archive_path,tree_manifest):
    executable=bool(member.mode & 0o111)
    if executable!=(entry['mode']=='100755'): fail('archive mode differs from selected Git tree: '+name)
  return len(actual)
+def validate_system_user_mapping(mapping,uid,gid,passwd,group):
+ if not isinstance(mapping,dict) or set(mapping)!={'username','uid','gid','passwdSha256','groupSha256'}: fail('system user mapping record is malformed')
+ if mapping.get('username')!='audit-runner' or type(mapping.get('uid')) is not int or type(mapping.get('gid')) is not int or mapping['uid']!=uid or mapping['gid']!=gid: fail('system user mapping identity mismatch')
+ expected_passwd=('audit-runner:x:'+str(uid)+':'+str(gid)+':Offline audit runner:/scratch/home:/bin/sh\n').encode()
+ expected_group=('audit-runner:x:'+str(gid)+':\n').encode()
+ if passwd!=expected_passwd or group!=expected_group: fail('system user mapping contents are unsafe')
+ if hashlib.sha256(passwd).hexdigest()!=mapping.get('passwdSha256') or hashlib.sha256(group).hexdigest()!=mapping.get('groupSha256'): fail('system user mapping digest mismatch')
+ return True
 def validate_execution(execution):
  if execution['platform']!='linux/amd64' or execution['network']!='none' or execution['rootFilesystem']!='read-only' or execution['sourceMount']!='read-only' or execution['toolchainMount']!='read-only' or execution['artifactsMount']!='promoter-only' or execution['dockerSocket']!='parent-launcher-only': fail('unsafe launch configuration record')
  uid=execution.get('uid');gid=execution.get('gid')
@@ -64,9 +72,27 @@ def validate_execution(execution):
  artifact_volume=execution.get('artifactVolume')
  if not isinstance(artifact_volume,str) or not re.fullmatch(r'csp-artifacts-[0-9a-f]{32}',artifact_volume): fail('unsafe artifact volume identity')
  target_mounts=mount_values(target);preflight_mounts=mount_values(preflight);promoter_mounts=mount_values(promoter)
+ host_platform=execution.get('hostPlatform','')
+ mapping=execution.get('systemUserMapping')
+ if host_platform.startswith('win32/'):
+  if (uid,gid)!=(10001,10001) or mapping is not None: fail('Windows Docker Desktop identity must retain its tested container account')
+  mapping_mounts=[]
+ else:
+  if not (host_platform.startswith('linux/') or host_platform.startswith('darwin/')): fail('unsupported host platform for system user mapping')
+  if not isinstance(mapping,dict) or mapping.get('username')!='audit-runner' or mapping.get('uid')!=uid or mapping.get('gid')!=gid: fail('system user mapping record does not match selected identity')
+  host_input=execution.get('hostInputDir')
+  if not isinstance(host_input,str) or not host_input.startswith('/') or '..' in host_input.split('/'): fail('system user mapping source directory is unsafe')
+  mapping_mounts=[
+   'type=bind,source='+host_input+'/sandbox-passwd,target=/etc/passwd,readonly',
+   'type=bind,source='+host_input+'/sandbox-group,target=/etc/group,readonly'
+  ]
+ for args,label in ((target,'target'),(preflight,'preflight'),(promoter,'promoter')):
+  mounts=mount_values(args)
+  actual=[value for value in mounts if ',target=/etc/passwd,' in value or ',target=/etc/group,' in value]
+  if actual!=mapping_mounts: fail('system user mapping mounts differ in '+label+' Docker arguments: '+repr(actual)+' != '+repr(mapping_mounts))
  if any('type=volume,' in value or artifact_volume in value for value in target_mounts+preflight_mounts): fail('artifact volume must not be mounted in target or preflight')
  volume_mounts=[value for value in promoter_mounts if value.startswith('type=volume,')]
- if volume_mounts!=['type=volume,source='+artifact_volume+',target=/artifacts']: fail('trusted promoter must receive only the selected artifact volume')
+ if volume_mounts!=['type=volume,source='+artifact_volume+',target=/artifacts']: fail('trusted promoter must receive only the selected artifact volume: '+repr(volume_mounts)+' expected '+repr(['type=volume,source='+artifact_volume+',target=/artifacts']))
  required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges',identity,'--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly']
  if any(value not in target_text for value in required_target) or 'target=/artifacts' in target_text or '/var/run/docker.sock' in target_text or '--privileged' in target_text: fail('unsafe or incomplete target Docker arguments')
  tmpfs='/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid='+str(uid)+',gid='+str(gid)+',mode=0700'
@@ -111,6 +137,11 @@ def verify():
   actual,_=digest_file('/runner/'+name,16*1024*1024)
   if actual!=want: fail('trusted runner digest mismatch: '+name)
  validate_execution(execution)
+ if execution.get('systemUserMapping') is not None:
+  with open('/input/sandbox-passwd','rb') as stream: passwd=stream.read(4097)
+  with open('/input/sandbox-group','rb') as stream: group=stream.read(4097)
+  if len(passwd)>4096 or len(group)>4096: fail('system user mapping exceeds size bound')
+  validate_system_user_mapping(execution['systemUserMapping'],execution['uid'],execution['gid'],passwd,group)
  with tarfile.open(archive_path,'r:') as archive:
   members={item.name:item for item in archive.getmembers()}
   def hash_member(name):
