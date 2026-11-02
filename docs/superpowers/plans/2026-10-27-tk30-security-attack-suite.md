@@ -31,7 +31,7 @@
 
 - Build a small Alpha/Beta fixture with synthetic admin, agent, customer, and foreign admin; authenticate through the real login route, verify disposable DB identity, and seed one Alpha ticket.
 - Enumerate each authenticated state-changing route: `POST /api/auth/logout`, `POST /api/tickets`, `PATCH /api/tickets/:id`, `PATCH /api/tickets/:id/assignment`, `POST /api/tickets/:id/comments`, `POST /api/memberships`, and `PATCH /api/memberships/:userId`.
-- For every route, send one request with the valid cookie and allowed Origin but no CSRF token, and one with the valid cookie/token but attacker Origin. Use valid payloads, organization selectors, and `If-Match` where otherwise required so middleware is the rejection point.
+- For every route, send one request with the valid cookie and allowed Origin but no CSRF token, and one with the valid cookie/token but attacker Origin. Use valid payloads, organization selectors, and `X-Ticket-Version` where otherwise required so middleware is the rejection point.
 - Assert `403` plus `CSRF_REJECTED`; snapshot ticket, comment, event, and membership state and assert no mutation after the matrix.
 - Run `node scripts/verify-test-database.mjs && npm run test:api -- tests/security/attack-suite.test.ts`.
 - Expected: all enumerated attacks reject before writes; successful E2E/product routes stay unchanged.

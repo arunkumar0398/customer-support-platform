@@ -52,6 +52,7 @@ export function TicketDetailPage({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<TicketListItem['status']>('OPEN');
+  const [reopenReason, setReopenReason] = useState('');
   const [priority, setPriority] = useState<TicketListItem['priority']>('MEDIUM');
   const [assigneeUserId, setAssigneeUserId] = useState('');
   const [comment, setComment] = useState('');
@@ -85,6 +86,7 @@ export function TicketDetailPage({
     setTitle(ticketQuery.data.title);
     setDescription(ticketQuery.data.description);
     setStatus(ticketQuery.data.status);
+    setReopenReason('');
     setPriority(ticketQuery.data.priority);
     setAssigneeUserId(ticketQuery.data.assigneeUserId ?? '');
   }, [ticketQuery.data]);
@@ -114,11 +116,19 @@ export function TicketDetailPage({
     setConflict(false);
     setSaving(true);
     try {
+      const isReopening = ticketQuery.data.status === 'RESOLVED' && status === 'IN_PROGRESS';
       const payload = isStaff
-        ? { title: title.trim(), description: description.trim(), status, priority }
+        ? {
+            title: title.trim(),
+            description: description.trim(),
+            status,
+            priority,
+            ...(isReopening ? { reopenReason: reopenReason.trim() } : {}),
+          }
         : { title: title.trim(), description: description.trim() };
       await updateTicket(organizationId, identity.csrfToken, ticketQuery.data, payload);
       setNotice('Ticket updated.');
+      setReopenReason('');
       await refreshAfterMutation();
     } catch (cause) {
       setError(getErrorMessage(cause));
@@ -177,7 +187,8 @@ export function TicketDetailPage({
         <p className="eyebrow">SUPPORT DESK · TICKET</p>
         <h1>Ticket unavailable</h1>
         <p role="alert">{ticketQuery.error ? getErrorMessage(ticketQuery.error) : 'The ticket could not be loaded.'}</p>
-        <Link className="button button-primary" to="/">Return to ticket queue</Link>
+        <button className="button button-primary" type="button" onClick={() => void ticketQuery.refetch()}>Try again</button>
+        <Link className="button button-quiet" to="/">Return to ticket queue</Link>
       </main>
     );
   }
@@ -233,9 +244,25 @@ export function TicketDetailPage({
               <textarea id="ticket-description" value={description} maxLength={10000} rows={7} required onChange={(event) => setDescription(event.target.value)} />
               {isStaff && <>
                 <label htmlFor="ticket-status">Ticket status</label>
-                <select id="ticket-status" value={status} onChange={(event) => setStatus(event.target.value as TicketListItem['status'])}>
+                <select id="ticket-status" value={status} onChange={(event) => {
+                  const nextStatus = event.target.value as TicketListItem['status'];
+                  setStatus(nextStatus);
+                  if (ticket.status !== 'RESOLVED' || nextStatus !== 'IN_PROGRESS') setReopenReason('');
+                }}>
                   {statuses.map((value) => <option key={value} value={value}>{titleCase(value)}</option>)}
                 </select>
+                {ticket.status === 'RESOLVED' && status === 'IN_PROGRESS' && <>
+                  <label htmlFor="ticket-reopen-reason">Reason for reopening</label>
+                  <textarea
+                    id="ticket-reopen-reason"
+                    value={reopenReason}
+                    maxLength={500}
+                    rows={3}
+                    required
+                    onChange={(event) => setReopenReason(event.target.value)}
+                  />
+                  <small>Explain why this resolved ticket needs active follow-up.</small>
+                </>}
                 <label htmlFor="ticket-priority-detail">Priority</label>
                 <select id="ticket-priority-detail" value={priority} onChange={(event) => setPriority(event.target.value as TicketListItem['priority'])}>
                   {priorities.map((value) => <option key={value} value={value}>{titleCase(value)}</option>)}

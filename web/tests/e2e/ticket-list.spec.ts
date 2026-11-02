@@ -19,11 +19,15 @@ const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
 const agentIds = Array.from({ length: 9 }, () => randomUUID());
+const adminId = randomUUID();
 const customerId = randomUUID();
 const otherCustomerId = randomUUID();
+const emptyCustomerId = randomUUID();
 const password = 'synthetic-ticket-list-fixture-password';
 const agentEmails = agentIds.map((id) => `queue-agent-${id}@example.test`);
+const adminEmail = `queue-admin-${adminId}@example.test`;
 const customerEmail = `queue-customer-${customerId}@example.test`;
+const emptyCustomerEmail = `queue-empty-customer-${emptyCustomerId}@example.test`;
 let verified = false;
 
 test.beforeAll(async () => {
@@ -50,6 +54,14 @@ test.beforeAll(async () => {
   })));
   await db.user.create({
     data: {
+      id: adminId,
+      email: adminEmail,
+      passwordHash,
+      memberships: { create: { organizationId, role: 'ADMIN' } },
+    },
+  });
+  await db.user.create({
+    data: {
       id: customerId,
       email: customerEmail,
       passwordHash,
@@ -60,6 +72,14 @@ test.beforeAll(async () => {
     data: {
       id: otherCustomerId,
       email: `queue-other-${otherCustomerId}@example.test`,
+      passwordHash,
+      memberships: { create: { organizationId, role: 'CUSTOMER' } },
+    },
+  });
+  await db.user.create({
+    data: {
+      id: emptyCustomerId,
+      email: emptyCustomerEmail,
       passwordHash,
       memberships: { create: { organizationId, role: 'CUSTOMER' } },
     },
@@ -87,9 +107,9 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (verified) {
     await db.ticket.deleteMany({ where: { organizationId } });
-    await db.session.deleteMany({ where: { userId: { in: [...agentIds, customerId, otherCustomerId] } } });
+    await db.session.deleteMany({ where: { userId: { in: [...agentIds, adminId, customerId, otherCustomerId, emptyCustomerId] } } });
     await db.membership.deleteMany({ where: { organizationId } });
-    await db.user.deleteMany({ where: { id: { in: [...agentIds, customerId, otherCustomerId] } } });
+    await db.user.deleteMany({ where: { id: { in: [...agentIds, adminId, customerId, otherCustomerId, emptyCustomerId] } } });
     await db.organization.deleteMany({ where: { id: organizationId } });
   }
   await db.$disconnect();
@@ -152,10 +172,28 @@ test('customers only see their own tickets in the queue', async ({ page }) => {
 
   const deniedRoster = page.waitForResponse((response) =>
     response.url().includes('/api/memberships') && response.request().method() === 'GET');
+  await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/admin/members');
   expect((await deniedRoster).status()).toBe(403);
   await expect(page.getByRole('heading', { name: 'Member management unavailable' })).toBeVisible();
   await expect(page.getByRole('alert')).toContainText('This action is not permitted.');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
+test('customer with no tickets sees a usable narrow empty queue and create path', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, emptyCustomerEmail);
+
+  await expect(page.getByText('0 tickets', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'No tickets match these filters' })).toBeVisible();
+  await expect(page.getByText('Clear a filter or try a different search to see more conversations.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Create ticket' })).toBeVisible();
+  await expect(page.locator('.ticket-table')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(page.getByRole('heading', { name: 'No tickets match these filters' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
 });
 
 test('staff can filter tickets by customer membership and specific assignee', async ({ page }) => {
@@ -234,7 +272,7 @@ test('queue pagination keeps page state in the URL', async ({ page }) => {
   await expect(page.getByText('No tickets match these filters')).toBeVisible();
 });
 
-test('ticket queue fits a narrow viewport and keeps loading and error states usable', async ({ page }) => {
+test('ticket queue keeps loading, error, and retry states usable at desktop and mobile widths', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, agentEmails[3]);
 
@@ -262,8 +300,84 @@ test('ticket queue fits a narrow viewport and keeps loading and error states usa
     await page.waitForTimeout(300);
     await route.continue();
   });
-  await page.reload();
+  await page.getByRole('button', { name: 'Try again' }).click();
 
   await expect(page.getByRole('status')).toContainText('Loading tickets');
   await expect(page.getByText('26 tickets')).toBeVisible();
+  await page.unroute('**/api/tickets?*');
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.route('**/api/tickets?*', async (route) => {
+    if (route.request().method() === 'GET') {
+      await page.waitForTimeout(250);
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 'UNAVAILABLE', message: 'Queue unavailable on desktop test.' } }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+  await page.reload();
+  await expect(page.getByRole('status')).toContainText('Loading tickets');
+  await expect(page.getByRole('alert')).toContainText('We could not load tickets');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
+  await page.unroute('**/api/tickets?*');
+  await page.getByRole('button', { name: 'Try again' }).click();
+  await expect(page.getByText('26 tickets')).toBeVisible();
+});
+
+test('queue role controls remain correct across desktop and mobile viewports', async ({ page }) => {
+  const viewports = [
+    { width: 1280, height: 800 },
+    { width: 375, height: 812 },
+  ];
+  const roles = [
+    { email: adminEmail, name: 'admin', staff: true, canManageMembers: true },
+    { email: agentEmails[0], name: 'agent', staff: true, canManageMembers: false },
+    { email: customerEmail, name: 'customer', staff: false, canManageMembers: false },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    for (const role of roles) {
+      await signIn(page, role.email);
+      await expect(page.getByRole('heading', { name: 'Ticket queue' })).toBeVisible();
+      await expect(page.getByText(role.staff ? '26 tickets' : '25 tickets')).toBeVisible();
+      if (role.staff) {
+        await expect(page.getByLabel('Customer ID')).toBeVisible();
+        await expect(page.getByLabel('Assignee ID')).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toBeVisible();
+      } else {
+        await expect(page.getByLabel('Customer ID')).toHaveCount(0);
+        await expect(page.getByLabel('Assignee ID')).toHaveCount(0);
+        await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
+      }
+      if (role.canManageMembers) {
+        await expect(page.getByRole('link', { name: 'Members', exact: true })).toBeVisible();
+      } else {
+        await expect(page.getByRole('link', { name: 'Members', exact: true })).toHaveCount(0);
+      }
+      const keyboardControls = await page.locator('.ticket-search input, .queue-filters select, .queue-filters input').all();
+      const focusResults = [];
+      for (const control of keyboardControls) {
+        await control.focus();
+        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
+        await expect(control).toBeFocused();
+        const outline = await control.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), color: style.outlineColor };
+        });
+        expect(outline.style, `${role.name} queue control outline at ${viewport.width}px`).toBe('solid');
+        expect(outline.width, `${role.name} queue control outline width at ${viewport.width}px`).toBeGreaterThanOrEqual(2);
+        focusResults.push({ control: await control.getAttribute('id'), ...outline });
+      }
+      console.info(`QUEUE_KEYBOARD_FOCUS ${role.name} ${viewport.width}px ${JSON.stringify(focusResults)}`);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('/sign-in');
+    }
+  }
 });

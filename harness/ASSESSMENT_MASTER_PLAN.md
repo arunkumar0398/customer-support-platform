@@ -1,7 +1,7 @@
 # Multi-Tenant Customer Support Platform — End-to-End Engineering Delivery Plan
 
 **Source of truth:** `reference/assessment.pdf` (3 pages, Full Stack Engineer — Product Development Assessment).  
-**Status:** Planning / not implemented.  
+**Status:** Historical implementation plan; the repository is implemented. Current evidence and remaining gates are recorded in [the acceptance ledger](../evidence/checkpoints/acceptance-status.md), [the assessment deliverables review](../evidence/checkpoints/ASSESSMENT_DELIVERY_REVIEW_2026-10-31.md), and [the current handoff](../evidence/checkpoints/CURRENT_HANDOFF.md). This plan is retained as the original target and is not a current progress status.
 **Timebox:** 2–3 days suggested by assessment, with a 60–90-minute review.  
 **Strategy:** Secure, documented vertical slice first; stretch capabilities only after release gates pass.  
 **Working model:** Codex Desktop (primary orchestrator) + `obra/superpowers` skills + deterministic local/CI harness + independent agent reviews.

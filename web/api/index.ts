@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { proxyApiRequest } from '../../src/server/api-proxy.js';
+import { proxyApiRequest } from '../src/server/api-proxy.js';
 
 type VercelRequest = IncomingMessage & {
   body?: unknown;
@@ -40,12 +40,23 @@ export function toFetchBody(body: Buffer | undefined): Uint8Array<ArrayBuffer> |
   return body === undefined ? undefined : Uint8Array.from(body);
 }
 
+export function originalApiUrl(incomingUrl: string, baseUrl = 'https://web.invalid'): URL {
+  const url = new URL(incomingUrl, baseUrl);
+  const apiPath = url.searchParams.get('__api_path') ?? url.searchParams.get('path');
+  if (apiPath !== null) {
+    url.searchParams.delete('__api_path');
+    url.searchParams.delete('path');
+    url.pathname = apiPath ? `/api/${apiPath}` : '/api';
+  }
+  return url;
+}
+
 export default async function handler(
   incoming: VercelRequest,
   outgoing: ServerResponse,
 ): Promise<void> {
   try {
-    const url = new URL(incoming.url ?? '/api/proxy', 'https://web.invalid');
+    const url = originalApiUrl(incoming.url ?? '/api');
     const body = await requestBody(incoming);
     const request = new Request(url, {
       method: incoming.method ?? 'GET',

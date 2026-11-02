@@ -50,28 +50,28 @@ async function createTicket() {
   } });
 }
 
-function update(account: Account, ticketId: string, ifMatch: string | undefined, title: string) {
+function update(account: Account, ticketId: string, version: string | undefined, title: string) {
   const identity = identities.get(account)!;
   const call = request(app).patch(`/api/tickets/${ticketId}`).set('Cookie', identity.cookie)
     .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId);
-  if (ifMatch !== undefined) call.set('If-Match', ifMatch);
+  if (version !== undefined) call.set('X-Ticket-Version', version);
   return call.send({ title });
 }
 
-function assign(account: Account, ticketId: string, ifMatch: string | undefined, assigneeUserId: string) {
+function assign(account: Account, ticketId: string, version: string | undefined, assigneeUserId: string) {
   const identity = identities.get(account)!;
   const call = request(app).patch(`/api/tickets/${ticketId}/assignment`).set('Cookie', identity.cookie)
     .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId);
-  if (ifMatch !== undefined) call.set('If-Match', ifMatch);
+  if (version !== undefined) call.set('X-Ticket-Version', version);
   return call.send({ assigneeUserId });
 }
 
-describe('optimistic ticket concurrency with If-Match', () => {
+describe('optimistic ticket concurrency with X-Ticket-Version', () => {
   it('allows exactly one of two concurrent writes based on the same version', async () => {
     const ticket = await createTicket();
     const [first, second] = await Promise.all([
-      update('agentOne', ticket.id, '"1"', 'Concurrent first title'),
-      update('agentTwo', ticket.id, '"1"', 'Concurrent second title'),
+      update('agentOne', ticket.id, '1', 'Concurrent first title'),
+      update('agentTwo', ticket.id, '1', 'Concurrent second title'),
     ]);
     const responses = [first, second];
     expect(responses.filter((response) => response.status === 200)).toHaveLength(1);
@@ -89,9 +89,9 @@ describe('optimistic ticket concurrency with If-Match', () => {
 
   it('rejects a sequential stale version without creating a second event', async () => {
     const ticket = await createTicket();
-    const current = await update('agentOne', ticket.id, '"1"', 'First committed title');
-    const stale = await update('agentTwo', ticket.id, '"1"', 'Stale title must not win');
-    const staleNoOp = await update('agentTwo', ticket.id, '"1"', 'First committed title');
+    const current = await update('agentOne', ticket.id, '1', 'First committed title');
+    const stale = await update('agentTwo', ticket.id, '1', 'Stale title must not win');
+    const staleNoOp = await update('agentTwo', ticket.id, '1', 'First committed title');
     expect(current.status).toBe(200);
     expect(current.body.version).toBe(2);
     expect(current.headers.etag).toBe('"2"');
@@ -111,12 +111,30 @@ describe('optimistic ticket concurrency with If-Match', () => {
     expect(response.headers.etag).toBe('"1"');
   });
 
+  it('accepts the explicit ticket-version header for a write and returns the committed version', async () => {
+    const ticket = await createTicket();
+    const identity = identities.get('admin')!;
+    const response = await request(app).patch(`/api/tickets/${ticket.id}`).set('Cookie', identity.cookie)
+      .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId)
+      .set('X-Ticket-Version', '1').send({ title: 'Version header update' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ title: 'Version header update', version: 2 });
+    expect(response.headers.etag).toBe('"2"');
+    expect(await db.activityEvent.count({ where: { ticketId: ticket.id, type: 'TITLE_CHANGED' } })).toBe(1);
+  });
+
   it('requires a valid version precondition before any write', async () => {
     const ticket = await createTicket();
-    for (const ifMatch of [undefined, 'W/"1"', '"1", "2"', '"0"', '"2147483648"']) {
-      const response = await update('admin', ticket.id, ifMatch, 'Must be rejected');
-      expect(response.status).toBe(ifMatch === undefined ? 428 : 422);
+    for (const version of [undefined, '0', '1.0', '1,2', '2147483648']) {
+      const response = await update('admin', ticket.id, version, 'Must be rejected');
+      expect(response.status).toBe(version === undefined ? 428 : 422);
     }
+    const identity = identities.get('admin')!;
+    const standardPrecondition = await request(app).patch(`/api/tickets/${ticket.id}`).set('Cookie', identity.cookie)
+      .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId)
+      .set('If-Match', '"1"').send({ title: 'Standard conditional header is not used' });
+    expect(standardPrecondition.status).toBe(428);
     expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({ title: ticket.title, version: 1 });
     expect(await db.activityEvent.count({ where: { ticketId: ticket.id } })).toBe(0);
   });
@@ -124,8 +142,8 @@ describe('optimistic ticket concurrency with If-Match', () => {
   it('allows only one concurrent assignment based on the same ticket version', async () => {
     const ticket = await createTicket();
     const [first, second] = await Promise.all([
-      assign('agentOne', ticket.id, '"1"', ids.agentOne),
-      assign('agentTwo', ticket.id, '"1"', ids.agentTwo),
+      assign('agentOne', ticket.id, '1', ids.agentOne),
+      assign('agentTwo', ticket.id, '1', ids.agentTwo),
     ]);
     const responses = [first, second];
     expect(responses.filter((response) => response.status === 200)).toHaveLength(1);
@@ -144,9 +162,9 @@ describe('optimistic ticket concurrency with If-Match', () => {
 
   it('requires a valid version precondition for assignment writes', async () => {
     const ticket = await createTicket();
-    for (const ifMatch of [undefined, 'W/"1"', '"1", "2"', '"0"', '"2147483648"']) {
-      const response = await assign('admin', ticket.id, ifMatch, ids.agentOne);
-      expect(response.status).toBe(ifMatch === undefined ? 428 : 422);
+    for (const version of [undefined, '0', '1.0', '1,2', '2147483648']) {
+      const response = await assign('admin', ticket.id, version, ids.agentOne);
+      expect(response.status).toBe(version === undefined ? 428 : 422);
     }
     expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({ version: 1, assigneeUserId: null });
     expect(await db.activityEvent.count({ where: { ticketId: ticket.id } })).toBe(0);
@@ -154,8 +172,8 @@ describe('optimistic ticket concurrency with If-Match', () => {
 
   it('rejects a stale assignment even when it matches the current assignee', async () => {
     const ticket = await createTicket();
-    const first = await assign('admin', ticket.id, '"1"', ids.agentOne);
-    const staleNoOp = await assign('agentTwo', ticket.id, '"1"', ids.agentOne);
+    const first = await assign('admin', ticket.id, '1', ids.agentOne);
+    const staleNoOp = await assign('agentTwo', ticket.id, '1', ids.agentOne);
     expect(first.status).toBe(200);
     expect(first.headers.etag).toBe('"2"');
     expect(staleNoOp.status).toBe(409);

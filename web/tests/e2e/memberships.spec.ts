@@ -21,10 +21,12 @@ const organizationId = randomUUID();
 const otherOrganizationId = randomUUID();
 const adminId = randomUUID();
 const agentId = randomUUID();
+const customerId = randomUUID();
 const otherOrgUserId = randomUUID();
 const emails = {
   admin: `membership-ui-admin-${adminId}@example.test`,
   agent: `membership-ui-agent-${agentId}@example.test`,
+  customer: `membership-ui-customer-${customerId}@example.test`,
   otherOrgUser: `membership-ui-existing-${otherOrgUserId}@example.test`,
 };
 const password = 'synthetic-membership-ui-fixture-password';
@@ -34,7 +36,12 @@ async function signIn(page: Page, email: string) {
   await page.goto('/sign-in');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
+  const loginResponse = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === '/api/auth/login' && response.request().method() === 'POST',
+  );
   await page.getByRole('button', { name: 'Sign in' }).click();
+  const response = await loginResponse;
+  expect(response.status(), 'synthetic sign-in API status').toBe(200);
   await expect(page).toHaveURL('/');
 }
 
@@ -56,23 +63,61 @@ test.beforeAll(async () => {
   await db.user.createMany({ data: [
     { id: adminId, email: emails.admin, passwordHash },
     { id: agentId, email: emails.agent, passwordHash },
+    { id: customerId, email: emails.customer, passwordHash },
     { id: otherOrgUserId, email: emails.otherOrgUser, passwordHash },
   ] });
   await db.membership.createMany({ data: [
     { organizationId, userId: adminId, role: 'ADMIN' },
     { organizationId, userId: agentId, role: 'AGENT' },
+    { organizationId, userId: customerId, role: 'CUSTOMER' },
     { organizationId: otherOrganizationId, userId: otherOrgUserId, role: 'ADMIN' },
   ] });
 });
 test.afterAll(async () => {
   if (verified) {
-    await db.session.deleteMany({ where: { userId: { in: [adminId, agentId, otherOrgUserId] } } });
+    await db.session.deleteMany({ where: { userId: { in: [adminId, agentId, customerId, otherOrgUserId] } } });
     await db.membership.deleteMany({ where: { organizationId: { in: [organizationId, otherOrganizationId] } } });
-    await db.user.deleteMany({ where: { id: { in: [adminId, agentId, otherOrgUserId] } } });
+    await db.user.deleteMany({ where: { id: { in: [adminId, agentId, customerId, otherOrgUserId] } } });
     await db.organization.deleteMany({ where: { id: { in: [organizationId, otherOrganizationId] } } });
   }
   await db.$disconnect();
   await verifier.end();
+});
+
+test('agent direct access to member management shows a narrow forbidden state', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, emails.agent);
+  const denied = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === '/api/memberships' && response.request().method() === 'GET',
+  );
+  await page.goto('/admin/members');
+  const response = await denied;
+  expect(response.status()).toBe(403);
+  await expect(page.getByRole('heading', { name: 'Member management unavailable' })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveText('This action is not permitted.');
+  await expect(page.getByRole('link', { name: 'Return to ticket queue' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
+test('agent and customer membership denial stays clear at desktop and mobile widths', async ({ page }) => {
+  for (const width of [375, 1280]) {
+    for (const [role, email] of [['agent', emails.agent], ['customer', emails.customer]] as const) {
+      await page.setViewportSize({ width, height: 812 });
+      await signIn(page, email);
+      const denied = page.waitForResponse((response) =>
+        new URL(response.url()).pathname === '/api/memberships' && response.request().method() === 'GET',
+      );
+      await page.goto('/admin/members');
+      const response = await denied;
+      expect(response.status(), `${role} membership response at ${width}px`).toBe(403);
+      await expect(page.getByRole('heading', { name: 'Member management unavailable' })).toBeVisible();
+      await expect(page.getByRole('alert')).toHaveText('This action is not permitted.');
+      await expect(page.getByRole('link', { name: 'Return to ticket queue' })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('/sign-in');
+    }
+  }
 });
 
 test('admin can add an existing account and update its organization role and activation', async ({ page }) => {
@@ -98,9 +143,44 @@ test('admin can add an existing account and update its organization role and act
   }));
   expect(membersTable.tableWidth).toBeGreaterThan(membersTable.viewportWidth);
   await captureCheckpointScreenshot(page, '12-memberships-mobile.png');
+  const beforeBlankAdd = await db.membership.count({ where: { organizationId } });
+  await page.getByRole('button', { name: 'Add member' }).click();
+  await expect.poll(() => page.getByLabel('Existing account email').evaluate((element: HTMLInputElement) => element.validity.valueMissing)).toBe(true);
+  await expect.poll(() => db.membership.count({ where: { organizationId } })).toBe(beforeBlankAdd);
+  const mobileAgentRow = page.getByRole('row', { name: new RegExp(emails.agent) });
+  const mobileRole = mobileAgentRow.getByLabel(`Role for ${emails.agent}`);
+  await mobileRole.focus();
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await expect(mobileRole).toBeFocused();
+  const membershipFocus = await mobileRole.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth), color: style.outlineColor };
+  });
+  expect(membershipFocus.style).toBe('solid');
+  expect(membershipFocus.width).toBeGreaterThanOrEqual(2);
+  console.info(`MEMBERSHIP_SELECT_KEYBOARD_FOCUS 375px ${JSON.stringify(membershipFocus)}`);
+  await expect.poll(() => page.locator('.members-table-wrap').evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await mobileRole.selectOption('CUSTOMER');
+  await mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` }).click();
+  await expect(mobileAgentRow.locator('td').nth(0)).toHaveText('Customer');
+  await expect.poll(() => db.membership.findUniqueOrThrow({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+  })).toMatchObject({ role: 'CUSTOMER' });
+  await mobileRole.selectOption('AGENT');
+  await expect(mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` })).toBeEnabled();
+  await mobileAgentRow.getByRole('button', { name: `Save ${emails.agent}` }).click();
+  await expect(mobileAgentRow.locator('td').nth(0)).toHaveText('Agent');
+  await expect.poll(() => db.membership.findUniqueOrThrow({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+  })).toMatchObject({ role: 'AGENT' });
   await page.setViewportSize({ width: 1280, height: 720 });
 
-  await page.getByLabel('Existing account email').fill(emails.otherOrgUser);
+  const emailInput = page.getByLabel('Existing account email');
+  await page.getByRole('button', { name: 'Add member' }).click();
+  await expect.poll(() => emailInput.evaluate((element: HTMLInputElement) => element.validity.valueMissing)).toBe(true);
+  await expect.poll(() => db.membership.count({ where: { organizationId } })).toBe(beforeBlankAdd);
+  await emailInput.fill(emails.otherOrgUser);
   await page.getByLabel('New member role').selectOption('AGENT');
   await page.getByRole('button', { name: 'Add member' }).click();
   const addedRow = page.getByRole('row', { name: new RegExp(emails.otherOrgUser) });
@@ -151,4 +231,59 @@ test('admin can add an existing account and update its organization role and act
   await expect.poll(() => db.membership.findUniqueOrThrow({
     where: { organizationId_userId: { organizationId, userId: adminId } },
   })).toMatchObject({ role: 'ADMIN', isActive: true });
+});
+
+test('membership route shows loading and failure states at desktop and mobile widths, then recovers on retry', async ({ page }) => {
+  await signIn(page, emails.admin);
+  for (const [index, width] of [375, 1280].entries()) {
+    if (index > 0) {
+      await page.getByRole('button', { name: 'Sign out' }).click();
+      await expect(page).toHaveURL('/sign-in');
+      await signIn(page, emails.admin);
+    }
+    await page.setViewportSize({ width, height: 812 });
+    let markRequestArrived!: () => void;
+    let releaseFailedResponse!: () => void;
+    const requestArrived = new Promise<void>((resolve) => { markRequestArrived = resolve; });
+    const failedResponseGate = new Promise<void>((resolve) => { releaseFailedResponse = resolve; });
+    let membershipRequests = 0;
+    const observedStatuses: number[] = [];
+    await page.route('**/api/memberships?*', async (route) => {
+      if (route.request().method() !== 'GET') return route.continue();
+      membershipRequests += 1;
+      if (membershipRequests === 1) {
+        markRequestArrived();
+        await failedResponseGate;
+        observedStatuses.push(503);
+        await route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: { code: 'UNAVAILABLE', message: 'Members temporarily unavailable.' } }),
+        });
+        return;
+      }
+      const response = await route.fetch();
+      observedStatuses.push(response.status());
+      await route.fulfill({ response });
+    });
+
+    await page.getByRole('link', { name: 'Members', exact: true }).click();
+    await expect(page).toHaveURL('/admin/members');
+    await expect(page.getByRole('status')).toContainText('Loading organization members');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await requestArrived;
+    releaseFailedResponse();
+
+    await expect(page.getByRole('heading', { name: 'Members could not load' })).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Members temporarily unavailable.');
+    await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+
+    await page.getByRole('button', { name: 'Try again' }).click();
+    await expect(page.getByRole('heading', { name: 'Organization members' })).toBeVisible();
+    await expect(page.getByRole('row', { name: new RegExp(emails.admin) })).toBeVisible();
+    expect(observedStatuses).toEqual([503, 200]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await page.unroute('**/api/memberships?*');
+  }
 });

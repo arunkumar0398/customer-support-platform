@@ -1,0 +1,74 @@
+{
+  "manifest_version": 1,
+  "bundle_status": "prepared_local_image_and_bounded_all_lane_passed_audit_incomplete",
+  "prepared_from_source_sha": "5671f14b106ba8898b45e7e36ee4c7670d406bda",
+  "target_lockfile_sha256": "0ec746129cd14c11105c4e8f9762032c82d7bb4ef2336565259e2c849fb6070d",
+  "prepared_image_lockfile_sha256": "30af23e771a28483818648dc61d293d9ada6ad6ef720a24d729ef8451a83cae0",
+  "prisma_schema_sha256": "1f8ffb6acf0df5b91ee72b5dcc4ef68257fef50ae451b68253c04e2c3c4d688d",
+  "platform": "linux/amd64",
+  "base_image": "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c",
+  "versions": {
+    "node": "24.22.1",
+    "npm": "11.19.1",
+    "vitest": "5.0.5",
+    "supertest": "7.3.1",
+    "prisma": "7.10.1",
+    "prisma_client": "7.10.1",
+    "playwright": "1.64.1",
+    "postgresql_server": "15.19 (Debian 15.19-0+deb12u1)",
+    "postgresql_client": "15.19 (Debian 15.19-0+deb12u1)"
+  },
+  "cloudflare_security_audit_skill": {
+    "repository": "https://github.com/cloudflare/security-audit-skill",
+    "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+    "directory_in_image": "/opt/cloudflare-security-audit-skill/skills/security-audit"
+  },
+  "image_id": "sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3",
+  "image_digest_or_archive_sha256": "sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3",
+  "toolchain_build_inputs": {
+    "dockerfile_sha256": "e996138b10d45755a29fba9e958220b61707006f9053b51ab710d970570d018d",
+    "preflight_script_sha256": "cea174da2f07b04957e796bbbcf486e080f9527dae5225e5bd9d4ff12c3aa330",
+    "offline_runner_sha256": "f15db3bdd7dd3f3ed2daf0c016bbe87c91dc5c34f464461d3dbef4d9fede0717",
+    "worktree_state": "The image was built from the listed Dockerfile, preflight, and runner hashes and tested against the committed clean source tree at prepared_from_source_sha. The image is local and unexported; rebuild and update this manifest if any hashed build input changes."
+  },
+  "provenance": "Local Docker Desktop build on 2026-11-01 from audit/provision/Dockerfile; image creation time 2026-11-01T13:10:04.1703745Z. Docker server 29.9.2, linux/amd64. Base image digest, target package lockfile and Prisma schema hashes, and Cloudflare audit skill commit are pinned. Image ID is local to this Docker engine and has not been exported or independently attested. The image was built from the listed Dockerfile, preflight, and runner hashes. A no-network preflight and bounded all test lane ran against a clean shallow clone at prepared_from_source_sha. This bounded test lane is not the six-phase Cloudflare security audit.",
+  "preflight_verification": {
+    "result": "PASS_PREFLIGHT_ONLY",
+    "exit_code": 0,
+    "observed_controls": "Linux AMD64 container, non-root uid 10001, --network=none, --read-only rootfs, /target and /input/source.tar read-only, /scratch bounded tmpfs, no active interface except loopback, no inherited proxy, CPU/memory/swap/PID/file-size ceilings, toolchain versions, pinned validator commit, lockfile and Prisma schema hashes verified; mounted clean Git HEAD matched 5671f14b106ba8898b45e7e36ee4c7670d406bda.",
+    "negative_checks": [
+      "An unallowlisted UNSAFE_TEST environment variable was refused with exit 1 before target execution.",
+      "An unsupported runner lane was refused with exit 2 before target execution."
+    ]
+  },
+  "bounded_test_lane_verification": {
+    "lane": "all",
+    "result": "PASS_LOCAL_BOUNDED_TEST_LANE",
+    "exit_code": 0,
+    "date": "2026-11-01",
+    "source_sha": "5671f14b106ba8898b45e7e36ee4c7670d406bda",
+    "source_archive_sha256": "007ffe506421dc99153c0091fbb8f046553e8b275e895ba5ef76a2ac954b5afd",
+    "image_id": "sha256:e988f93c6d977ddcd3ca5f2d8814a6c1cbf53c18640da496c0fadea76a1d9ba3",
+    "checks": {
+      "lint": "PASS",
+      "typecheck": "PASS",
+      "api": "419 passed",
+      "web": "12 passed",
+      "production_build": "PASS",
+      "playwright": "46 passed (2.8m)"
+    },
+    "container_limits": "--network=none --read-only --user 10001:10001 --cap-drop=ALL --security-opt=no-new-privileges --cpus=1 --memory=1536m --memory-swap=1536m --pids-limit=256 --ulimit fsize=1073741824:1073741824; /scratch tmpfs 1100 MiB; exact candidate and source archive mounted read-only",
+    "interpretation": "Local deterministic validation of the fixed all lane only. It is not the Cloudflare six-phase audit; deferred coverage, independent finding verification, official validators, and final audit report remain open."
+  },
+  "audit_execution_status": "NOT_RUN",
+  "runtime_launcher_contract": {
+    "version": "audit-launcher-v1",
+    "status": "implementation-present; current-candidate execution pending until committed clean source is selected",
+    "runtime_runner_source": "Committed selected source: audit/run/preflight.sh, audit/run/run-offline.sh, audit/run/verify_input.py, and audit/run/promote_artifacts.py. Host launcher copies these into per-run private input directory, hashes them, mounts them read-only at /runner, and binds hashes into the launch record.",
+    "image_script_distinction": "The image build-input hashes above describe the helper scripts baked into the prepared image on 2026-11-01. The launcher uses the source-bound per-run /runner copies; it does not invoke the older /opt/audit-runner script copies.",
+    "source_binding": "Requires explicit full commit equal to clean HEAD; trusted git archive; Git commit marker; full Git tree ID plus recursive path/mode/blob manifest; independent archive payload verification; archive/tree/manifest/lock/schema/image/runner hashes.",
+    "promotion": "Linux-only parent helper opens scratch and artifact directory descriptors with O_NOFOLLOW before target starts; target has no artifact mount or Docker socket; after target exit/removal, promote only predeclared flat filenames using descriptor-relative no-follow checks, regular/single-link/inode/size/identity verification, bounded reads, exclusive staging, fsync, and atomic rename.",
+    "retention": "Host retrieves each exact allowlisted file only from the helper artifact directory and verifies its digest. No recursive scratch copy. A failed/uncertain run retains named volumes with a recovery record; operator reconciles exact resources.",
+    "execution_policy": "Pinned local Docker Desktop Linux AMD64 image; pull=never, no network, read-only root/source/runner, loopback-only network namespace observed by preflight, UID 10001, capabilities dropped, no-new-privileges, 1 CPU, 1536 MiB memory, swap disabled, 256 PIDs, 1 GiB file size, 1.1 GiB scratch, max 90 minutes; target receives only explicit safe environment values."
+  }
+}

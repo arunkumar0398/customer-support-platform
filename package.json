@@ -11,6 +11,9 @@
     "api",
     "web"
   ],
+  "overrides": {
+    "zod": "4.6.7"
+  },
   "scripts": {
     "lint": "npm run lint --workspace api && npm run lint --workspace web",
     "typecheck": "npm run typecheck --workspace api && npm run typecheck --workspace web",
@@ -24,6 +27,9 @@
     "db:seed": "npm run db:seed --workspace api",
     "db:wait": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-health.ps1",
     "db:verify-test": "node scripts/verify-test-database.mjs",
+    "preview:verify-target": "tsx scripts/preview/verify-target.ts",
+    "preview:provision-fixtures": "tsx scripts/preview/provision-fixtures.ts",
+    "preview:cleanup-fixtures": "tsx scripts/preview/cleanup-fixtures.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:e2e -- --list && npm run build"
   },
   "devDependencies": {

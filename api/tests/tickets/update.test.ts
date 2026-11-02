@@ -46,7 +46,7 @@ function update(account: Account, ticketId: string, body: object, organizationId
   const identity = identities.get(account)!;
   return request(app).patch(`/api/tickets/${ticketId}`).set('Cookie', identity.cookie)
     .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId)
-    .set('If-Match', '"1"').send(body);
+    .set('X-Ticket-Version', '1').send(body);
 }
 
 async function createTicket({

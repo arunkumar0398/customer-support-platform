@@ -20,7 +20,7 @@
 .ticket-create-field textarea { min-height: 150px; padding: 12px; resize: vertical; line-height: 1.6; }
 .ticket-create-field input:focus,
 .ticket-create-field textarea:focus,
-.ticket-create-field select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
+.ticket-create-field select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); }
 .ticket-create-field [aria-invalid="true"] { border-color: #c96551; box-shadow: 0 0 0 3px rgb(236 121 97 / 13%); }
 .ticket-create-field small { color: var(--muted); font-size: 11px; line-height: 1.5; }
 .ticket-create-priority { max-width: 260px; }

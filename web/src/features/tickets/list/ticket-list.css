@@ -11,7 +11,7 @@
 .search-field { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 9px; }
 .search-field input, .queue-filters select { min-height: 42px; border: 1px solid #cbd7cd; border-radius: 5px; background: var(--white); color: var(--ink); font-size: 12px; }
 .search-field input { width: 100%; min-width: 0; padding: 0 12px; }
-.search-field input:focus, .queue-filters select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); outline: none; }
+.search-field input:focus, .queue-filters select:focus { border-color: #557f6b; box-shadow: 0 0 0 3px rgb(85 127 107 / 13%); }
 .search-field .button { min-height: 42px; }
 .queue-filters { display: flex; flex-wrap: wrap; gap: 12px; }
 .queue-filters label { min-width: 148px; }

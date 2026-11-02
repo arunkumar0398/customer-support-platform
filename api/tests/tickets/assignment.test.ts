@@ -48,7 +48,7 @@ async function signIn(account: Account): Promise<Identity> {
 function assign(account: Account, ticketId: string, assigneeUserId: string | null, organizationId = alphaId) {
   const identity = identities.get(account)!;
   return request(app).patch(`/api/tickets/${ticketId}/assignment`).set('Cookie', identity.cookie)
-    .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId).set('If-Match', '"1"')
+    .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', organizationId).set('X-Ticket-Version', '1')
     .send({ assigneeUserId });
 }
 
@@ -85,6 +85,31 @@ describe('tenant-safe ticket assignment', () => {
     const event = await db.activityEvent.findFirstOrThrow({ where: { ticketId: ticket.id, type: 'ASSIGNMENT_CHANGED' } });
     expect(event.previousValue).toBe(ids.agent);
     expect(event.newValue).toBeNull();
+  });
+
+  it('rolls back an assignment and version when PostgreSQL rejects its activity event', async () => {
+    const ticket = await createTicket();
+    const name = `tk16_${randomUUID().replaceAll('-', '')}`;
+    const eventsBefore = await db.activityEvent.count({ where: { ticketId: ticket.id } });
+    try {
+      await verifier.query(`CREATE FUNCTION "${name}"() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic assignment event rejection'; END $$`);
+      await verifier.query(`CREATE TRIGGER "${name}" BEFORE INSERT ON "ActivityEvent" FOR EACH ROW WHEN (NEW."organizationId" = '${alphaId}'::uuid AND NEW."ticketId" = '${ticket.id}'::uuid AND NEW."type" = 'ASSIGNMENT_CHANGED') EXECUTE FUNCTION "${name}"()`);
+      const response = await assign('admin', ticket.id, ids.agent);
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('INTERNAL_ERROR');
+      expect(response.text).not.toContain('synthetic assignment event rejection');
+      expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({
+        version: 1, assigneeOrganizationId: null, assigneeUserId: null,
+      });
+      expect(await db.activityEvent.count({ where: { ticketId: ticket.id } })).toBe(eventsBefore);
+    } finally {
+      await verifier.query(`DROP TRIGGER IF EXISTS "${name}" ON "ActivityEvent"`);
+      await verifier.query(`DROP FUNCTION IF EXISTS "${name}"()`);
+    }
+    const recovered = await assign('admin', ticket.id, ids.agent);
+    expect(recovered.status).toBe(200);
+    expect(recovered.body).toMatchObject({ assigneeUserId: ids.agent, version: 2 });
+    expect(await db.activityEvent.count({ where: { ticketId: ticket.id, type: 'ASSIGNMENT_CHANGED' } })).toBe(1);
   });
 
   it.each(['admin', 'agent'] as const)('rejects a cross-org agent target for %s without writes', async (account) => {
@@ -142,7 +167,7 @@ describe('tenant-safe ticket assignment', () => {
     for (const body of [{ assigneeUserId: 'not-a-uuid' }, { assigneeUserId: ids.agent, organizationId: betaId }, { assigneeUserId: undefined }]) {
       const identity = identities.get('admin')!;
       const response = await request(app).patch(`/api/tickets/${ticket.id}/assignment`).set('Cookie', identity.cookie)
-        .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('If-Match', '"1"').send(body);
+        .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('X-Ticket-Version', '1').send(body);
       expect(response.status).toBe(422);
     }
     expect(await db.ticket.findUniqueOrThrow({ where: { id: ticket.id } })).toMatchObject({ version: 1, assigneeUserId: null });
@@ -151,7 +176,7 @@ describe('tenant-safe ticket assignment', () => {
   it('requires a valid ticket UUID', async () => {
     const identity = identities.get('admin')!;
     const response = await request(app).patch('/api/tickets/not-a-uuid/assignment').set('Cookie', identity.cookie)
-      .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('If-Match', '"1"').send({ assigneeUserId: ids.agent });
+      .set('Origin', origin).set('X-CSRF-Token', identity.csrf).set('X-Organization-ID', alphaId).set('X-Ticket-Version', '1').send({ assigneeUserId: ids.agent });
     expect(response.status).toBe(422);
   });
 });

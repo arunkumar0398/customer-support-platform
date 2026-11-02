@@ -57,7 +57,7 @@ No million-row fixture or concurrent load test was run. The 50,000-row transacti
 
 ## Concurrency and duplicate request behavior
 
-A29 remains PASS on the separately reviewed real-PostgreSQL race evidence in evidence/checkpoints/TK-20.md: two simultaneous updates with the same ETag yield one success and one 409, one version increment, and one matching activity event. TK-31 did not re-run or change this contract.
+A29 remains PASS on the separately reviewed real-PostgreSQL race evidence in evidence/checkpoints/TK-20.md: two simultaneous updates with the same `X-Ticket-Version` yield one success and one 409, one version increment, and one matching activity event. TK-31 did not re-run or change this contract.
 
 Ticket creation has no idempotency key. api/tests/tickets/create.test.ts verifies that repeating the same POST creates distinct tickets and distinct creation events. A replay after a client timeout can therefore create a duplicate. This is documented behavior, not a claim of safe retry or idempotency. Clients should not automatically retry an ambiguous create until an idempotency-key contract is implemented; future implementation should atomically persist a key scoped to the actor/organization and replay the original result.
 

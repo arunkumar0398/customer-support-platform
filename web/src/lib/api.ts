@@ -104,6 +104,7 @@ export interface UpdateTicketPayload {
   description?: string;
   status?: TicketListItem['status'];
   priority?: TicketListItem['priority'];
+  reopenReason?: string;
 }
 
 export interface CreateTicketPayload {
@@ -210,7 +211,7 @@ export function updateTicket(
     headers: {
       'X-Organization-ID': organizationId,
       'X-CSRF-Token': csrfToken,
-      'If-Match': `"${ticket.version}"`,
+      'X-Ticket-Version': String(ticket.version),
     },
     body: JSON.stringify(payload),
   });
@@ -227,7 +228,7 @@ export function assignTicket(
     headers: {
       'X-Organization-ID': organizationId,
       'X-CSRF-Token': csrfToken,
-      'If-Match': `"${ticket.version}"`,
+      'X-Ticket-Version': String(ticket.version),
     },
     body: JSON.stringify({ assigneeUserId }),
   });

@@ -2,79 +2,92 @@
 
 ## System shape
 
-The application is a TypeScript modular monolith in an npm workspace. The `web/` workspace is a React/Vite single-page application. The `api/` workspace is an Express JSON API, with Zod request validation and Prisma data access to PostgreSQL. There are no microservices or external runtime dependencies in the mandatory local MVP.
+The product is a TypeScript modular monolith in npm workspaces. `web/` is a React/Vite single-page application; `api/` is an Express JSON API using Zod validation and Prisma with PostgreSQL. There are no runtime microservices.
 
 ```mermaid
 flowchart LR
-  Browser[React + Vite browser app]
-  Proxy[Same-origin /api proxy]
-  Express[Express API]
-  Auth[Session and membership authorization]
-  Domain[Ticket, comment, dashboard services]
-  DB[(PostgreSQL)]
-  Browser --> Proxy --> Express
-  Express --> Auth --> Domain --> DB
+  Browser[Browser]
+  subgraph Local[Docker-local]
+    Nginx[Nginx static web and /api proxy]
+    API[Express API container]
+    DB[(PostgreSQL Compose)]
+    Browser --> Nginx --> API --> DB
+  end
+  subgraph Hosted[Hosted deployment shape]
+    VercelWeb[Vercel static React/Vite]
+    WebProxy[Vercel web /api proxy function]
+    VercelAPI[Vercel Express Node Function]
+    Neon[(Neon PostgreSQL)]
+    Browser --> VercelWeb -->|same-origin /api rewrite| WebProxy -->|allowlisted headers and body| VercelAPI --> Neon
+  end
+  Browser -->|development| Dev[Vite dev server] -->|/api proxy| API
 ```
 
-The employer requires a secure multi-tenant support product, an API, persistent data, a usable web interface, test evidence, and a deploy/operations discussion. This project chooses TypeScript, React/Vite, Express, PostgreSQL/Prisma, one shared schema, opaque sessions, membership-based roles, and a same-origin browser API as implementation choices. The detailed boundary and assumptions are in [assumptions](assumptions.md); the data entities and keys are in [data model](data-model.md).
+The browser talks to the same-origin `/api` path. In local development Vite proxies it to the API listener. In Docker, Nginx serves the built frontend and reverse-proxies `/api/*` to the API container. The hosted projects use a Vercel static frontend plus a small Vercel web proxy function for same-origin `/api/*`, which forwards to a separate Express Node Function; the API accesses Neon PostgreSQL. The API function entrypoint exports the Express app from `api/index.ts`; `api/src/local-server.ts` starts a local listener.
 
-`api/index.ts` exports the Express application for a future serverless function. `api/src/local-server.ts` owns local `listen()` startup. Request handlers validate and normalize input, authorization derives organization and role from a revalidated membership, domain services apply lifecycle and concurrency rules, and Prisma persists mutations and audit events atomically.
-
-## Local runtime and data flow
-
-For local development, the browser dev server proxies `/api` to the API listener. The API connects to the Compose PostgreSQL service through the development role and `support_dev` database. Integration tests use a separate `support_test` role/database and verify its actual identity before database mutation. Compose exposes Postgres only on loopback. The example environment file is copied to the repository-root `.env`; the ignored local file must never be committed or copied into evidence.
-
-An authenticated request resolves the opaque session token to a stored hash, checks expiry/revocation, reloads the current user membership, and builds a request context with the authorized organization and role. Services use that context for all reads and writes. The UI does not supply trusted organization scope. Ticket writes use an expected version and a transaction containing the ticket change and its immutable event; stale versions return `409`.
-
-The local database and application are deliberately separate checkpoints. TK-02 proves PostgreSQL availability and role/database isolation. It does not prove the complete application can run in Compose, schema migrations work, or deterministic tenant seed exists. Those remain unverified until their later tasks and evidence.
+The request path is: request ID and JSON-size middleware → health/auth/membership/ticket/dashboard router → session and current-membership authorization → role/tenant-scoped service → Prisma/PostgreSQL. Ticket writes use expected versions and transactions that update the ticket and add an immutable activity event together. See [API contract](api.md) and [data model](data-model.md).
 
 ## Security boundaries
 
-- Passwords are stored only as adaptive hashes. Session tokens are opaque; only a hash is persisted. Cookie flags are `HttpOnly`, `SameSite=Lax`, and `Secure` in production.
-- Unsafe cookie-authenticated requests enforce an approved same-origin check and CSRF defense. Login is rate-limited. Session and membership changes are re-read so expiry, revocation, and role changes take effect.
-- Input schemas are role- and operation-specific allowlists. Customers cannot set requester identity; the server derives it from their authenticated membership. Admins and agents may set `requesterUserId` only on ticket creation, and the service verifies an active same-organization `CUSTOMER` membership. Organization, role, password hash, internal version, and audit metadata are never client-controlled.
-- Every tenant-owned lookup, relation, filter, search, aggregate, and mutation scopes to the validated organization and role/owner. Cross-organization references fail in service checks and database constraints where practical.
-- Unexpected errors are sanitized and carry a request ID. Logs redact credentials, session values, connection URLs, and customer-sensitive content.
-- The test database verifier rejects a development or non-loopback target before the test process performs database mutations. No code may reset or clean an unverified database.
+### Data and tenant boundaries
 
-## Hosted topology (after approval)
+PostgreSQL stores organizations, global user identities, organization memberships, tickets, comments, immutable activity events, and hashed sessions. Organization identity and role are derived server-side from the authenticated session and current membership. Composite tenant foreign keys constrain ticket requesters/assignees, comment authors, and event actors to the ticket’s organization. They complement request-level authorization; they do not replace it.
 
-After the mandatory local release gate and separate human approval, the intended hosted shape is two Vercel projects: Vite static frontend and Express Node Function API, with `/api/*` routed to the API and the browser remaining same-origin for session behavior. Neon supplies distinct preview and production databases. Runtime uses the pooled connection URL; migrations use a direct/unpooled URL. Preview and production are never interchangeable.
+The seed creates synthetic Alpha and Beta organizations and local demo accounts. The seeder refuses non-loopback targets and only writes to the local `support_dev` identity. Tests use a separate verified `support_test` identity. Details and exact indexes are in [data model](data-model.md).
 
-This describes an intended design only. No project, paid provider resource, domain, secret, database, migration, or deployment is created by this architecture document. Deployment configuration and operations will be validated against current provider behavior in the deployment task, with preview and production authorization kept separate.
+## Runtime configuration and security
+
+- Cookie sessions are opaque; the database stores a token hash, expiry, and optional revocation.
+- Cookies use HttpOnly and SameSite=Lax; Secure is enabled in production.
+- Unsafe auth requests require the configured exact origin and CSRF proof. Membership and authorization are revalidated on requests.
+- API JSON bodies are limited to 32 KiB; request schemas reject unknown fields. Errors use a stable safe envelope and request IDs.
+- Login throttling is an in-process map with per-account and per-IP windows. It is not shared across function instances; forwarding headers are not trusted because Express proxy trust is disabled. This limitation and required validation are in [limitations](limitations.md).
+- The local test database guard checks database identity before mutation. Never point test setup at Preview or Production.
+
+## Local runtime and data flow
+
+The local development and Docker paths use the same browser-facing `/api` contract:
 
 ```mermaid
 flowchart LR
-  User[Browser] --> TLS[HTTPS / Vercel edge]
-  TLS --> Web[Vercel static React/Vite project]
-  Web -->|same-origin /api rewrite| API[Vercel Express Node Function]
-  API -->|pooled runtime URL| PreviewDB[(Neon preview database)]
-  API -->|pooled runtime URL| ProdDB[(Neon production database)]
-  Migration[Approved migration job] -->|direct unpooled URL, one environment at a time| PreviewDB
-  Migration -->|separately approved direct URL| ProdDB
+  Browser[Browser] --> Nginx[Nginx static web]
+  Nginx --> API[Express API container]
+  API --> DB[(PostgreSQL Compose)]
+  Browser --> Dev[Vite dev server]
+  Dev -->|/api proxy| API
 ```
 
-The preview and production database edges are separate environments, not simultaneous choices made by one request. The production migration edge is disabled until its distinct approval. The diagram shows target architecture, not provisioned or tested infrastructure.
+## Docker-local runtime
+
+`docker-compose.yml` runs three services: a loopback-bound PostgreSQL service, an API container, and an Nginx web container. The API waits for database readiness; the web container waits for API readiness. The root `Dockerfile` builds API and web runtime targets from the pinned Node base image. App containers run non-root. The Compose volume persists local databases unless explicitly removed; destructive volume removal is not part of the routine workflow.
+
+For commands and recovery details, see [operations](operations.md).
+
+## Hosted topology (after approval)
+
+```mermaid
+flowchart LR
+  Browser[Browser] --> Web[Vercel static React/Vite]
+  Web -->|same-origin /api rewrite| Proxy[Vercel web proxy function]
+  Proxy -->|allowlisted request| API[Vercel Express Node Function]
+  API --> DB[(Neon PostgreSQL)]
+```
+
+The hosted architecture uses separate Vercel projects for the web and API, plus Neon PostgreSQL. In the Web project, `web/vercel.json` rewrites `/api/*` to `web/api/index.ts`; that handler reconstructs the original API path and `web/src/server/api-proxy.ts` forwards only an allowlist of request/response headers, body, and cookies to validated `API_ORIGIN`. Preview requests add a Vercel OIDC trusted-source token. The API project exports the Express app at `api/index.ts`. Runtime database access uses the pooled Neon URL; migrations use a direct/unpooled URL, with Preview and Production kept separate.
+
+The application source SHA with verified successful Web/API deployments is `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` (Actions #74). Documentation candidate reviewed before this update `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` passed Actions #94. Both exact-SHA Vercel statuses on that docs candidate report provider build-rate-limit failures; these are not application build results and do not establish a healthy deployment at this SHA. Docs-only runs #90–#93 are historical and remain SHA-specific. Deployment is optional in the assessment. No provider upgrade is required.
 
 ## Operations and reliability
 
-| Area | Local MVP / intended operational control |
+| Concern | Current control / limitation |
 |---|---|
-| TLS | Local loopback is development-only. Hosted traffic uses provider TLS; enforce secure cookies and HTTPS redirect/proxy behavior. Verify forwarded-protocol handling instead of trusting arbitrary headers. |
-| Secrets | Root `.env` is ignored and local only. Use a secret manager/provider environment settings for hosted credentials; separate preview and production; rotate on exposure. Never print connection strings. |
-| Networking | Postgres binds to loopback in Compose. Hosted API access is restricted to the intended database network/authentication path. Do not expose database ports publicly. |
-| Backups and restore | Use provider backups/PITR when hosted; document retention and recovery-point objectives, test a restore into an isolated database, then verify row counts and app readiness before switching traffic. Local synthetic data can be recreated. |
-| CI/CD | CI installs from the lockfile and runs lint, typecheck, unit/API, DB integration, browser, and build gates. A release is promoted only from a reviewed SHA; secrets are unavailable to untrusted fork workflows. |
-| Migrations | Apply versioned migrations once per environment using the direct URL before app traffic depends on a new schema. Prefer expand/contract changes; record the applied migration and a rollback/forward-fix plan. Never run production migrations without approval. |
-| Monitoring and alerts | Track API availability/error rate/latency, database connectivity/pool exhaustion, auth throttling, migration failures, and terminal notification failures. Alert on sustained user-visible errors and restore objective breaches; logs use request IDs and omit secrets/content. |
-| Rollback | Revert the application to the last reviewed deployment when compatible. For incompatible schema changes, use a forward fix or reviewed restore plan; do not assume a destructive down migration is safe. |
-| Cost | Main drivers are database compute/storage/egress, function invocations and duration, build/deployment usage, logs/retention, and backup retention. Start with the smallest suitable tier and review actual usage before scaling. |
-| Scale | Bound page size, add tenant-first indexes, inspect representative `EXPLAIN` plans, cap connection pools, and keep request work short. Grow to keyset pagination, read replicas, or background jobs only when measured workload supports it. |
-
-Notification delivery, if introduced, writes an outbox record in the ticket transaction, then retries asynchronously with bounded backoff and idempotency; terminal failures remain inspectable and recoverable. An unavailable provider must not undo a valid ticket mutation. This integration remains unimplemented and is not claimed as tested.
+| Secrets | Local `.env` is ignored; hosted settings hold separate environment secrets. Never put connection strings or private admin credentials in docs. |
+| Database URLs | Pooled URL is for runtime; direct/unpooled URL is for controlled migrations. Verify target identity before any migration. |
+| Migrations | Versioned Prisma migrations are checked in. Compatibility and rollback need separate evidence; no SQL reverse migration is claimed here. |
+| Backups | Hosted restore/PITR procedures require provider-side validation; a local seed is reproducible but is not a backup. |
+| Observability | Request IDs and sanitized errors exist; a full monitoring/alerting system is not implemented. |
+| Release | Use exact-SHA CI evidence; keep Preview and Production authorization/data separate. |
 
 ## Tradeoffs and growth path
 
-A single API and shared PostgreSQL schema keep the MVP easy to run and reason about. Tenant IDs and composite relationships reduce accidental cross-org linkage, while server-side membership checks remain the authorization source. This is simpler than separate database-per-tenant or service-per-domain deployments but puts stronger responsibility on query scoping and database integration tests.
-
-Bounded offset pagination and a modest local connection pool are appropriate for a small assessment dataset; they are not a promise of performance at millions of rows. Tenant-first indexes and query plans provide a measurable starting point. At larger scale, keyset pagination, workload-specific indexes, background outbox processing, and separate reporting/read paths can be considered based on observed latency and volume. Each adds operational complexity and should be justified by measurements.
+A shared PostgreSQL schema and modular monolith keep the assessment system simple to run and inspect. Tenant isolation depends on both authorization scoping and composite database constraints. Capped offset pagination is simpler for the small assessment dataset; deep pages cost more and may need keyset pagination as volume grows. Notifications, attachments, realtime, rich analytics, and observability dashboards are out of scope. Deployment is optional by the assessment. See [limitations and next steps](limitations.md).

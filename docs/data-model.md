@@ -1,6 +1,6 @@
-# Data model and query contract
+# Data model and key indexes
 
-The employer asks for a persistent relational model, organization isolation, a two-organization seed, and a discussion of query scale. The choices below define the intended PostgreSQL model; actual Prisma schema, migrations, and database tests are owned by TK-04 through TK-06 and must agree with this document. This is a design contract, not evidence that those artifacts already exist.
+This document describes the checked-in Prisma schema and migrations, not a future design. Source of truth: `api/prisma/schema.prisma` and the three checked-in migrations under `api/prisma/migrations/`.
 
 ## Entities and relationships
 
@@ -8,65 +8,51 @@ The employer asks for a persistent relational model, organization isolation, a t
 erDiagram
   ORGANIZATION ||--o{ MEMBERSHIP : has
   USER ||--o{ MEMBERSHIP : joins
+  MEMBERSHIP ||--o{ TICKET : requests
+  MEMBERSHIP ||--o{ TICKET : assigned
   ORGANIZATION ||--o{ TICKET : owns
-  USER ||--o{ TICKET : requests
-  USER ||--o{ TICKET : assigned_to
   TICKET ||--o{ COMMENT : has
-  USER ||--o{ COMMENT : writes
+  MEMBERSHIP ||--o{ COMMENT : authors
   TICKET ||--o{ ACTIVITY_EVENT : records
-  USER ||--o{ ACTIVITY_EVENT : performs
+  MEMBERSHIP ||--o{ ACTIVITY_EVENT : acts
   USER ||--o{ SESSION : owns
-
-  ORGANIZATION { uuid id PK }
-  USER { uuid id PK string email UK string passwordHash }
-  MEMBERSHIP { uuid organizationId PK uuid userId PK enum role boolean active }
-  TICKET { uuid id PK uuid organizationId string ticketNumber enum status enum priority int version }
-  COMMENT { uuid organizationId uuid ticketId uuid id PK }
-  ACTIVITY_EVENT { uuid organizationId uuid ticketId uuid id PK }
-  SESSION { uuid id PK uuid userId string tokenHash UK timestamptz expiresAt }
 ```
 
-| Entity | Important fields and rules |
-|---|---|
-| `Organization` | Stable UUID, unique slug, display name, created/updated timestamps. Parent tenant for memberships and tickets. |
-| `User` | Stable UUID, normalized unique email, adaptive `passwordHash`, timestamps. A user may join multiple organizations; global identity does not imply a tenant role. |
-| `Membership` | `(organizationId, userId)` key, role enum (`ADMIN`, `AGENT`, `CUSTOMER`), active state, timestamps. Each user/org pair has at most one current membership row. Enforce last-active-admin protection in the transaction service. |
-| `Ticket` | Stable UUID, tenant ID, organization-unique positive `ticketNumber`, requester membership, nullable assignee membership, title/description, status, priority, `dueAt`, positive version, timestamps. Requester and assignee must have memberships in that same organization. The optional Prisma composite assignee relation stores a nullable organization scalar alongside the nullable user scalar; the migration checks that the two scalars are both null or that the assignee organization equals the ticket organization. A customer-created ticket uses the authenticated customer as requester; on ticket creation only, an admin or agent may choose a same-org user with an active `CUSTOMER` membership as requester. |
-| `Comment` | Tenant ID, ticket ID, author ID, body, created timestamp. Append-only in the MVP; ticket and author must be in the same tenant; no new comments after closure. |
-| `ActivityEvent` | Tenant ID, ticket ID, actor ID, event type, sanitized before/after metadata, optional reason, created timestamp. Append-only; tenant-linked to ticket and actor. Insert in the same transaction as the associated mutation. |
-| `Session` | User ID, unique token hash, expiry, optional revocation and last-seen timestamps, and created timestamp. Store no raw bearer token; authentication revalidates current membership per request. |
+- **Organization**: UUID primary key; unique slug; display name and timestamps.
+- **User**: UUID primary key; unique normalized email, password hash, timestamps. User identity is global; roles live on memberships.
+- **Membership**: `(organizationId, userId)` composite primary key; role enum `ADMIN | AGENT | CUSTOMER`, active flag, timestamps. A user may belong to several organizations.
+- **Ticket**: UUID primary key; organization, positive organization-local ticket number, requester membership, optional assignee membership, title, description, status, priority, optional due time, optimistic version, timestamps. Unique `(organizationId, id)` supports tenant-scoped child foreign keys; unique `(organizationId, ticketNumber)` makes ticket numbering organization-local.
+- **Comment**: UUID, organization and ticket IDs, author membership, body, creation time. API behavior treats comments as append-only.
+- **ActivityEvent**: UUID, organization and ticket IDs, actor membership, event type, optional JSON before/after values, optional reason, creation time. Ticket mutation and its activity insert are performed in one transaction. API behavior is append-only; no database trigger claims immutability.
+- **Session**: UUID, user ID, unique hash of opaque session token, expiry, optional revocation/last-seen timestamps and created timestamp. Raw session tokens are not stored in this table.
 
 ## Tenant integrity
 
-Use organization-scoped unique keys and composite foreign keys so a relationship cannot accidentally pair a ticket in organization X with a user/member in organization Y. At minimum, expose unique `(organizationId, id)` keys for tenant-owned parent rows, reference composite keys from tenant-owned children, and reference `(organizationId, userId)` from requester, assignee, comment author, and event actor. Composite references prove same-organization membership; create-service policy additionally proves customer role for staff-selected requesters. Service methods verify role, ownership, active status, and same-tenant relationships before writes.
+Foreign keys use the composite `(organizationId, userId)` membership key for ticket requester/assignee, comment author, and activity actor. Comment and activity ticket relationships use `(organizationId, ticketId)` to a ticket's unique `(organizationId, id)`. The migration has explicit checks that `ticketNumber > 0`, `version > 0`, and assignee columns are either both null or both present with assignee organization equal to ticket organization. The user email check requires a normalized, non-empty value. Enum types constrain roles, ticket statuses/priorities, and activity types.
 
-All tenant-owned SQL is parameterized and includes the validated `organizationId` in its predicate. The request layer derives that value from current session + membership. Search and dashboard aggregation cannot bypass the tenant predicate. Database constraints protect referential integrity; they do not replace application authorization.
+These constraints prevent cross-organization references in the relational graph. The API still must check caller authorization, ownership, active membership, and operation-specific permission; database constraints do not prove those policies.
 
 ## Constraints and indexes
 
-Expected constraints to realize in Prisma/SQL and verify against PostgreSQL:
+| Table | Index / key | Purpose |
+|---|---|---|
+| Organization | `Organization_slug_key` unique (`slug`) | Resolve tenant slug. |
+| User | `User_email_key` unique (`email`) | Resolve normalized login. |
+| Membership | `Membership_pkey` (`organizationId, userId`) | Membership lookup and FK target. |
+| Membership | `Membership_userId_isActive_organizationId_idx` (`userId, isActive, organizationId`) | List active organizations for a user. |
+| Ticket | `Ticket_organizationId_ticketNumber_key` unique (`organizationId, ticketNumber`) | Tenant-local numbering. |
+| Ticket | `Ticket_org_created_id_idx` (`organizationId, createdAt DESC, id DESC`) | Default tenant list order. |
+| Ticket | `Ticket_org_status_created_id_idx` (`organizationId, status, createdAt DESC, id DESC`) | Status-filtered listing. |
+| Ticket | `Ticket_org_priority_created_id_idx` (`organizationId, priority, createdAt DESC, id DESC`) | Priority-filtered listing. |
+| Ticket | `Ticket_org_requester_status_created_id_idx` (`organizationId, requesterUserId, status, createdAt DESC, id DESC`) | Customer-owned filtering. |
+| Ticket | `Ticket_org_assignee_status_created_id_idx` (`organizationId, assigneeUserId, status, createdAt DESC, id DESC`) | Agent workload filtering. |
+| Ticket | `Ticket_org_due_status_idx` (`organizationId, dueAt, status`) | Due/overdue dashboard calculation. |
+| Comment | `Comment_org_ticket_created_id_idx` (`organizationId, ticketId, createdAt DESC, id DESC`) | Tenant-scoped conversation paging. |
+| ActivityEvent | `ActivityEvent_org_ticket_created_id_idx` (`organizationId, ticketId, createdAt DESC, id DESC`) | Tenant-scoped history paging. |
+| Session | `Session_tokenHash_key` unique (`tokenHash`); `Session_userId_expiresAt_idx` (`userId, expiresAt`) | Session lookup and user expiry management. |
 
-- Unique normalized `User.email`, `Organization.slug`, `(Membership.organizationId, Membership.userId)`, and `(Ticket.organizationId, Ticket.ticketNumber)`; ticket numbers and versions must be positive.
-- Composite tenant foreign keys for ticket requester/assignee, comment ticket/author, and event ticket/actor.
-- Check or enum constraints for allowed role/status/priority values; positive ticket version; non-empty required names/title/body where suitable.
-- Unique session token hash and foreign key to its user; session token hash is never returned to the browser.
-- No `UPDATE`/`DELETE` service path for comments or activity events. The database writer is restricted to application-owned tables and migration authority remains separate in hosted environments.
-
-Initial indexes should follow the tenant-leading predicates:
-
-| Table | Index |
-|---|---|
-| `Membership` | Primary/unique `(organizationId, userId)`; reverse lookup `(userId, active, organizationId)` |
-| `Ticket` | Unique `(organizationId, ticketNumber)`; listing `(organizationId, createdAt DESC, id DESC)`; status `(organizationId, status, createdAt DESC, id DESC)`; priority `(organizationId, priority, createdAt DESC, id DESC)` |
-| `Ticket` | Assignee workload `(organizationId, assigneeUserId, status, createdAt DESC, id DESC)`; requester ownership `(organizationId, requesterUserId, status, createdAt DESC, id DESC)`; overdue `(organizationId, dueAt, status)` |
-| `Comment` | `(organizationId, ticketId, createdAt, id)` |
-| `ActivityEvent` | `(organizationId, ticketId, createdAt, id)` |
-| `Session` | Unique `(tokenHash)`; lookup/cleanup `(userId, expiresAt)` and expiry index if cleanup query needs it |
-
-Index order will be adjusted from real query plans. Avoid duplicate indexes created solely because they are listed here; capture the final migration definitions and representative `EXPLAIN` output in release evidence.
+Additional unique indexes `Ticket_organizationId_id_key`, `Comment_organizationId_id_key`, and `ActivityEvent_organizationId_id_key` support tenant-composite child references. The Prisma schema names all indexes; confirm exact deployed state with migration status rather than assuming documentation proves a database was migrated.
 
 ## Query and scale behavior
 
-Ticket list endpoints require validated tenant scope, a deterministic order of `createdAt DESC, id DESC`, a bounded page size, and filters limited to status, priority, assignee, requester, and bounded text search. The MVP uses capped offset pagination with a documented maximum. A cursor over `(createdAt, id)` is the growth path when deep-page latency is observed. Dashboard queries use one UTC evaluation instant and the definitions in [assumptions](assumptions.md).
-
-The assessment mentions millions of tickets as a scale discussion. This model does not claim that scale has been load-tested. Before a release claim, measure representative list/search/workload queries with seeded data and inspect `EXPLAIN (ANALYZE, BUFFERS)` on a safe local database. Apply indexes based on query predicates and selectivity; monitor slow queries, pool saturation, storage growth, and migration duration. For larger workloads, keyset pagination and a read/reporting path may be justified, with additional consistency and operational costs.
+Ticket lists filter by validated organization, role/owner, status, priority, assignment, and bounded text search. The API uses capped offset pagination: at most 1,000 pages and 100 rows per page, so no page returns beyond the first 100,000 matching rows. This is simple and deterministic for the assessment but deep offsets can become expensive. Keyset pagination on `(createdAt, id)` is the growth path. Dashboard and list query plan evidence is scoped to the recorded local PostgreSQL dataset in [performance](performance.md); it is not a large-scale load test.

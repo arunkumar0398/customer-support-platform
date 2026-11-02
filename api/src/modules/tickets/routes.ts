@@ -7,7 +7,7 @@ import type { AuthOptions } from '../auth/session.js';
 import { createActivityRouter } from '../activity/routes.js';
 import { createCommentsRouter } from '../comments/routes.js';
 import { assignTicket, createTicket, getTicketDetail, listTickets, updateTicket } from './service.js';
-import { parseExpectedVersion, parseTicketId, parseTicketListQuery } from './schemas.js';
+import { parseTicketVersion, parseTicketId, parseTicketListQuery } from './schemas.js';
 import { ApiError } from '../../middleware/errors.js';
 
 export function createTicketRouter(options: AuthOptions): Router {
@@ -28,9 +28,9 @@ export function createTicketRouter(options: AuthOptions): Router {
   router.patch('/:ticketId', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
     const ticketId = parseTicketId(request.params.ticketId);
-    const ifMatch = request.get('If-Match');
-    if (ifMatch === undefined) throw new ApiError(428, 'PRECONDITION_REQUIRED', 'If-Match with the current ticket version is required.');
-    const expectedVersion = parseExpectedVersion(ifMatch);
+    const ticketVersion = request.get('X-Ticket-Version');
+    if (ticketVersion === undefined) throw new ApiError(428, 'PRECONDITION_REQUIRED', 'X-Ticket-Version with the current ticket version is required.');
+    const expectedVersion = parseTicketVersion(ticketVersion);
     const ticket = await updateTicket((options.getClient ?? getPrismaClient)(), actor, ticketId, request.body, expectedVersion);
     response.setHeader('ETag', `"${ticket.version}"`);
     response.json(ticket);
@@ -38,9 +38,9 @@ export function createTicketRouter(options: AuthOptions): Router {
   router.patch('/:ticketId/assignment', async (request, response) => {
     const actor = response.locals.membership as ActiveMembershipContext;
     const ticketId = parseTicketId(request.params.ticketId);
-    const ifMatch = request.get('If-Match');
-    if (ifMatch === undefined) throw new ApiError(428, 'PRECONDITION_REQUIRED', 'If-Match with the current ticket version is required.');
-    const expectedVersion = parseExpectedVersion(ifMatch);
+    const ticketVersion = request.get('X-Ticket-Version');
+    if (ticketVersion === undefined) throw new ApiError(428, 'PRECONDITION_REQUIRED', 'X-Ticket-Version with the current ticket version is required.');
+    const expectedVersion = parseTicketVersion(ticketVersion);
     const ticket = await assignTicket((options.getClient ?? getPrismaClient)(), actor, ticketId, request.body, expectedVersion);
     response.setHeader('ETag', `"${ticket.version}"`);
     response.json(ticket);

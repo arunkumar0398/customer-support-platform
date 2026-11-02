@@ -16,17 +16,19 @@ const testUrl = process.env.TEST_DATABASE_URL;
 const verifier = new Client({ connectionString: testUrl, connectionTimeoutMillis: 5000 });
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: testUrl, max: 2 }) });
 const organizationId = randomUUID();
+const adminId = randomUUID();
 const agentId = randomUUID();
 const customerId = randomUUID();
 const ticketIds = [randomUUID(), randomUUID(), randomUUID()];
+const adminEmail = `dashboard-ui-${adminId}@example.test`;
 const agentEmail = `dashboard-ui-${agentId}@example.test`;
 const customerEmail = `dashboard-ui-${customerId}@example.test`;
 const password = 'synthetic-dashboard-ui-fixture-password';
 let verified = false;
 
-async function signIn(page: Page) {
+async function signIn(page: Page, email = agentEmail) {
   await page.goto('/sign-in');
-  await page.getByLabel('Email').fill(agentEmail);
+  await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL('/');
@@ -48,11 +50,13 @@ test.beforeAll(async () => {
   });
   await db.user.createMany({
     data: [
+      { id: adminId, email: adminEmail, passwordHash },
       { id: agentId, email: agentEmail, passwordHash },
       { id: customerId, email: customerEmail, passwordHash },
     ],
   });
   await db.membership.createMany({ data: [
+    { organizationId, userId: adminId, role: 'ADMIN' },
     { organizationId, userId: agentId, role: 'AGENT' },
     { organizationId, userId: customerId, role: 'CUSTOMER' },
   ] });
@@ -89,9 +93,9 @@ test.afterAll(async () => {
     await db.activityEvent.deleteMany({ where: { organizationId } });
     await db.comment.deleteMany({ where: { organizationId } });
     await db.ticket.deleteMany({ where: { organizationId } });
-    await db.session.deleteMany({ where: { userId: { in: [agentId, customerId] } } });
+    await db.session.deleteMany({ where: { userId: { in: [adminId, agentId, customerId] } } });
     await db.membership.deleteMany({ where: { organizationId } });
-    await db.user.deleteMany({ where: { id: { in: [agentId, customerId] } } });
+    await db.user.deleteMany({ where: { id: { in: [adminId, agentId, customerId] } } });
     await db.organization.deleteMany({ where: { id: organizationId } });
   }
   await db.$disconnect();
@@ -110,6 +114,28 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
   await page.unroute('**/api/dashboard');
   const totals = page.getByRole('region', { name: 'Support totals' });
+  const openFill = page.locator('[data-testid="status-count-OPEN"] .dashboard-status-track span');
+  let openMotion = await openFill.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { transitionProperty: style.transitionProperty, scale: new DOMMatrixReadOnly(style.transform).a };
+  });
+  expect(openMotion.transitionProperty.split(',').map((property) => property.trim())).toContain('transform');
+  expect(openMotion.transitionProperty).not.toContain('width');
+  await expect.poll(async () => {
+    openMotion = await openFill.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { transitionProperty: style.transitionProperty, scale: new DOMMatrixReadOnly(style.transform).a };
+    });
+    return openMotion.scale;
+  }).toBeCloseTo(2 / 3, 2);
+  expect(openMotion.scale).toBeCloseTo(2 / 3, 2);
+  const fillLayout = await openFill.evaluate((element) => ({ width: (element as HTMLElement).offsetWidth, trackWidth: element.parentElement!.clientWidth }));
+  expect(fillLayout.width).toBe(fillLayout.trackWidth);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedMotionDuration = await openFill.evaluate((element) => getComputedStyle(element).transitionDuration);
+  expect(Number.parseFloat(reducedMotionDuration)).toBeLessThanOrEqual(0.01);
+  console.info(`DASHBOARD_STATUS_ANIMATION ${JSON.stringify({ transitionProperty: openMotion.transitionProperty, scale: openMotion.scale, layoutWidth: fillLayout.width, trackWidth: fillLayout.trackWidth, reducedMotionDuration })}`);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect(totals.getByText('3', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-OPEN').getByText('2', { exact: true })).toBeVisible();
   await expect(page.getByTestId('status-count-IN_PROGRESS').getByText('1', { exact: true })).toBeVisible();
@@ -119,7 +145,7 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByText(/Metrics as of .* UTC/)).toBeVisible();
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 open');
   await expect(page.getByRole('row', { name: new RegExp(agentEmail) })).toContainText('1 in progress');
-  await expect(page.getByRole('region', { name: 'Agent workload' })).toContainText('2 assigned active tickets');
+  await expect(page.getByRole('region', { name: 'Agent workload', exact: true })).toContainText('2 assigned active tickets');
   await captureCheckpointScreenshot(page, '09-dashboard-desktop.png');
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
@@ -166,4 +192,54 @@ test('staff dashboard explains tenant metrics and refreshes after ticket changes
   await expect(page.getByText(`${agentEmail} · customer`)).toBeVisible();
   await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard');
   await expect(page.getByRole('region', { name: 'Support totals' })).toHaveCount(0);
+  await db.membership.update({
+    where: { organizationId_userId: { organizationId, userId: agentId } },
+    data: { role: 'AGENT' },
+  });
+});
+
+test('admin can open the team dashboard', async ({ page }) => {
+  // Keep this empty-state assertion independent of the preceding dashboard
+  // workflow, which also deletes fixtures after exercising its refresh path.
+  await db.activityEvent.deleteMany({ where: { organizationId } });
+  await db.ticket.deleteMany({ where: { organizationId } });
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page, adminEmail);
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await expect(page).toHaveURL('/dashboard');
+  await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Support totals' })).toContainText('0');
+  await expect(page.getByRole('status')).toContainText('No tickets yet');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(page.getByRole('heading', { name: 'Team dashboard' })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('No tickets yet');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1280);
+});
+
+test('customer dashboard is not in navigation and direct access is denied', async ({ page }) => {
+  await signIn(page, customerEmail);
+  await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
+  await page.goto('/dashboard');
+  await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard.');
+  await expect(page.getByRole('region', { name: 'Support totals' })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('alert')).toContainText('You do not have access to the dashboard.');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
+test('workload table can be focused and scrolled with the keyboard on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await signIn(page);
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  const workload = page.getByRole('region', { name: 'Agent workload table' });
+  await expect(workload).toHaveAttribute('tabindex', '0');
+  await expect(workload).toHaveAttribute('aria-label', 'Agent workload table');
+  await workload.focus();
+  await expect(workload).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(() => workload.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
 });
