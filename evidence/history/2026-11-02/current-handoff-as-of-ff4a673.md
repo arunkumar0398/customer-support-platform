@@ -1,0 +1,324 @@
+> Historical snapshot of evidence/checkpoints/CURRENT_HANDOFF.md at source SHA ff4a673a076f237bab047ce3fe5cdae994208ec8 on 2026-11-02. Dated and SHA-specific statements are preserved as published before this navigation restructure. Use the active page for current status. Relative links were rebased from the original file path.
+
+---
+
+# Current session handoff — default assessment recheck (2026-11-02)
+
+## Exact source and current results
+
+- **Default and provider checks:** `codex/assessment-mvp` is at `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`. Exact-SHA Actions [#130](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41459211826), job `verify`, passed. Vercel Web/API statuses are provider success only. Separate read-only API health/readiness GETs returned `ok` / `ready`; no user flow or Production write was run.
+- **Actions test gates:** API 431/431, Web 17/17, and Playwright 47 passed. Lint, typecheck, build, and disposable-database verification/migration/seed also passed. Commands and outputs are in the [CI evidence record](../../reviews/assessment-ci-evidence-19246132-2026-11-02.md).
+- **Local rehearsal evidence:** a separate local rehearsal report and output files were not found. The prior local `npm run check`, Playwright, and `support_test` migration summaries are not claimed as inspectable evidence.
+- **Compose setup:** host and Linux-container `npm ping`, host `npm ci`, isolated PostgreSQL, all three migrations, and synthetic seed passed. The first API/Web image build hit transient `ECONNRESET` at `RUN npm ci`; one retry on the same SHA built both images and both containers became healthy. API readiness and the Web root returned HTTP 200. The unique project, volume, images, and ignored `.env` were removed.
+- **Lockfile audit:** 10 moderate development-only entries rooted in `minimatch@10.2.6`; the production-only audit had zero. No dependencies changed. See the [exact-SHA report](../../reviews/assessment-readiness-19246132-2026-11-02.md).
+
+## Assessment and open acceptance
+
+- **Section 8:** source access is **PARTIAL**, pending evaluator permission verification. README setup/run and the other six deliverables are **PASS**, supported by local Docker evidence and the exact-SHA CI record. CI and hosted deployment are optional under Section 8. The private repository owner must confirm evaluator identity and read access; no identity was supplied, and no invitation or visibility change was made.
+- **Docker:** at exact default SHA `19246132f22bd0e37b6a6a0b9286bb1621d3bad1`, one retry of `docker compose -p csp-assess-current-1924613 up -d --build --wait api web` passed after transient BuildKit `ECONNRESET`. Both containers were healthy; API readiness and Web root returned HTTP 200. Migrations and seed passed. The isolated project, images, volume, and temporary `.env` were removed. See the [readiness report](../../reviews/assessment-readiness-19246132-2026-11-02.md).
+- **A35:** **BLOCKED / NOT_RUN** on the evidence in this PR. The linked execution package is **NOT APPROVED** and records no authorization for hosted writes, authenticated role requests, or deployments. No separate approved execution record supports the earlier customer/agent/admin journey-and-mutation claim; that claim is withdrawn. Authenticated denial/no-write and cleanup/zero-residual evidence remain absent.
+- **Other internal gates:** the audit remains incomplete, with native-Linux proof outstanding. A22/A23/A37 remain partial. Manual screen-reader review and A28 human rehearsal remain unrun.
+- Current PR worktree: branch `codex/assessment-readiness-1924613`, HEAD `d22457925b29af29443164eb5c9c831f976c6f5c`, clean and tracking the same remote SHA. PR #2 is open. No merge, deployment, or submission was performed.
+
+# Historical handoff snapshots
+## Isolated Preview fixture tooling package — 2026-11-01
+
+- Implementation branch `codex/preview-provisioner-f55decb` starts from `f55decb8368f5ea3997020845577372a8eafb6a0` in a separate worktree. The separate dirty checkout and its screenshot edits/output backup were not modified.
+- The package adds the shared scrypt helper, strict local/Preview target validation, transactional synthetic fixture provision/cleanup, CLI commands, tests, and [operator documentation](../../../docs/preview-validation.md). Local checks were run before committing these source changes; no exact-SHA CI result exists yet. The full plan is [here](../../../docs/superpowers/plans/2026-11-01-preview-fixtures-and-release-gates.md).
+- Local disposable PostgreSQL verification: focused fixture/password tests 27/27, API 419/419, Web 12/12, typecheck/lint/build passed, `npm run check` exit 0, doc contract exit 0. `npm run check` listed 46 Playwright tests but did not execute them; separate auth browser flow passed 8/8 and the lifecycle browser flow passed 1/1 with zero residual fixtures and private files removed. No screen-reader pass was done. Details and commands are in [evidence](../../checkpoints/preview-fixtures-local.md).
+- No Preview/Production writes or probes occurred. A35 remains `BLOCKED / NOT_RUN` pending owner-confirmed API/database binding and explicit approval for a named fixture run and credential destination. Offline audit remains `BLOCKED / NOT_RUN` pending a compliant preinstalled Linux bundle. UI A22/A23/A37, A28 rehearsal, evaluator access, and G7 remain open.
+- Worktree tests were run with uncommitted source changes based on `f55decb`; this is not an Actions result, a deployment validation, or evidence for the separate `b2fd369` checkout.
+
+## Latest substantive local UI follow-up — 2026-11-01
+
+- Isolated worktree baseline: `a0d71d1b4ab6440e1b7108db590a5583854391eb`; current changes are a local working-tree layer, not committed or covered by hosted CI.
+- Focused CSS changes fix the sign-in focus ring and three contrast pairs, remove focus suppression from applicable form controls, and animate dashboard bars with transform scaling. Rendered checks at 320/375/1280/1440/1920 measured contrast 5.50:1, 5.68:1, 5.68:1 and ring 7.30:1; no document overflow. Keyboard assertions cover sign-in, queues for all roles, create controls including select/textarea, detail fields, and membership select. Dashboard animation and reduced motion were checked separately.
+- `npm run check` passed (API 392/392, Web 12/12, lint/type checks, 45 E2E discovered, builds); `npm run test:e2e` passed 45/45 in 54 seconds. All 12 tracked TK-29 screenshot files were restored from the pre-run backup; verify the final diff excludes them.
+- Evidence: [Hallmark follow-up report](../../reviews/hallmark-followup-2026-11-01/REPORT.md), its computed measurements JSON, and five viewport screenshots. The automated route/role/state work is supplemental; A22/A23/A37 remain partial because remaining cells and a manual screen-reader pass are not complete.
+- A35 remains BLOCKED / NOT_RUN pending verified API-to-Neon Preview binding and safe synthetic credentials/fixtures. Cloudflare audit remains BLOCKED / NOT_RUN because the compliant offline image has no compatible preinstalled test runners; no packages were installed and no deployed endpoints were probed. A28 rehearsal and evaluator access remain unresolved. Preserve release hold; do not infer G7 readiness.
+
+## Verified candidate evidence — 2026-11-01
+
+- Requested reconciliation candidate 070bf718e6a43a45d699e3b3c065b442c0db7c41 passed exact-SHA Actions [#114](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41287273871). Its exact-SHA Vercel API/Web contexts are provider success only ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/D525b3nS1FtwDekEpjEg7H2Tdmd), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/DmgWseASV1CF62DJMg5qKM7Ze6Kk)).
+- Application source provenance is 24f51c05328fc764bf7089fce8f398adad475648 / #105; 3e613c0b7df5bec290553cfb7b5a9404bfaec1a1 / #74 remains historical.
+- Commit aac66e4da3b3a52b99b6f6021601245c4f405584 added the ticket detail retry, the Hallmark report, and evidence corrections. Actions [#115](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41289821533) passed exact SHA.
+- After that commit, the local working tree added a direct agent membership-route denial browser check. Combined npm run check and npm run test:e2e passed locally, with 37/37 browser tests; this extra test is not covered by #115, which ran on the parent commit. All 12 tracked screenshots were restored and hash-compared after browser execution.
+- Hallmark output is report-only and covers source heuristics plus the sign-in page at five viewports; it is not full route/state accessibility acceptance.
+- A35 Preview and the bounded Cloudflare audit remain BLOCKED / NOT_RUN. UI A22/A23/A37 remain partial, A36 is limited to code recovery/prior-version compatibility, and SQL down migration/PITR are untested. A28 rehearsal and evaluator access remain unresolved. Preserve the release hold.
+
+**Candidate workflow:** this package was limited to explicit intended paths and received one consolidated status reconciliation. Local documentation-contract, diff, application, and browser checks passed before commit. The subsequent commit SHA and exact-SHA Actions result must be read and linked separately; #113 remains attached to the base commit. Continue A35 only when Preview binding/credentials/fixtures are verified; run the offline audit only with a compliant preinstalled toolchain. Request G7 after substantive gates have evidence.
+
+
+## Exact-SHA status update — 2026-11-01
+
+- Reconciled docs/evidence candidate `0d9589643aec1514694fb12c5e7c29583b99911b` passed Actions [#110](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41276642408), job `verify`, on the exact SHA. GitHub Vercel status descriptions for both API and Web were “Deployment has completed” ([API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/FhcswbbUzoCG9oekqNrZ5MLzVWkb), [Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/7CXoqM8kvQgtvTR9xXkMp7WABwRR)); provider completion is not runtime acceptance. This report preserves the independent G7 verdict as applying to 4b404f7 / #108 only; later docs-only commits have not been independently reviewed.
+- Reconciled docs/evidence candidate `cd6e64cd9ed9e61e40f90306a3b4a40d86f9be67` passed Actions [#111](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41278121491), job `verify`, on the exact SHA. Its API/Web Vercel descriptions were “Deployment has completed,” provider statuses only. The read-only G7 follow-up on cd6e returned **BLOCKED_BY_ENVIRONMENT**; a later integrated candidate needs a fresh G7 review.
+- Local UI acceptance work added an admin ticket-create flow at 375px. The verified disposable DB check passed, focused narrow E2E passed 4/4, full Playwright passed 30/30, and `npm run check` passed (API 392/392, Web 12/12, lint/typecheck, 30 E2E discovered, builds). The new test/evidence is in the current worktree, not yet remote-validated. The test helper overwrote tracked checkpoint screenshots despite the temp-output setting; I restored the screenshot set from the original checkout. The ten pre-existing modified TK-29 screenshots remain modified and unstaged.
+
+- Prior docs/evidence publication `9ef3697ab2701f5082a64fde912aa978e17370ac` passed Actions [#109](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41276007594), job `verify`, with Vercel provider descriptions “Deployment has completed.” It is historical and is not the current candidate. Its report retained the G7 verdict for `4b404f7…` / #108; `9ef3697` was not itself independently reviewed.
+
+- Candidate `c179180a56977cda6fe084786989ae6098afe995` on `codex/clean-candidate-b2fd369` passed Actions [#107](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41274734553), job `verify`, including disposable database setup and required gates. The commit contains only E2E assertions and evidence reconciliation; deployed application code remains `24f51c05328fc764bf7089fce8f398adad475648` / #105. Historical implementation baseline: `3e613c0…` / #74.
+- Docs/evidence reconciliation head `4b404f77a65bc4bb0251f218a75832a12fae090d` passed Actions [#108](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41275153551), job `verify`, on the exact SHA. Its Vercel API/Web status contexts also succeeded at the provider level; no runtime checks are claimed. Fresh independent G7 on this exact head returned **BLOCKED_BY_ENVIRONMENT**; see [the report](../../reviews/g7-4b404f7-2026-11-01.md). The subsequent docs-only 9ef3697 / #109 records the reviewer verdict and latest provider descriptions; it does not change app/test source or itself have an independent G7 review.
+- GitHub's exact-SHA Vercel API and Web status contexts for c179180 were `success`. These are provider statuses, not a runtime or authenticated acceptance test. The earlier `c30917c` readiness GETs remain scoped to that older candidate.
+- Independent read-only G7 review of c179180 returned **BLOCKED_BY_ENVIRONMENT**. A35 remains blocked pending owner-provisioned short-lived synthetic credentials and authenticated role/denial tests. The full Cloudflare audit remains blocked because the compliant no-network image lacks compatible preinstalled runners. Evaluator access and A28 rehearsal remain unverified; A22/A23/A37 remain partial; A36 remains limited to local code rollback/forward recovery, with SQL down migration and hosted PITR untested.
+- This handoff update is being recorded after the exact-SHA CI and reviewer checks. It does not represent an additional Preview test, security audit, or Production operation.
+
+## Neon Preview recovery recheck — 2026-11-01 10:08 IST / 04:38 UTC
+
+- The authorized retry resumed Neon Preview compute: project `customer-support-platform-preview`, branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx` showed ACTIVE.
+- Read-only `SELECT 1 AS connectivity_check` completed at about 10:07 IST with one row (`1`). The Tables view showed the app's public schema entities. No migrations, fixture query, seed, or writes were run in this recheck.
+- The one approved fixture discovery remains the 09:11 IST / 03:41 UTC query: 15 active synthetic memberships and 15 synthetic tickets across two organizations. It was not rerun.
+- API Deployment Protection shows Vercel Authentication `Require Log In` enabled and the Web project listed as a Preview trusted source. This confirms configured protection/trust, not a successful authenticated app journey or that the deployed API's database URL resolves to this Neon branch. Web Preview protection was separately observed enabled earlier.
+- A35 preconditions are READY; A35 remains BLOCKED / NOT_RUN pending safe short-lived synthetic role credentials and authenticated role/denial checks. See [Preview readiness report](../../checkpoints/PREVIEW-READINESS-2026-11-01.md).
+
+## Local UI and audit-tool readiness — 2026-11-01 10:17 IST / 04:47 UTC
+
+- Added E2E assertions for keyboard Tab order and visible sign-in focus styling at 375px, and for customer dashboard route denial/no overflow at 375px. Targeted runs passed 3/3 and 10/10; full `npm run test:e2e` passed 29/29 (32.1s) with screenshot output redirected to a temp directory. `npm run check` passed: API 392/392, Web 12/12, lint, typecheck, Playwright discovery, and both builds. These assertions are committed at c179180 and validated by Actions #107 on exact SHA. A22/A23/A37 remain partial.
+- Docker Desktop Linux is available, but the local audit image lacks the required preinstalled runners (`vitest`, `@playwright/test`, `supertest`, `axe-core`). No dependency was installed/fetched and no audit target tests or deployed probes ran. Full audit remains BLOCKED / NOT_RUN; see [audit environment note](../../checkpoints/SECURITY-AUDIT-ENVIRONMENT-2026-11-01.md).
+- The app/test source itself is unchanged from `24f51c0` in this worktree; the new browser assertions are test-source changes. Exact commit/CI status must be recorded after committing and running hosted CI.
+
+## Earlier published evidence — 2026-11-01 10:03 IST (superseded by c179180 / Actions #107)
+
+The earlier docs/evidence head `c30917c021d9414f6b870419097b66d69faa4caa` on `codex/clean-candidate-b2fd369` passed Actions [#106](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41273276178), job `verify`, on the exact SHA. The later app/test implementation candidate was `24f51c05328fc764bf7089fce8f398adad475648` / #105. Vercel Web/API were Preview/Ready on c30917c; branch-alias readiness GETs returned `{"status":"ready"}` at about 10:03 IST. Those are historical health checks only: no authenticated roles or API-to-Neon branch identity was established.
+
+Neon Preview branch `production` / endpoint `ep-shy-surf-b36pzssx` recovery and the one read-only discovery are reported PASS from 09:11 IST: `SELECT 1`, 15 active synthetic memberships and 15 synthetic tickets across two organizations. Compute was observed ACTIVE at 09:52; no second fixture query ran. A35 preconditions are ready, but A35 remains BLOCKED / NOT_RUN due absent safe short-lived role credentials and unverified runtime DB alignment. Local seed credentials were not tried.
+
+Local exact 24f app/test verification: `npm run check` exit 0 and `npm run test:e2e` 29/29 against disposable loopback PostgreSQL. A22/A23/A37 remain partial; A36 passes only its stated local restore/forward-recovery and previous-code compatibility criterion, with SQL down migration/hosted PITR untested. Full Cloudflare audit, evaluator access, and A28 human rehearsal remain open. Keep merge/submission on hold. Preserve the ten modified TK-29 screenshots; they remain unstaged.
+
+## Current snapshot — 2026-11-01 09:52 IST
+
+Current application/test candidate is `24f51c05328fc764bf7089fce8f398adad475648` on `codex/clean-candidate-b2fd369`. Actions [#105](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41272626603) completed with `verify` success on that exact SHA; the job includes disposable DB setup/migrations/seed and required gates. Vercel Web and API deployment records ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/GZwzX4yme3DraJgf32HNFNtWYHyA), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/AEp2x3kR68FCA6rsdchApNx8WG8U)) show Preview/Ready on the same source commit. Read-only GET `/api/health/ready` to each current deployment alias returned `{"status":"ready"}`. These responses do not verify the configured Neon branch or authenticated Vercel protection access.
+
+Neon recovery and the one authorized read-only fixture discovery remain **reported PASS**: Preview project `customer-support-platform-preview`, branch `production`, database `neondb`, endpoint `ep-shy-surf-b36pzssx`; 2026-11-01 09:11 IST / 03:41 UTC; `SELECT 1` succeeded, with 15 active synthetic memberships and 15 synthetic tickets across two organizations. Neon Console still showed compute ACTIVE at 09:52 IST; no repeated fixture query was run. **A35 preconditions READY; A35 BLOCKED / NOT_RUN** pending safe short-lived agent/customer credentials and authenticated role/denial checks. The app has no signup, password-reset, global provisioning, or credential-change route; local shared seed credentials were not tried in Preview.
+
+At exact `24f51c0`, local `npm run check` and `npm run test:e2e` passed against a disposable loopback PostgreSQL 18.6 database; E2E passed 29/29. A22/A23/A37 remain partial, not full passes. A36 remains PASS only for its local restore/forward-recovery and previous-code compatibility criterion; SQL down-migration and hosted PITR are untested. Full Cloudflare offline audit, evaluator access, and A28 rehearsal remain open. Keep merge/submission on hold. The earlier source `3e613c0` / #74 is historical; it does not supersede current app/test candidate `24f51c0` / #105.
+
+Current worktree is detached at `24f51c0`; docs/matrix edits and ten pre-existing modified TK-29 screenshots are unstaged. Preserve all ten screenshots and do not stage them. The original `b2fd369` dirty worktree remains separate and must not be represented as validated by #105.
+
+
+## Historical release snapshot — superseded by the current candidate record above
+
+**Prior docs-status candidate:** `33fdf49a30aee3b67dfac852ba7850f0549d9518`; Actions [run #104](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41271376080) passed exact-SHA `verify`. Vercel Web/API provider descriptions said “Deployment has completed,” which is not runtime/database/role evidence. The G7 follow-up on this exact SHA returned **BLOCKED_BY_ENVIRONMENT** ([report](../../reviews/g7-33fdf49-2026-11-01.md)); this historical verdict is recorded in the current docs candidate. Preview app source remains `a5673cbcee3c6b30178404c80c1eb1bf56f963a4`; historic source-run `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74 stays distinct.
+
+## Preview readiness refresh — 2026-11-01
+
+Neon recovery and one read-only fixture discovery are **reported PASS** in the authorized owner browser session: Preview project customer-support-platform-preview, branch production, database neondb, endpoint ep-shy-surf-b36pzssx; observed 2026-11-01 09:11 IST / 03:41 UTC. SELECT 1 returned 1; one discovery query returned 15 active synthetic memberships and 15 tickets across two organizations. Sanitized details: [Preview readiness report](../../checkpoints/PREVIEW-READINESS-2026-11-01.md).
+
+Vercel Web and API Preview deployments were Ready on branch codex/preview-mobile-roster-ux, source a5673cbcee3c6b30178404c80c1eb1bf56f963a4. Web root rendered the sign-in page; API /api/health, /api/health/ready, and Web-proxied /api/health returned healthy JSON. Neon branch alignment for the API runtime remains unverified. No safe Preview passwords are available; the local seed password was not tried. Thus **A35 preconditions READY; A35 itself BLOCKED / NOT_RUN**. No migrations/seeding or Production checks were run.
+
+A36 is **PASS for its stated local restore/forward-recovery and previous-code compatibility criterion**; SQL down-migration and hosted PITR remain untested. A22/A23 and A37 remain partial evidence, not full passes. Full offline audit, evaluator access, and A28 human rehearsal remain open. Keep merge/submission on hold.
+
+**Reviewed docs-status candidate:** `24f1d953ef487a42928ccc21923bf0dc3cca1dd7`; Actions [run #102](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41266004499) passed exact-SHA job `verify`. Its Vercel Web/API status markers are `success` with “Canceled by Ignored Build Step” descriptions; these are not deployments. Previous candidate `cd0b04ff830a187d45fd3370db97a22c2adba476` / #101 had provider deployment-completed statuses without runtime smoke. Application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` / #74. The independent G7 review on 24f1 returned **BLOCKED_BY_ENVIRONMENT** ([report](../../reviews/g7-24f1d95-2026-11-01.md)).
+
+Remaining blockers: Preview role/tenant checks, full offline audit, evaluator access, complete A22/A23/A37, and A28 human rehearsal. A36 local database restore/forward recovery and pre-fix-code tests now pass; SQL down-migration and hosted PITR remain untested. See the [UI matrix](../../checkpoints/UI_A22_A23_MATRIX_2026-11-01.md) and [A36 evidence](../../checkpoints/A36-migration-recovery-2026-11-01.md). Request another exact-head G7 review after this reconciliation commit and its own CI run. Keep merge/submission on hold.
+
+**Verified docs candidate at task start:** `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` on `codex/clean-candidate-b2fd369`. GitHub Actions [run #94](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41223707522) completed successfully on that exact SHA; job `verify` passed, including disposable PostgreSQL setup/migrations/seed and required gates. Both exact-SHA Vercel Web/API statuses were provider build-rate-limit failures (“Deployment rate limited — retry in 24 hours”), not application failures ([checks](https://github.com/arunkumar0398/customer-support-platform/commit/5e27f68a7f2c8aa12c502995b26c2b5063e1309b/checks)).
+
+**Application implementation source:** `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`; Actions [run #74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) passed on that exact source SHA, and its Vercel Web/API checks succeeded. Documentation snapshots #90–#93 are historical and remain bound to their own SHAs. See [docs/testing.md](../../../docs/testing.md) for run outcomes and quota classification.
+
+**Assessment deliverables:** The eight required items and evidence paths are in [assessment deliverables inventory](https://github.com/arunkumar0398/customer-support-platform/blob/codex/clean-candidate-b2fd369/evidence/checkpoints/DELIVERABLES_INVENTORY.md). The private GitHub repository exists, but evaluator access is unverified; the owner must grant the evaluator access or provide an approved private handoff. Do not make the repository public without authorization. Architecture, data-model, API, testing, and limitations documents have been reconciled to the implementation/evidence in this documentation update.
+
+**Open gates:** Preview role journeys, same-tenant-other-customer and foreign-tenant denials remain **BLOCKED / NOT_RUN** pending safe synthetic role credentials. Neon compute and fixture discovery are now reported ready; the API's database-branch alignment remains unverified. The full bounded offline security audit remains **BLOCKED / NOT_RUN** pending a compliant sandbox with compatible preinstalled tools; Run-6 covered only the isolated throttle helper. Evaluator access to the private repository is unverified. G7 on exact d30, 7ec, cd0, and 24f1 heads returned **BLOCKED_BY_ENVIRONMENT**. Keep merge/submission on hold. Deployment URL is optional under the assessment; no plan upgrade is needed.
+
+The local worktree `b2fd3691fe01f81a1652f29ab7ef67d615c0051f` on `codex/vercel-api-route-preview` remains dirty and separate, including ten modified TK-29 screenshots. Remote CI evidence does not validate that dirty checkout.
+
+The candidate reviewed in this handoff is `24f1d953ef487a42928ccc21923bf0dc3cca1dd7` / Actions #102. This handoff update creates a new docs-only descendant; its Actions result must be recorded separately. Vercel builds are not being retried for a docs-only update. The application implementation remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`.
+
+### Immediate handoff
+
+- At handoff start, the reviewed candidate `24f1d953ef487a42928ccc21923bf0dc3cca1dd7` / Actions #102 `verify` passed exactly; both Vercel contexts were canceled by the ignored-build step. Application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`, whose run #74 and Web/API checks passed.
+- Full browser rerun at 24f1 worktree HEAD passed 23/23 against verified disposable `support_test`; focused keyboard Tab/focus rerun passed 1/1. A36 restore/forward-recovery assertions passed and pre-fix source `39b9ae3` passed 28/28 API tests against the final schema. See [testing](../../../docs/testing.md), [UI matrix](../../checkpoints/UI_A22_A23_MATRIX_2026-11-01.md), and [A36 report](../../checkpoints/A36-migration-recovery-2026-11-01.md).
+- Assessment deliverables were audited in [delivery review](../../checkpoints/ASSESSMENT_DELIVERY_REVIEW_2026-10-31.md). A27 documentation coverage passes; A26 remains blocked on evaluator access, and A28 remains not run pending an actual human rehearsal.
+- Keep the dirty local `b2fd3691fe01f81a1652f29ab7ef67d615c0051f` worktree and its ten TK-29 screenshot edits untouched; remote CI does not validate it.
+- Preview role/foreign-object acceptance and the full offline audit remain blocked/incomplete. Do not probe Production or deployed endpoints for the audit. A36 recovery strategy passed locally; SQL down-migration and hosted PITR remain untested.
+- Evaluator access to the private GitHub repo is unverified; the owner must grant access or provide an approved private handoff. Do not change visibility.
+- Deployment URL is optional under the assessment. Do not upgrade Vercel plan for the quota status.
+
+## Historical handoff snapshot before reconciliation — 2026-10-31
+
+- Application source candidate `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`: Actions [run #74](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41202806223) passed with job `verify`; Vercel Web and API checks succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/6AuPqU7gLSB1Rp51jjoUDaSHQDie), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/DCA5qzWusqeP2stcicpkdpQ2VL5y)). Prior docs-only snapshot `d65a105ae93739330d6686fed44cdb5ea99d7636`: Actions [run #78](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41205052559) passed with job `verify`; Vercel Web/API checks succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/vihdC9VrQCgcPLEGF7TCwr4Shch6), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/2y1ZEHt5fxyEKrYpbNvLcXtgRexT)). Prior reconciliation snapshot `bc4ba4580f3f03e6a6b330c7677d08b386fbc852`: Actions [run #80](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41217088051) completed successfully with job `verify`; Vercel Web/API checks succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/CQgHB1cYia68pjQPRustn8VGXWfy), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/Htmnsrm2zfFRnxkCwPx3j3y776G7)). Prior verified docs publication snapshot `0f15b7cea90ecc978f86bd9802f8871182ba095a`: Actions [run #81](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41218160802) completed with conclusion `success` on that exact commit; job `verify` succeeded. Exact-commit Vercel checks were Web `success` ([deployment](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/kZQZdK2MQjMtb2EfMxEXxhX3M1uE)) and API `success` ([deployment](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/41EUdmeHeik9TbtwPsGVtb5iA9jG)). The comparison confirms these revisions changed documentation only; application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`. The current docs are published on [branch `codex/clean-candidate-b2fd369`](https://github.com/arunkumar0398/customer-support-platform/tree/codex/clean-candidate-b2fd369). Current verified docs snapshot `825ad918f05a8547a8327fd0909bc349d3f36da6`: Actions [run #82](https://github.com/arunkumar0398/customer-support-platform/actions/runs/41218657613) completed successfully on the exact commit with job `verify`; exact-commit Vercel Web and API checks both succeeded ([Web](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-web/AVY1LU2j3CBhc5FEGdZLKsZLs98N), [API](https://vercel.com/arunkumars-projects-67bc2fdd/customer-support-platform-api/H4XyTdbakgoo2Bjk529RFg5Piv94)). Commit `825ad918…` is docs-only; the application source remains `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1`.
+- Audit remains incomplete. The only bounded offline execution recorded is the sanitizer test (2/2) in a no-network, read-only container; no fresh audit lanes were run in this update. Auth/session/CSRF/throttle, tenant/object authorization, membership mutation, transaction/rollback, query-bound, and dashboard/membership UI coverage remain unexecuted or deferred. Five deferred areas—session/CSRF, membership mutations, child-resource/dashboard authorization, Vercel proxy, and CI/container supply chain—remain open. Throttle is unresolved; no SQL migration reversal test was performed. No packages were installed/fetched and no deployed endpoints were probed.
+- Preview role journeys and foreign-ticket read/write no-side-effect checks remain **BLOCKED / NOT_RUN** pending safe synthetic agent/customer credentials. Neon compute recovery and one read-only fixture discovery returned 15 active synthetic memberships and 15 tickets. Read-only Preview health checks ran; no authenticated role requests or data mutations were made.
+- Fresh independent G7 follow-up reviewed exact branch snapshot `825ad918f05a8547a8327fd0909bc349d3f36da6` read-only and returned **BLOCKED**: Preview role/foreign-ticket acceptance and compliant audit execution remain open. The reviewer checked while Actions #82 was still running; it has since completed successfully and is recorded above. Keep merge/submission on hold.
+- Local worktree `b2fd3691fe01f81a1652f29ab7ef67d615c0051f` is separate and remains dirty; all existing edits, including ten TK-29 screenshots, were preserved and excluded from this GitHub update.
+## Historical handoff snapshot — 2026-10-28 (superseded by the current snapshot above)
+
+Date: 2026-10-28; timezone Asia/Calcutta (UTC+05:30).
+Repository: `D:\__superset\cactro-tests\_react-node-apps\customer-support-platform\customer-support-platform`
+OS/shell: Windows 11 Home build 22000; Docker Desktop 4.97.0 using the Docker VMM engine. The older inbox WSL check still fails, but the non-WSL Docker engine is running.
+Branch: `codex/assessment-mvp`
+Current source SHA: `4d01e3c4f88b7c26ab8cb07caa2ac0d888cebed5` (TK-33 Windows shell line-ending fix). `TK-33` is COMPLETE; A24 is PASS. G5 remains NOT_RUN because hosted exact-SHA CI and the final release/security gate are outstanding.
+Working tree: the only primary-worktree modifications are the ten pre-existing TK-29 screenshot PNGs; all remain unstaged and untouched.
+
+## Historical implementation snapshot (superseded by the release-validation snapshot above)
+
+- Docker VMM successfully built and ran the local application without using WSL. A fresh detached Windows worktree at the current SHA completed `npm ci`, database creation, three migrations, seed, API/web image builds, and Compose startup with all three services healthy.
+- Clean-checkout validation passed `npm run check` (API 386/386, web 3/3, lint, typecheck, Playwright discovery 23, builds) and `npm run test:e2e` (23/23). Root, `/tickets`, `/api/health`, and `/api/health/ready` all returned HTTP 200. API and web container UIDs were 1000 and 101.
+- The clean checkout initially exposed the CRLF `bash\r` shebang issue under `core.autocrlf=true`; `.gitattributes` now forces LF for `docker/postgres/*.sh`. A brand-new worktree reports index/worktree LF, and startup passes.
+- Parent reviewer-kit static review at `4d01e3c4f88b7c26ab8cb07caa2ac0d888cebed5`: no P0–P3 findings. Independent runtime review at parent commit `4e28dbbd0838993637a4e0f12d26c885dfec1abe`: no P0–P3 findings; it verified live service health and local suites, but did not run a clean checkout.
+- No deployment, push, merge, hosted resource creation, or production migration. C6/TK-34 requires the separate explicit approval required by the master prompt.
+- Next local planning action: continue G5 evidence only if its remaining hosted CI/release-gate dependencies can be run without pushing or deployment; otherwise pause at the C6 approval boundary.
+
+The detailed TK-01–TK-32 summaries and earlier Docker recovery attempts below are historical notes. Their older TK-33/A24 status is superseded by the current snapshot and `TK-33.md`.
+
+## Historical task state notes
+
+- TK-01–TK-07 are closed with checkpoint evidence and independent review. TK-07 source `eab45653346fd4c7ea46494aa6cc6d707b2e4b0f` passed 53 API tests, one web test, lint/type/build; review closed with no P0–P2 findings.
+- TK-08 implements password login, hashed opaque persisted sessions, current identity/membership response, cookie flags, logout/expiry/revocation, origin/CSRF defense, and bounded local throttling. Source checks pass; independent read-only review at `ed479132a49e949d8328ac5d05260113fb5dfd29` closed it with no P0–P2 findings and confirmed G1's local gate PASS. See `TK-08.md` for exact RED/GREEN evidence.
+- TK-09 implements database-derived current membership using `X-Organization-ID`; source checks pass and independent read-only review at `abf8ab1eb6ae51f304fd0bd6dd2824e5a6574953` closed it with no P0–P2 findings. The middleware is exercised through test-only context routes; product routes are not implemented yet.
+- TK-10 central admin/staff/ownership/action/query policies are implemented with 35 unit tests; checkpoint/spec review closed it at `3ca8bb30cb209fa177d6fa3c35f4a1a436902fd3`. Separate security/code review permits advancement with one non-blocking P2 limiter availability concern. ADR 0003 splits comments from history access: authorized closed history readable, new comments denied. No product route or executed SQL policy proof is implied.
+- Exact TK-10 source check: `npm run check` exit 0, API 132/132, web 1/1, lint/type/build pass. Playwright listed one shell test, did not execute it. Last migration/identity proof is TK-08 with no schema change in TK-09/TK-10.
+- TK-11 is closed: ADMIN-only roster/add/role/activation, strict input, actor recheck after tenant row lock and transactional last-admin protection. Source check exit 0: API177/177, web1/1, lint/type/build pass; browser listed only. Independent reviewer replay45/45 and separate static security review closed it. One reporting P2 corrected A03 to PASS for its API-only acceptance scope. Five Python validator regressions pass; --initial preserves the original all-NOT_RUN baseline check.
+- TK-12 source adds `POST /api/tickets`, strict role-specific schemas, active same-org CUSTOMER requester validation, org-locked current membership recheck, local max+1 ticket numbering and nested atomic `TICKET_CREATED` event. Exact source `npm run check` exit0: API228/228, web1/1, lint/type/build pass; Playwright listed only. A 51-case real PostgreSQL targeted suite includes actual trigger failure rollback/recovery and a blocked transaction with actor role change. Reviewer pending. See TK-12.md.
+- TK-12 was independently statically reviewed with no code finding. Its reviewer test run had 50/51 pass and one beforeEach timeout; root replayed named case and complete targeted suite, both passed, no source changes. Cause remains unexplained and is disclosed in the persisted review report. TK-13 removed its own repeated five-account login setup after encountering slow fixture setup during RED. Do not conflate the two test setup observations.
+- TK-13 source adds tenant/customer-scoped `GET /api/tickets` with status, priority, assignee/unassigned, customer and case-insensitive text filters plus scoped count in RepeatableRead. Review found LIKE wildcard semantics on `_`; regression reproduced, corrected by escaping backslash/%/_, independently replayed at source00120c7 with 36/36. Corrected-source `npm run check` exit0: API264/264, web1/1, lint/type/build pass; Playwright listed only. A18 PASS; A07 needs dashboard, A17 needs browser. See TK-13.md and review report.
+- TK-14 source `c68d652db632090bbcde89d5d725a1ae2d224fca` adds strict bounded `page` (1–1000) / `pageSize` (1–100), deterministic `createdAt DESC, id DESC`, offset paging, and `{items,total,page,pageSize}` metadata. Real guarded PostgreSQL/API tests cover same-timestamp IDs, exact non-overlapping pages, bounds/defaults, filters, repeated/unknown keys. Exact-source `npm run check` exit0: API281/281, web1/1, lint/typecheck/build pass; Playwright listed only. Independent checkpoint replay exit0 17/17; A19 PASS for API scope. Static review found a P2 scale ceiling of 100,000 rows; API docs now disclose the limit and cursor-pagination growth path. See `TK-14.md` and review report.
+- TK-15 source `22598cad56d45d1cb7a2c73a44517e9756aea34f` adds UUID-validated `GET /api/tickets/{ticketId}`, with tenant/customer scope inside the DB predicate and a generic 404 for inaccessible/missing tickets. Focused suite 7/7, full `npm run check` API288/288 plus web1/1/lint/type/build; Playwright listed only. Independent replay 7/7 and separate static review found no source issue. A04 PASS for API-only foreign-ticket GET; A06 remains NOT_RUN until mutation denial is implemented; A10 remains NOT_RUN pending browser journey. One stale docs sentence was corrected in the evidence follow-up. See TK-15 and review report.
+- TK-16 source `d5cce1829cc0fd5790869a05302a0f2c0911e5bd` adds strict role-based ticket PATCH, legal status transitions, reasoned reopen, per-field event creation in the update transaction, no-op suppression, and version increment. Focused suite 30/30; full check API318/318, web1/1/lint/type/build; Playwright listed only. Independent reviewer replay 30/30, separate static review no findings. A13 PASS for API lifecycle; A12, A15, A31 remain NOT_RUN for broader scope. See TK-16/review.
+- TK-17 source `3f7598c80a490fffce6b7be40c32714b1cf98ec6` adds staff assignment/unassignment to active same-org AGENTs, with current actor reload, DB tenant scope, composite FK verification, transaction event, and version increment. Focused suite 13/13; full check API331/331, web1/1/lint/type/build; independent replay 13/13; static review no findings. A09 PASS; A12 remains NOT_RUN for browser/full scope. See TK-17/review.
+- TK-18 source `ad8416f27be8ad095f4b514c340aed78c13e4230` adds read-only tenant/customer-scoped activity history with bounded deterministic paging and real PostgreSQL update/event rollback fault injection. Focused suite and independent replay 11/11; full check API342/342, web1/1/lint/type/build; docs contract and diff checks pass. Parent reviewer kit used; stale docs P2 corrected, no remaining code findings. A15/A16 remain NOT_RUN for complete scope; G3 remains NOT_RUN. See TK-18/review.
+- TK-19 source `1e458fbd74ba79c78a789a1bbc83865aaf64f352` adds tenant/customer-scoped comment read/create, bounded chronological pages, closed-ticket write denial, current-membership reload, and atomic COMMENT_ADDED events. Focused suite and independent replay 11/11; full check API353/353, web1/1/lint/type/build; docs contract and diff checks pass. Both reviewer-kit passes report no findings. A05/A06/A14/A15/A16 remain NOT_RUN for their complete scopes; G3 remains NOT_RUN. See TK-19/review.
+- TK-20 source `84106fa3fff66ad304b1e56d7a690d4e20445a28` adds strong version ETags and required `If-Match` compare-and-swap checks to content and assignment PATCH. Same-version concurrent requests allow one success and one 409; stale no-op requests also return 409; only the winning write creates an event. Focused concurrency suite and independent replay 7/7, assignment suite 13/13, full check API360/360 and web1/1 with lint/typecheck/build passing; docs contract and diff checks pass. Parent reviewer closed prior P1; static reviewer closed P2 test gap; no remaining findings. A29 PASS for its stated API race-test scope; A15 remains NOT_RUN for full audit acceptance. G3 remains NOT_RUN pending dashboard and remaining backend criteria. See TK-20/review.
+- TK-21 source `93485ad0c10d4247a2ed6d7c1852bcc282488da7` adds staff-only `/api/dashboard` with organization-scoped status/priority totals, one UTC evaluation timestamp, overdue formula and active-agent workload rows; query params are rejected. Exact dashboard suite and independent replay 6/6; full check API366/366, web1/1, lint/typecheck/build; docs contract and diff checks pass. Static review's assumptions-role wording P2 was corrected; no remaining findings. A20/A21 PASS for API/DB scopes. A07 remains NOT_RUN pending combined list/dashboard acceptance; G3 remains NOT_RUN pending health/docs and other backend criteria. See TK-21/review.
+- TK-22 source `49f0a2c5c94cf24efe980d6862cda34e8d99985c` adds database-independent `/api/health`, real-query `/api/health/ready` with sanitized 503, accurate API route documentation, and contract-content checks. Health suite 3/3, documentation regression suite 6/6, full check API369/369 and web1/1 plus lint/typecheck/build passed. Parent reviewer independently replayed health 3/3 against guarded `support_test`; static review found no issue. Playwright was listed only. A22/A23 and G3 remain NOT_RUN; see `TK-22.md` and its review report.
+- A03 PASS; other AIDs remain NOT_RUN. Complete G2 and browser/release journeys remain pending.
+- Before these evidence files were added, source working tree was clean. Preserve the current evidence changes/commit and inspect actual `git status` on resume.
+
+## TK-32 completion — CI gates and sanitizer hardening
+
+TK-32 final exact source SHA is `5a3582d41a05cf3a9d1a097f7c94bd135cce9118`. Static and runtime parent-kit reviews closed both initial P2 findings (structured/indented auth-cookie redaction and mutable Actions refs) with no remaining findings. Focused sanitizer tests passed 2/2; `npm run check` passed (API385, web3, 23 Playwright tests discovered, lint/typecheck/build); YAML parsed. No hosted GitHub CI was run, so A34 and G5 remain NOT_RUN; A24 Docker application startup and A26 final document audit remain NOT_RUN. Details: [TK-32 checkpoint](../../checkpoints/TK-32.md), [review report](../../reviews/tk32-2026-10-28-5a3582d.md).
+
+## Historical gate status (2026-10-28; superseded by the current snapshot above)
+
+| Gate | Status / evidence |
+|---|---|
+| G0 | PASS for the existing local baseline: pinned install evidence in TK-01, unchanged lockfile, current lint/type/build passed. |
+| G1 | PASS for local schema/test DB criteria: TK-02, TK-04–TK-06 plus current real-DB suite and migration/identity proof in TK-08. Application release is still incomplete. |
+| G2 | NOT_RUN as a whole; HTTP auth/current membership and unit policies verified; actual product-route isolation still pending. |
+| G3 | NOT_RUN; ticket/comment/event/dashboard/health APIs exist and have scoped evidence; combined acceptance and remaining backend criteria are pending. |
+| G4 | NOT_RUN; auth, queue, create, and detail browser journeys are implemented, but dashboard/admin UI and complete responsive/state coverage remain pending. |
+| G5 | NOT_RUN; full Docker app launch, clean checkout, CI and security release suite pending. |
+| G6 | NOT_RUN; deployment has not been authorized. |
+| G7 | NOT_RUN; bounded task reviews exist, final candidate review does not. |
+
+## Review workflow and limits
+
+Use the provided sibling `..\100xdevs_assessment_review_agent_skill` directly. Its reviewer skill is not installed/discovered repo-locally. Read its SKILL.md and references; review independently in read-only mode against an exact source/evidence SHA. Existing reviewer agent `/root/assessment_design_review` has handled prior checkpoints and may be resumed. It must not mutate files or run DB tests concurrently with the builder; do not attribute parent-executed checks to it.
+
+No known unresolved P0/P1. One OPEN P2 / LIKELY finding `SEC-FOUNDATION-01`: the bounded local login-limiter table rejects new keys while full, creating an availability tradeoff under many distinct source IP/account keys. Source inspection only; exhaustion/recovery NOT_RUN. See `evidence/reviews/security-foundation-2026-10-26-2f95a1a.md`; address/test in TK-30 and before public exposure. The limiter is also per process; browser/proxy and shared/serverless protection remain pending.
+
+## TK-23 completion and current state
+
+TK-23 auth shell source 24c48a30577cd6e46cd60dea1bccb4003d4fbf38 was independently reviewed with browser replay and static inspection using the sibling reviewer kit. Static review found a likely P2 narrow-tablet layout issue. Root reproduced it with a failing 640px browser geometry assertion, fixed the breakpoint, then verified source 93c074d96ffa696624842e5b0628a694d1d2f6a8 with the regression, all five browser tests, full npm run check, documentation contract, and diff check. Evidence is in TK-23.md and ../reviews/tk23-2026-10-27-93c074d.md. External reviewers did not rerun the patch SHA.
+
+G4 remains NOT_RUN; TK-23–TK-26 deliver auth, queue, create, and detail journeys, but dashboard/admin and complete A22/A23 coverage remain pending. A01 remains NOT_RUN until API and browser evidence are explicitly mapped together. A32 production/proxy behavior remains NOT_RUN.
+
+## TK-24 completion and current state
+
+TK-24 ticket queue UI is committed at `c1ddb17018329bd5cbd8cc58f2db58d6551bb4d8`. The parent-folder reviewer-kit browser reviewer independently verified guarded `support_test` identity and replayed `ticket-list.spec.ts` at that exact SHA: 10/10 passed. Static review at the same SHA found no P0–P2 code issues. A reported stale-query bug was reproduced at intermediate SHA `e37ad48a4fc839e0a1840de827d1e6e30cad8e0c`; URL updates now compose against the latest requested state, and the exact failing sequence is green. Root also ran the focused API list suite 36/36, `npm run check` (API369/369, web3/3, lint/typecheck/build pass), and the full browser suite 15/15. Detailed evidence is in `TK-24.md` and `../reviews/tk24-2026-10-27-c1ddb17.md`.
+
+A17 is PASS for its scoped API + browser filter criterion. A18/A19 retain API-only PASS scope; the queue adds positive search and page-navigation evidence but does not re-prove cross-tenant search isolation or duplicate-free ordering. A22/A23 and G4 remain NOT_RUN because detail/create/dashboard/admin and complete product states are outstanding. The static reviewer recommended adding history navigation during a pending route update; no defect was confirmed, and the reported rapid combined update sequence is covered and green.
+
+## TK-25 completion and current state
+
+TK-25 added the role-aware create form, server-authoritative validation/error handling, creation receipt, and cache invalidation. Exact source `ef7b771bcc2c2a1b889329f8fcf5115768020ea9` passed targeted create browser tests 4/4, full browser suite 19/19, targeted guarded PostgreSQL API suite 51/51, and `npm run check` (API369/369, web3/3, lint/typecheck/build). Parent-folder reviewer kit browser and static reviews ran against the exact source SHA with no findings. Evidence: `TK-25.md` and `../reviews/tk25-2026-10-27-ef7b771.md`.
+
+A10 is now PASS on the aggregate create/list/detail/ownership evidence. A11 remains NOT_RUN because complete field/range coverage is incomplete. A22/A23 remain NOT_RUN because dashboard/admin and full state/viewport coverage are pending. G4 remains NOT_RUN.
+
+## TK-26 completion and current state
+
+TK-26 is complete at source `d731fffbbd0351ebb7021510787f71acf4578db4`. The parent-folder reviewer kit browser replay passed 18/18 and its static review found no remaining P0–P3 issues after a P1 cache-leak fix. See [TK-26](../../checkpoints/TK-26.md) and [review](../../reviews/tk26-2026-10-27-d731fff.md). A10, A12, A14, and A15 pass for their documented aggregate scope; A16 remains NOT_RUN.
+
+## TK-27 completion and current state
+
+TK-27 dashboard UI is committed at `e98279aa887f2bde403c7d6d473d3433aac27bec`, with the parent-review P2 correction at final source `1fe5731589890e0f40ddbfe7edff34ccaac65102`. The static reviewer found that the workload badge included unassigned active tickets. Added an unassigned fixture and observed the expected RED, then changed the badge to sum assigned agent workloads. Focused dashboard browser test passed 1/1; `npm run check` passed (API369/369, web3/3, lint/type/build); full guarded E2E passed 23/23. Parent-kit browser replay of dashboard and ticket-list specs passed 9/9; static review found no remaining P0–P3. See [TK-27](../../checkpoints/TK-27.md) and [review](../../reviews/tk27-2026-10-27-1fe5731.md).
+
+A20/A21 remain PASS for their earlier scoped PostgreSQL/API evidence. Dashboard UI coverage is recorded, but A22/A23 remain NOT_RUN overall because admin and complete viewport/state criteria remain open. G4 remains NOT_RUN.
+
+## TK-28 completion and current state
+
+TK-28 admin membership controls and the follow-up role-draft correction are committed at exact source `6260fd55853917eb966f2468dfb28b2de3480df2`. The prior-role value is captured before scheduling React state reconciliation; the browser test verifies that a clean selector follows refreshed server data while a deliberate unsaved role choice remains dirty. Parent-folder reviewer-kit browser replay at this SHA verified disposable `support_test` and passed membership + ticket-list tests 8/8. Static review closed the prior P2 and found no new P0–P3 in scope. Root `npm run check` passed (API369/369, web3/3, lint/typecheck/discovery/build), and guarded full E2E passed 23/23. See [TK-28](../../checkpoints/TK-28.md) and [review](../../reviews/tk28-2026-10-27-6260fd5.md).
+
+A08 is PASS for the documented API + browser membership administration criterion, using TK-11 real PostgreSQL/API evidence and TK-28 browser flows plus exact-SHA independent replay. A03 retains its scoped API PASS. A22/A23 and G4 remain NOT_RUN overall; full viewport and product-state coverage is incomplete.
+
+## TK-29 completion and current state
+
+TK-29 responsive, keyboard, and state coverage is recorded at source `f834843094d8b23887e567e8314032e1deea0436`. The parent-folder browser reviewer replayed the full E2E suite at that exact SHA (23/23), inspected all 12 screenshots, and closed the mobile membership scroll-discoverability P2 after the visible mobile cue was added. The static reviewer found no P0–P3 issues. Root `npm run check` passed (API369/369, web3/3, lint/typecheck/discovery/build); root guarded full E2E passed 23/23. See [TK-29.md](../../checkpoints/TK-29.md) and [review](../../reviews/tk29-2026-10-27-f834843.md).
+
+A22, A23, A37, and G4 remain `NOT_RUN`: this checkpoint adds screenshot, responsive, state, keyboard focus, and accessible-name evidence, but does not establish every route/viewport/state combination or a dedicated accessibility audit. The reviewer replay regenerated 10 tracked screenshot artifacts, now retained with the checkpoint evidence.
+
+## TK-31 completion and next action
+
+TK-31 implementation source `a74ee31f3198425f9afed8dda58b63cdb3eddb9c` adds a guarded rollback-only query-plan assessment utility. Root verification passed the query helper 1/1, the exact-source full check (API385/385, web3/3, 23 E2E discovered, lint/typecheck/build), and docs/diff checks. The parent-folder reviewer kit static replay reported no P0/P1 source findings; its P2 acceptance-ledger mismatch and P3 index-count wording were corrected in the evidence follow-up. Runtime replay found no P0–P3 findings, passed the guarded query-plan assessment and 58 create/concurrency API tests. See `TK-31.md` and `../reviews/tk31-2026-10-27-a74ee31.md`.
+
+A38 is PASS for the representative tenant/status index plan; A30 is N/A because idempotency is not implemented and duplicate create/retry behavior is explicit. A29 remains PASS. These scoped results do not complete G5; overall release is NOT_READY. The login limiter capacity/recovery P2 remains open.
+
+Next: TK-33 Docker-local production build and runbook. Review `evidence/checkpoints/TK-32.md` and the TK-32 review report. Preserve the ten modified TK-29 screenshots. Read the Docker/local-run requirements and current Compose configuration, then implement local API startup and production containers with RED/GREEN proof. Use the sibling parent-folder reviewer kit for exact-SHA static/runtime review. A24 and G5 remain NOT_RUN until a fresh documented Docker app startup and all release criteria are proven.
+
+Only local implementation/testing/feature-branch commits are authorized. Do not push, merge, deploy, provision resources, mutate production, reset, or clean. Existing DB identities remain support_dev and guarded disposable support_test; never save/read back credentials into evidence. Resume from actual Git state and source, preserving all work.
+
+
+## TK-33 status — 2026-10-28
+
+- Added Docker production API/web targets, local Compose run path, non-root containers, Nginx same-origin API proxy, local API listener, and operations runbook. Source commit: d79a4ef9addd793e74643a2b8a7e6fab1840619a.
+- Parent reviewer-kit runtime checks passed focused listener 1/1, lint, typecheck, build, and Compose config validation. Docker build and app startup could not run: Docker Desktop Linux engine pipe was missing. Full npm check attempt had DB connection failures/timeouts; do not mark as passed.
+- Static review found credential instructions ambiguity and URL character risk. Corrected and exact-SHA re-reviewed at final docs SHA 5b1a1fab0f334656ff9f542b8377b45593567cbf; no setup findings remain. Review at evidence/reviews/tk33-2026-10-28.md.
+- A24 and G5 remain NOT_RUN; Docker app build/start, fresh startup and runtime smoke are outstanding. No Vercel/Neon deployment authorized or performed.
+- Preserve ten modified TK-29 screenshot artifacts.
+
+
+## Docker recovery follow-up — 2026-10-28
+
+Root cause is now narrowed to host compatibility: Docker Desktop 4.95 on Windows 11 Home build 22000 calls the old C:\Windows\System32\wsl.exe, which does not support --version. Docker logs report WSLUpdateRequired. C:\Program Files\WSL\wsl.exe is WSL 3.0.3.0, but this does not change the system32 inbox executable used by Docker. Current Docker Windows requirements specify Windows 11 23H2/build 22631+. wsl --update reported no updates. Docker Desktop was force-stopped and left stopped after restart failed. No destructive cleanup was done; A24/G5 remain NOT_RUN. Next: Windows feature update/reboot via local Windows Update/admin, then verify Docker, run docs/operations.md, and finish TK-33.
+
+
+## Docker retry — 2026-10-28
+
+Retried after user request. Host remains Windows 11 build 22000 and system32 WSL CLI rejects --version; Docker CLI start timed out and fresh logs repeated the same WSL check error. Docker Desktop is now stopped. No container run/build proof; A24 and G5 remain NOT_RUN. Required next: Windows 11 23H2/build 22631+ or newer feature update, reboot, then rerun TK-33 operations checklist. Deployment config TK-34 remains gated by explicit C6 approval.
+
+
+## Docker retry with complete child-process paths — 2026-10-28
+
+The Codex-launched Windows environment had empty ProgramData, APPDATA, HOMEDRIVE, and HOMEPATH. A fresh Docker Desktop GUI launch with process-local standard paths fixed its data/settings initialization. The backend then stayed up, but the Linux engine _ping returned HTTP 500/503 and current logs still show the inbox C:\Windows\System32\wsl.exe --version rejection. Do not claim Docker ready; A24/G5 remain NOT_RUN pending Windows/WSL compatibility repair. No machine environment variables were changed and no container build/start succeeded.
+
+Reran Docker-independent checks: API listener 1/1, lint, typecheck, web 3/3, browser discovery 23 tests, production build, documentation contract, and diff check all passed. Browser tests were discovered but not executed. Preserve the ten modified TK-29 screenshot PNGs.
+
+
+## Docker VMM alternative attempt — 2026-10-28
+
+The WSL-independent Docker route was attempted. Docker Desktop 4.97.0 was installed per-user with engineTypeWindows=docker-vmm after SHA-256 and Authenticode verification. Docker Desktop now reports running; docker info responds with Engine 29.9.2 and Linux kernel 7.0.14-linuxkit. No WSL distro or Docker data reset was performed.
+
+Compose configuration validates, but image pulls remain blocked. A Docker Compose build and an Alpine pull both fail inside Docker Desktop because registry-1.docker.io cannot be resolved; Docker logs say Docker Desktop has no HTTPS proxy. Windows nslookup succeeds and curl to the registry returns HTTP 401, showing host DNS/HTTPS works. A temp Docker config bypassed the child-process credential-helper PATH issue without changing the user's credential store. No images/containers/volumes were created. Docker VMM reports 2 GiB memory while its documentation requires 4 GiB minimum. Windows build 22000 is below Docker's current 22631 minimum.
+
+TK-33 remains IN_PROGRESS; A24 and G5 remain NOT_RUN. Restart from the current running Docker VMM, diagnose/resolve VMM DNS or proxy on a supported Windows build, set VMM memory to at least 4 GiB, then rerun the build and fresh Compose startup. Docker VMM evidence commit: e1b4dc3c3cec6936b0e3462dc7c6396f2f4c0b19. The TK-33 application source commit remains d79a4ef9addd793e74643a2b8a7e6fab1840619a. The ten user-modified TK-29 screenshots remain the only working-tree changes; they were not touched.
+
+
+## GitHub publish and G5 closeout — 2026-10-28
+
+- Private remote: https://github.com/arunkumar0398/customer-support-platform; origin is configured and codex/assessment-mvp tracks origin/codex/assessment-mvp. Pushed without force. Ten pre-existing modified TK-29 screenshot PNGs remain unstaged and untouched.
+- Candidate 58ca5df340e4de1d089f3753acd4aea2c3568765 passed hosted GitHub Actions run [#1](https://github.com/arunkumar0398/customer-support-platform/actions/runs/40644651623), including disposable PostgreSQL, migrations/seed, API/web tests, Playwright, lint/typecheck, and production build. Sanitized logs uploaded. A34 PASS.
+- G5 PASS for that candidate based on hosted CI, fresh Windows Docker checkout/runtime proof in TK-33, and exact-SHA reviews with no P0/P1. Keep the known login limiter capacity/recovery P2 disclosed; A33 and broad unverified acceptance checks remain NOT_RUN.
+- TK-34 is now unblocked by G5 and is the next task. Only local configuration/build/dry-run validation is in scope until provider resource provisioning or actual deployment is explicitly authorized. Production publish and production migrations remain separate approvals.
+# Historical handoff — local audit continuation `080d883` (2026-11-02)
+
+## Exact local candidate and observed work
+
+- Candidate: `080d883029e6e68619c34e8dc4d055d03b4dcbb7`, branch `codex/provisioning-timeout-diagnostics-44042`, local/unpushed. The original dirty `44042d47` checkout and screenshot/backup files were preserved.
+- Run 22 remains the exact-candidate retained local evidence: API 425/425 (28 files) and provisioner 21/21. Hashes and source binding were rechecked. No CI result is claimed for `080d883`.
+- Cleanup timeout cause was CPU contention from two API workers in a one-CPU audit sandbox; no PostgreSQL blocking lock was observed. The combined `all` lane now uses one API worker only; timeout remains five seconds and Web remains at two workers. The concurrency assertion passed; the combined lane itself has not been rerun after this harness edit.
+- Throttle capacity behavior is locally confirmed, while no security vulnerability is established. Independent verifier reports intentional fail-closed behavior; Vercel topology and IP distribution remain unverified without deployed probing.
+
+## Preview disposition
+
+- Neon Preview compute is active on the recorded project/branch/endpoint. Earlier read-only `SELECT 1` succeeded; not repeated. No hosted fixture write or authenticated role test occurred.
+- Latest inspected API deployment is `DB8kjRru6d6EzY9tqV12kvrxRqiK` / source `a6922fca49d05abe774c26fdf5774db750fd094c`; latest Web is `HCkQZraegPxMo1NPuNi3WbotiM2L` / source `ddf3d69b32db494e04ae36256633633bf9132583`. Current Web Preview `API_ORIGIN` points to a different API deployment. API runtime DB binding remains unverified. A35 is **BLOCKED / NOT_RUN**.
+- The exact-run approval package is [here](../../checkpoints/PREVIEW-EXECUTION-APPROVAL-2026-11-02.md). It proposes aligning Web Preview to the inspected API deployment, but does not authorize changing Vercel settings, deploying, provisioning fixtures, or running role tests. Owner must confirm the corrected pair, API DB endpoint mapping/role, and approve this specific run.
+
+## Remaining gates
+
+- Offline audit: **INCOMPLETE**; Run 22 does not satisfy all pinned Cloudflare phases. Local proxy and throttle evidence are not hosted configuration evidence. Coverage critique, independent record verification, structured/prose reconciliation and official validators on any changed structured ledger remain due.
+- A22/A23/A37: partial; Hallmark results carry forward only for unchanged source surfaces. Manual screen-reader journey is **NOT_RUN**; script is [SCREENREADER-MANUAL-2026-11-02.md](../../checkpoints/SCREENREADER-MANUAL-2026-11-02.md).
+- Assessment Section 8 deliverables are documented, but evaluator access and A28 rehearsal remain unresolved. Deployment and CI are optional assessment items; internal Preview/audit release gates remain separate.
+- Do not transfer older deployment/acceptance evidence to this candidate. No push, deployment, hosted data change, merge, or submission is authorized by this handoff.
+
+# Previous handoff history
