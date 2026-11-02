@@ -14,8 +14,13 @@ const FIXED_LANES=Object.freeze(['api','web','browser','browser-smoke','browser-
 export function sandboxIdentity(platform=process.platform,uid=process.getuid?.(),gid=process.getgid?.()){
  if(platform==='win32')return {uid:10001,gid:10001};
  if(platform!=='linux'&&platform!=='darwin')throw new Error('unsupported host platform for private bind-mount identity');
- if(!Number.isInteger(uid)||!Number.isInteger(gid)||uid===0)throw new Error('audit target requires a non-root host UID/GID for private input access');
+ if(!Number.isSafeInteger(uid)||!Number.isSafeInteger(gid)||uid<1||gid<1||uid>4294967294||gid>4294967294)throw new Error('audit target requires valid non-root host UID/GID integers for private input access');
  return {uid,gid};
+}
+export function sandboxIdentityContract(identity,size=67108864){
+ if(!identity||!Number.isSafeInteger(identity.uid)||!Number.isSafeInteger(identity.gid)||identity.uid<1||identity.gid<1||identity.uid>4294967294||identity.gid>4294967294)throw new Error('unsafe sandbox container identity');
+ if(!Number.isSafeInteger(size)||size<1)throw new Error('unsafe artifact volume size');
+ return {containerUser:identity.uid+':'+identity.gid,scratchSpec:'/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid='+identity.uid+',gid='+identity.gid+',mode=0700',artifactVolumeOptions:'size='+size+',mode=0700,uid='+identity.uid+',gid='+identity.gid};
 }
 function restrictWindowsHostDirectory(directory){
  const run=(command,args)=>spawnSync(command,args,{encoding:'utf8',windowsHide:true,timeout:10000});
@@ -143,7 +148,7 @@ export async function prepareSourceSnapshot({repoRoot,commit,outputDir,toolchain
  return {...record,archivePath,treeManifestPath,recordPath,recordSha256:await hashFile(recordPath)};
 }
 function docker(args,timeout=30000){const r=spawnSync('docker',args,{encoding:'utf8',windowsHide:true,timeout,maxBuffer:4*1024*1024});if(r.error)throw r.error;if(r.status!==0)throw new Error('docker '+args[0]+' failed: '+String(r.stderr||r.stdout||'').trim());return String(r.stdout||'').trim();}
-function makeVolume(name,size){docker(['volume','create','--driver','local','--opt','type=tmpfs','--opt','device=tmpfs','--opt','o=size='+size+',mode=0700,uid=10001,gid=10001',name]);}
+function makeVolume(name,options){docker(['volume','create','--driver','local','--opt','type=tmpfs','--opt','device=tmpfs','--opt','o='+options,name]);return options;}
 function closeCode(child){return new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',(code,signal)=>resolve({code,signal}));});}
 export function formatPromoterDiagnostics(stdout='',stderr=''){
  return [stdout,stderr].filter(Boolean).join(' ').replace(/\s+/g,' ').trim().slice(-2000);
@@ -243,18 +248,18 @@ export async function launchSandbox({repoRoot,commit,lane,evidenceDir,timeoutSec
  if(!evidenceDir)throw new Error('external evidence directory is required');if(timeoutSeconds<1||timeoutSeconds>5400)throw new Error('timeout must be 1..5400 seconds');
  verifyLaunchSource(repoRoot,commit);
  const nonce=randomUUID().replaceAll('-','');const runId='audit-'+commit.slice(0,12)+'-'+Date.now()+'-'+nonce.slice(0,8);const runDir=await makeEvidenceRun(repoRoot,evidenceDir,runId);
- const identity=sandboxIdentity();const containerUser=identity.uid+':'+identity.gid;const inputDir=await createPrivateHostDirectory('csp-audit-input-');let promotionDir;try{promotionDir=await createPrivateHostDirectory('csp-audit-promote-');}catch(error){await removePrivateInputDir(inputDir).catch(()=>undefined);throw error;}const artifactVolume='csp-artifacts-'+nonce;const preflightName='csp-preflight-'+nonce;const targetName='csp-target-'+nonce;const helperName='csp-promoter-'+nonce;
+ const identity=sandboxIdentity();const identityContract=sandboxIdentityContract(identity);const containerUser=identityContract.containerUser;const inputDir=await createPrivateHostDirectory('csp-audit-input-');let promotionDir;try{promotionDir=await createPrivateHostDirectory('csp-audit-promote-');}catch(error){await removePrivateInputDir(inputDir).catch(()=>undefined);throw error;}const artifactVolume='csp-artifacts-'+nonce;const preflightName='csp-preflight-'+nonce;const targetName='csp-target-'+nonce;const helperName='csp-promoter-'+nonce;
  let helper=null,helperDone=null,createdArtifacts=false,completed=false,targetOutcome=null,targetDiagnostic='target stderr: unavailable',preflightOutcome=null,preflightDiagnostic='preflight stderr: unavailable';
  try{
   const dockerEndpoint=docker(['context','inspect','--format','{{.Endpoints.docker.Host}}']);if(!dockerEndpoint.startsWith('npipe:')&&!dockerEndpoint.startsWith('unix://')&&!/^tcp:\/(\/)?(127\.0\.0\.1|localhost)(:|$)/.test(dockerEndpoint))throw new Error('Docker context is not a local engine endpoint');const dockerServer=docker(['version','--format','{{.Server.Os}}/{{.Server.Arch}} {{.Server.Version}}']);if(!dockerServer.startsWith('linux/amd64 '))throw new Error('Docker server must be local Linux AMD64');
   const record=await prepareSourceSnapshot({repoRoot,commit,outputDir:inputDir,lane,toolchainDigest:IMAGE_DIGEST});
-  makeVolume(artifactVolume,67108864);createdArtifacts=true;
+  record.execution.artifactVolumeOptions=makeVolume(artifactVolume,identityContract.artifactVolumeOptions);createdArtifacts=true;
   for(const name of ['preflight.sh','run-offline.sh','promote_artifacts.py','verify_input.py']){const source='audit/run/'+name;const dest=path.join(inputDir,name);await writeFile(dest,gitBlob(repoRoot,commit,source),{mode:0o444,flag:'wx'});}
   record.execution.hostInputDir=inputDir;record.execution.parentPromotionInputDir=promotionDir;record.execution.dockerEndpointKind=dockerEndpoint.split(':')[0];record.execution.dockerServer=dockerServer;record.execution.dockerContext=docker(['context','show']);record.execution.hostPlatform=os.platform()+'/'+os.arch();record.execution.hostRelease=os.release();record.execution.requestedTimeoutSeconds=timeoutSeconds;record.execution.promoterLimits={cpu:0.25,memoryBytes:268435456,swapBytes:0,pids:32,fileSizeLimitBytes:10485760};record.execution.runId=runId;record.execution.scratchStrategy='private tmpfs attached to target only';record.execution.artifactVolume=artifactVolume;record.execution.inputMount='/input and /runner read-only';record.execution.promoterInputMount='parent-created /scratch read-only; never mounted in target';record.execution.artifactPath='/artifacts, promoter only';record.execution.targetContainerName=targetName;record.execution.preflightContainerName=preflightName;record.execution.promoterContainerName=helperName;record.execution.promotionAfterTargetTermination=true;
   const helperFixed=['--pull=never','--network=none','--read-only','--user',containerUser,'--cap-drop=ALL','--security-opt=no-new-privileges'];
   const helperArgs=['run','--name',helperName,'-i',...helperFixed,'--cpus=0.25','--memory=256m','--memory-swap=256m','--pids-limit=32','--ulimit','fsize=10485760:10485760','--mount','type=bind,source='+inputDir+',target=/runner,readonly','--mount','type=bind,source='+promotionDir+',target=/scratch,readonly','--mount','type=volume,source='+artifactVolume+',target=/artifacts','--env','PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin','--entrypoint','python3',IMAGE_DIGEST,'/runner/promote_artifacts.py','--serve','/scratch','/artifacts'];
   const env=['--env','PATH=/opt/toolchain/project/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin','--env','HOME=/scratch/home','--env','TMPDIR=/scratch/tmp','--env','CI=1','--env','NODE_ENV=test','--env','AUDIT_SOURCE_SHA='+commit,'--env','AUDIT_ARCHIVE_SHA256='+record.source.archiveSha256,'--env','AUDIT_EXPECTED_IMAGE_DIGEST='+IMAGE_DIGEST,'--env','AUDIT_LAUNCH_RECORD_SHA256=<record-sha256-derived-after-serialization>','--env','AUDIT_LOCK_SHA256='+record.toolchain.lockfileSha256,'--env','AUDIT_SOURCE_LOCK_SHA256='+record.toolchain.sourceLockfileSha256,'--env','AUDIT_TREE_MANIFEST_SHA256='+record.source.treeManifestSha256];
-  const targetTmpfs='--tmpfs';const tmpfsSpec='/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid='+identity.uid+',gid='+identity.gid+',mode=0700';
+  const targetTmpfs='--tmpfs';const tmpfsSpec=identityContract.scratchSpec;
   const shared=['--pull=never','--network=none','--read-only','--user',containerUser,'--cap-drop=ALL','--security-opt=no-new-privileges','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','--ulimit','fsize=1073741824:1073741824',targetTmpfs,tmpfsSpec,'--mount','type=bind,source='+inputDir+',target=/input,readonly','--mount','type=bind,source='+inputDir+',target=/runner,readonly',...env];
   const targetArgs=['run','--name',targetName,'--init',...shared,'--entrypoint','/bin/bash',IMAGE_DIGEST,'/runner/run-offline.sh',lane];
   const preflightEnv=[...env,'--env','DATABASE_URL=postgresql://support_dev:audit-only@127.0.0.1:5432/support_dev','--env','DATABASE_URL_UNPOOLED=postgresql://support_dev:audit-only@127.0.0.1:5432/support_dev','--env','TEST_DATABASE_URL=postgresql://support_test:audit-only@127.0.0.1:5432/support_test'];

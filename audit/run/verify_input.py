@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import hashlib, json, os, subprocess, sys, tarfile
+import hashlib, json, os, re, subprocess, sys, tarfile
 def fail(message): raise ValueError(message)
 def digest_file(path, limit=None):
  h=hashlib.sha256(); total=0
@@ -41,7 +41,10 @@ def verify_archive_payload(archive_path,tree_manifest):
  return len(actual)
 def validate_execution(execution):
  if execution['platform']!='linux/amd64' or execution['network']!='none' or execution['rootFilesystem']!='read-only' or execution['sourceMount']!='read-only' or execution['toolchainMount']!='read-only' or execution['artifactsMount']!='promoter-only' or execution['dockerSocket']!='parent-launcher-only': fail('unsafe launch configuration record')
- if (execution['uid'],execution['gid'],execution['capabilities'],execution['noNewPrivileges'])!=(10001,10001,'drop-all',True): fail('unsafe identity or privilege configuration')
+ uid=execution.get('uid');gid=execution.get('gid')
+ if type(uid) is not int or type(gid) is not int or not (1<=uid<=4294967294) or not (1<=gid<=4294967294): fail('unsafe identity: UID/GID must be valid non-root integers')
+ identity=str(uid)+':'+str(gid)
+ if (execution['capabilities'],execution['noNewPrivileges'])!=('drop-all',True): fail('unsafe identity or privilege configuration')
  if (execution['cpuLimit'],execution['memoryLimitBytes'],execution['swapLimitBytes'],execution['pidLimit'],execution['fileSizeLimitBytes'],execution['wallClockLimitSeconds'])!=(1,1610612736,0,256,1073741824,5400): fail('unsafe target resource or time limit')
  if execution['scratch']!={'mode':'tmpfs','maxBytes':1153433600}: fail('unsafe scratch configuration')
  allowed={'PATH','HOME','TMPDIR','CI','NODE_ENV','AUDIT_SOURCE_SHA','AUDIT_ARCHIVE_SHA256','AUDIT_TREE_MANIFEST_SHA256','AUDIT_EXPECTED_IMAGE_DIGEST','AUDIT_LOCK_SHA256','AUDIT_SOURCE_LOCK_SHA256','AUDIT_LAUNCH_RECORD_SHA256','DATABASE_URL','DATABASE_URL_UNPOOLED','TEST_DATABASE_URL'}
@@ -52,20 +55,33 @@ def validate_execution(execution):
  if execution.get('promoterLimits')!={'cpu':0.25,'memoryBytes':268435456,'swapBytes':0,'pids':32,'fileSizeLimitBytes':10485760}: fail('unsafe trusted promoter limits')
  target=execution.get('targetArgumentsTemplate'); preflight=execution.get('preflightArguments'); promoter=execution.get('promoterArguments')
  if not isinstance(target,list) or not isinstance(preflight,list) or not isinstance(promoter,list): fail('Docker argument records are missing')
+ def require_identity(args,label):
+  positions=[index for index,value in enumerate(args) if value=='--user']
+  if len(positions)!=1 or positions[0]+1>=len(args) or args[positions[0]+1]!=identity: fail('unsafe identity in '+label+' Docker arguments')
+ for args,label in ((target,'target'),(preflight,'preflight'),(promoter,'promoter')): require_identity(args,label)
  target_text='\0'.join(target); preflight_text='\0'.join(preflight); promoter_text='\0'.join(promoter)
- required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly']
+ def mount_values(args): return [args[index+1] for index,value in enumerate(args[:-1]) if value=='--mount']
+ artifact_volume=execution.get('artifactVolume')
+ if not isinstance(artifact_volume,str) or not re.fullmatch(r'csp-artifacts-[0-9a-f]{32}',artifact_volume): fail('unsafe artifact volume identity')
+ target_mounts=mount_values(target);preflight_mounts=mount_values(preflight);promoter_mounts=mount_values(promoter)
+ if any('type=volume,' in value or artifact_volume in value for value in target_mounts+preflight_mounts): fail('artifact volume must not be mounted in target or preflight')
+ volume_mounts=[value for value in promoter_mounts if value.startswith('type=volume,')]
+ if volume_mounts!=['type=volume,source='+artifact_volume+',target=/artifacts']: fail('trusted promoter must receive only the selected artifact volume')
+ required_target=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges',identity,'--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','target=/input,readonly','target=/runner,readonly']
  if any(value not in target_text for value in required_target) or 'target=/artifacts' in target_text or '/var/run/docker.sock' in target_text or '--privileged' in target_text: fail('unsafe or incomplete target Docker arguments')
- tmpfs='/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid=10001,gid=10001,mode=0700'
+ tmpfs='/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid='+str(uid)+',gid='+str(gid)+',mode=0700'
  tmpfs_args=[target[index+1] for index,value in enumerate(target[:-1]) if value=='--tmpfs']
  if tmpfs_args != [tmpfs] or 'target=/scratch' in target_text: fail('unsafe target scratch configuration: expected one private bounded tmpfs only')
- required_preflight=['run','--pull=never','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','10001:10001','--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','fsize=1073741824:1073741824','target=/input,readonly','target=/runner,readonly','--entrypoint','/bin/bash','/runner/preflight.sh']
+ required_preflight=['run','--pull=never','--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges',identity,'--cpus=1','--memory=1536m','--memory-swap=1536m','--pids-limit=256','fsize=1073741824:1073741824','target=/input,readonly','target=/runner,readonly','--entrypoint','/bin/bash','/runner/preflight.sh']
  if any(value not in preflight_text for value in required_preflight) or 'target=/artifacts' in preflight_text or '/var/run/docker.sock' in preflight_text or '--privileged' in preflight_text: fail('unsafe or incomplete preflight Docker arguments')
  preflight_tmpfs=[preflight[index+1] for index,value in enumerate(preflight[:-1]) if value=='--tmpfs']
  if preflight_tmpfs!=[tmpfs]: fail('unsafe preflight scratch configuration')
  required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/runner,readonly','target=/artifacts','target=/scratch,readonly','--pids-limit=32']
  if any(value not in promoter_text for value in required_promoter) or '/var/run/docker.sock' in promoter_text or '--privileged' in promoter_text: fail('unsafe trusted-promoter Docker arguments')
  promotion_input=execution.get('parentPromotionInputDir')
- if not isinstance(promotion_input,str) or not promotion_input or len(promotion_input)>4096 or promotion_input==execution.get('hostInputDir') or promotion_input not in promoter_text or promotion_input in target_text: fail('parent promotion input must be separate and promoter-only')
+ if not isinstance(promotion_input,str) or not promotion_input or len(promotion_input)>4096 or promotion_input==execution.get('hostInputDir') or promotion_input not in promoter_text or promotion_input in target_text or promotion_input in preflight_text: fail('parent promotion input must be separate and promoter-only')
+ expected_volume_options='size=67108864,mode=0700,uid='+str(uid)+',gid='+str(gid)
+ if execution.get('artifactVolumeOptions')!=expected_volume_options: fail('unsafe artifact volume ownership')
  required_promoter=['--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','target=/runner,readonly','target=/artifacts','target=/scratch,readonly','--pids-limit=32']
  if any(value not in promoter_text for value in required_promoter) or '/var/run/docker.sock' in promoter_text or '--privileged' in promoter_text: fail('unsafe trusted-promoter Docker arguments')
 

@@ -3,7 +3,7 @@ import os from 'node:os'; import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test'; import assert from 'node:assert/strict';
-import { createPrivateHostDirectory, formatPromoterDiagnostics, isSupportedLane, launchSandbox, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, sandboxIdentity, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
+import { createPrivateHostDirectory, formatPromoterDiagnostics, isSupportedLane, launchSandbox, makeEvidenceRun, prepareSourceSnapshot, promoterExitMessage, removePrivateInputDir, safeTargetDiagnostic, sandboxIdentity, sandboxIdentityContract, summarizeTargetOutcome, validateEnvExample, validateTrackedSourceTree, verifyLauncherLocation, writePromotionInputs } from './launch-offline.mjs';
 const SAFE_ENV_TEMPLATE='NODE_ENV=development\nPORT=3101\nHOST=127.0.0.1\nPGPORT=5433\nWEB_PORT=8080\nPOSTGRES_SUPERUSER_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nAPP_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nTEST_DB_PASSWORD=LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE\nDATABASE_URL=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nDATABASE_URL_UNPOOLED=postgresql://support_dev:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_dev?schema=public\nTEST_DATABASE_URL=postgresql://support_test:LOCAL_ONLY_SET_A_RANDOM_LOCAL_VALUE@localhost:5433/support_test?schema=public\nSESSION_SECRET=REPLACE_IN_LOCAL_ENV_WITH_RANDOM_VALUE\nAPP_ORIGIN=http://localhost:5173\n';
 async function repo(t) {
  const root=await mkdtemp(path.join(os.tmpdir(),'audit-binding-')); t.after(()=>rm(root,{recursive:true,force:true}));
@@ -58,6 +58,12 @@ test('uses the host owner for Unix bind mounts and refuses a root-owned target i
  assert.deepEqual(sandboxIdentity('darwin',501,20),{uid:501,gid:20});
  assert.deepEqual(sandboxIdentity('win32'),{uid:10001,gid:10001});
  assert.throws(()=>sandboxIdentity('linux',0,0),/non-root host UID\/GID/);
+ for(const [uid,gid] of [[1,0],[-1,20],[2**32,20],[20,2**32]])assert.throws(()=>sandboxIdentity('linux',uid,gid),/non-root host UID\/GID/);
+});
+test('uses one selected identity for container users, private scratch and artifact volume ownership', () => {
+ const identity=sandboxIdentity('linux',2345,3456);
+ assert.deepEqual(sandboxIdentityContract(identity),{containerUser:'2345:3456',scratchSpec:'/scratch:rw,noexec,nosuid,nodev,size=1153433600,uid=2345,gid=3456,mode=0700',artifactVolumeOptions:'size=67108864,mode=0700,uid=2345,gid=3456'});
+ assert.throws(()=>sandboxIdentityContract({uid:0,gid:0}),/unsafe sandbox container identity/);
 });
 
 test('restricts Windows private bind directories and inherited files to owner and system principals', async t => {

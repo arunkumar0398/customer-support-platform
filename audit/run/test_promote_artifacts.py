@@ -44,5 +44,7 @@ class PromotionTests(unittest.TestCase):
   self.assertEqual((dest/'keep').read_text(),'keep')
  def test_rejects_changing_file_during_read(self):
   self.put('race',b'x'*32)
-  with self.assertRaises((ValueError,OSError)): promote_files(self.scratch,self.artifacts,'run-test',['race'],per_file_limit=64,total_limit=96,after_open=lambda name: (self.scratch/name).write_bytes(b'y'*32))
+  def mutate_same_size_file(name):
+   path=self.scratch/name;path.write_bytes(b'y'*32);current=path.stat();os.utime(path,ns=(current.st_atime_ns,current.st_mtime_ns+1000000))
+  with self.assertRaises((ValueError,OSError)): promote_files(self.scratch,self.artifacts,'run-test',['race'],per_file_limit=64,total_limit=96,after_open=mutate_same_size_file)
 if __name__=='__main__': unittest.main()
