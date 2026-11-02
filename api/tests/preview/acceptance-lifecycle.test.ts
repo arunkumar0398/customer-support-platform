@@ -144,12 +144,14 @@ afterAll(async () => {
 
 describe('local acceptance-shaped Preview fixture lifecycle', () => {
   it('provisions, authenticates, exercises permitted ticket and membership flows, denies unauthorized access without writes, and cleans up', async () => {
-    const alpha = fixture.manifest.organizations.find((row) => row.slug.endsWith('-alpha'))!;
-    const beta = fixture.manifest.organizations.find((row) => row.slug.endsWith('-beta'))!;
-    const alphaCustomerOne = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.label === 'customer-one')!;
-    const alphaCustomerTwo = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.label === 'customer-two')!;
-    const alphaAgent = fixture.manifest.users.find((row) => row.organizationId === alpha.id && row.role === 'AGENT')!;
-    const betaCustomer = fixture.manifest.users.find((row) => row.organizationId === beta.id && row.label === 'customer-one')!;
+    const provisioned = fixture;
+    if (!provisioned) throw new Error('Synthetic fixture provisioning did not complete.');
+    const alpha = provisioned.manifest.organizations.find((row) => row.slug.endsWith('-alpha'))!;
+    const beta = provisioned.manifest.organizations.find((row) => row.slug.endsWith('-beta'))!;
+    const alphaCustomerOne = provisioned.manifest.users.find((row) => row.organizationId === alpha.id && row.label === 'customer-one')!;
+    const alphaCustomerTwo = provisioned.manifest.users.find((row) => row.organizationId === alpha.id && row.label === 'customer-two')!;
+    const alphaAgent = provisioned.manifest.users.find((row) => row.organizationId === alpha.id && row.role === 'AGENT')!;
+    const betaCustomer = provisioned.manifest.users.find((row) => row.organizationId === beta.id && row.label === 'customer-one')!;
     const ownFixtureTicket = ticketFor(alphaCustomerOne.id);
     const otherCustomerTicket = ticketFor(alphaCustomerTwo.id);
     const foreignTicket = ticketFor(betaCustomer.id);

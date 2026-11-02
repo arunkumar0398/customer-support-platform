@@ -1,10 +1,12 @@
 import express from 'express';
+import express, { type RequestHandler } from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { errorHandler } from '../../src/middleware/errors.js';
 import { createLoginThrottle } from '../../src/modules/auth/routes.js';
-const options=(now,limits={ip:100000,account:100000})=>({appOrigin:'http://localhost:5173',sessionSecret:'synthetic-only-secret-with-more-than-32-characters',now:()=>new Date(now),testLoginThrottleLimits:limits});
-function invoke(middleware,ip,email){const headers={};let called=false;let error;try{middleware({ip,body:{email}},{setHeader:(name,value)=>headers[name]=value},()=>{called=true;});}catch(e){error=e;}return {headers,called,error};}
+import type { AuthOptions } from '../../src/modules/auth/session.js';
+const options=(now:number,limits:NonNullable<AuthOptions['testLoginThrottleLimits']>={ip:100000,account:100000}):AuthOptions=>({appOrigin:'http://localhost:5173',sessionSecret:'synthetic-only-secret-with-more-than-32-characters',now:()=>new Date(now),testLoginThrottleLimits:limits});
+function invoke(middleware:RequestHandler,ip:string,email:string){const headers:Record<string,string>={};let called=false;let error:unknown;try{middleware({ip,body:{email}} as Parameters<RequestHandler>[0],{setHeader:(name:string,value:number|string)=>headers[name]=String(value)} as unknown as Parameters<RequestHandler>[1],()=>{called=true;});}catch(e){error=e;}return {headers,called,error};}
 describe('login throttle capacity policy',()=>{
  it('enforces the 4096-entry ceiling through an Express login route without entering the login handler',async()=>{
   let now=Date.UTC(2026,10,1);let loginHandlerCalls=0;
@@ -12,6 +14,7 @@ describe('login throttle capacity policy',()=>{
   let routeIp='';
   const app=express();app.use(express.json());app.disable('trust proxy');
   app.post('/api/auth/login',throttle,(request,response)=>{
+   if(!request.ip)throw new Error('Express did not provide the test client IP.');
    routeIp=request.ip;
    loginHandlerCalls++;response.status(204).end();
   });app.use(errorHandler);
