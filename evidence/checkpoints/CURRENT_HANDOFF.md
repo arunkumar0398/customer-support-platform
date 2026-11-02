@@ -277,3 +277,26 @@ TK-33 remains IN_PROGRESS; A24 and G5 remain NOT_RUN. Restart from the current r
 - Candidate 58ca5df340e4de1d089f3753acd4aea2c3568765 passed hosted GitHub Actions run [#1](https://github.com/arunkumar0398/customer-support-platform/actions/runs/40644651623), including disposable PostgreSQL, migrations/seed, API/web tests, Playwright, lint/typecheck, and production build. Sanitized logs uploaded. A34 PASS.
 - G5 PASS for that candidate based on hosted CI, fresh Windows Docker checkout/runtime proof in TK-33, and exact-SHA reviews with no P0/P1. Keep the known login limiter capacity/recovery P2 disclosed; A33 and broad unverified acceptance checks remain NOT_RUN.
 - TK-34 is now unblocked by G5 and is the next task. Only local configuration/build/dry-run validation is in scope until provider resource provisioning or actual deployment is explicitly authorized. Production publish and production migrations remain separate approvals.
+# Current handoff — fresh continuation 2026-11-02
+
+## Exact local candidate and observed work
+
+- Candidate: `080d883029e6e68619c34e8dc4d055d03b4dcbb7`, branch `codex/provisioning-timeout-diagnostics-44042`, local/unpushed. The original dirty `44042d47` checkout and screenshot/backup files were preserved.
+- Run 22 remains the exact-candidate retained local evidence: API 425/425 (28 files) and provisioner 21/21. Hashes and source binding were rechecked. No CI result is claimed for `080d883`.
+- Cleanup timeout cause was CPU contention from two API workers in a one-CPU audit sandbox; no PostgreSQL blocking lock was observed. The combined `all` lane now uses one API worker only; timeout remains five seconds and Web remains at two workers. The concurrency assertion passed; the combined lane itself has not been rerun after this harness edit.
+- Throttle capacity behavior is locally confirmed, while no security vulnerability is established. Independent verifier reports intentional fail-closed behavior; Vercel topology and IP distribution remain unverified without deployed probing.
+
+## Preview disposition
+
+- Neon Preview compute is active on the recorded project/branch/endpoint. Earlier read-only `SELECT 1` succeeded; not repeated. No hosted fixture write or authenticated role test occurred.
+- Latest inspected API deployment is `DB8kjRru6d6EzY9tqV12kvrxRqiK` / source `a6922fca49d05abe774c26fdf5774db750fd094c`; latest Web is `HCkQZraegPxMo1NPuNi3WbotiM2L` / source `ddf3d69b32db494e04ae36256633633bf9132583`. Current Web Preview `API_ORIGIN` points to a different API deployment. API runtime DB binding remains unverified. A35 is **BLOCKED / NOT_RUN**.
+- The exact-run approval package is [here](PREVIEW-EXECUTION-APPROVAL-2026-11-02.md). It proposes aligning Web Preview to the inspected API deployment, but does not authorize changing Vercel settings, deploying, provisioning fixtures, or running role tests. Owner must confirm the corrected pair, API DB endpoint mapping/role, and approve this specific run.
+
+## Remaining gates
+
+- Offline audit: **INCOMPLETE**; Run 22 does not satisfy all pinned Cloudflare phases. Local proxy and throttle evidence are not hosted configuration evidence. Coverage critique, independent record verification, structured/prose reconciliation and official validators on any changed structured ledger remain due.
+- A22/A23/A37: partial; Hallmark results carry forward only for unchanged source surfaces. Manual screen-reader journey is **NOT_RUN**; script is [SCREENREADER-MANUAL-2026-11-02.md](SCREENREADER-MANUAL-2026-11-02.md).
+- Assessment Section 8 deliverables are documented, but evaluator access and A28 rehearsal remain unresolved. Deployment and CI are optional assessment items; internal Preview/audit release gates remain separate.
+- Do not transfer older deployment/acceptance evidence to this candidate. No push, deployment, hosted data change, merge, or submission is authorized by this handoff.
+
+# Previous handoff history

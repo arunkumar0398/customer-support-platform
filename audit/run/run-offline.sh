@@ -184,7 +184,7 @@ case "$lane" in
     npm run db:migrate:test
     npm run lint
     npm run typecheck
-    npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
+    npm run test:api -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=1
     npm run test:web -- --fsModuleCachePath=/scratch/vitest-cache --maxWorkers=2
     npm run test:e2e -- --list
     npm run build

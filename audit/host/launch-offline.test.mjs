@@ -31,6 +31,9 @@ test('keeps API lane concurrency within the prepared one-CPU sandbox', async () 
  const runner=await readFile(new URL('../run/run-offline.sh',import.meta.url),'utf8');
  const apiLane=runner.slice(runner.lastIndexOf('\ncase "$lane" in')).split('\n  api)')[1].split('\n  api-provisioning-file)')[0];
  assert.match(apiLane,/--maxWorkers=1/);
+ const allLane=runner.slice(runner.lastIndexOf('\ncase "$lane" in')).split('\n  all)')[1].split('\nesac')[0];
+ assert.match(allLane,/npm run test:api -- --fsModuleCachePath=\/scratch\/vitest-cache --maxWorkers=1/);
+ assert.match(allLane,/npm run test:web -- --fsModuleCachePath=\/scratch\/vitest-cache --maxWorkers=2/);
 });
 test('exposes only fixed offline lanes, including bounded provisioning diagnostics', () => {
  for (const lane of ['api','web','browser','browser-smoke','all','api-provisioning-file','api-provisioning-clean-selected','api-provisioning-foreign-membership']) assert.equal(isSupportedLane(lane),true,lane);

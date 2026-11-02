@@ -80,3 +80,27 @@ Neon recovery and one read-only fixture discovery are reported PASS (15 active s
 - Full bounded offline audit: **BLOCKED / INCOMPLETE** because the available Docker Linux images lack compatible preinstalled test runners. The repo-contained report documents only bounded pure-helper tests; route, database, proxy, throttle, UI, and supply-chain audit lanes remain unverified. No deployed probes or dependency installation/fetch occurred. See [environment readiness record](SECURITY-AUDIT-ENVIRONMENT-2026-11-01.md).
 - Fresh G7 on exact candidate c179180 and docs head 4b404f7 returned **BLOCKED_BY_ENVIRONMENT**; see the [c179180 review](../reviews/g7-c179180-2026-11-01.md) and [4b404f7 review](../reviews/g7-4b404f7-2026-11-01.md). Release remains blocked by Preview credentials/authorization evidence, the full audit, evaluator access, A28 rehearsal, and broader UI evidence.
 - Deployment URL: **OPTIONAL** under the assessment. Current Vercel API rate-limit results do not require a paid-plan upgrade.
+# Assessment deliverables inventory — current local continuation 2026-11-02
+
+Candidate `080d883029e6e68619c34e8dc4d055d03b4dcbb7` (`codex/provisioning-timeout-diagnostics-44042`) is local/unpushed. Run 22 provides local evidence on this exact source; it is not Actions CI or G7. Application-source/deployment evidence remains SHA-specific and must not be attributed to the local candidate. The assessment requires the eight Section 8 deliverables below; deployment and CI are optional. Separate internal gates A35, complete bounded audit, full UI/accessibility, evaluator access, and A28 remain open.
+
+| Required item | Current path/status | Evidence and gap |
+|---|---|---|
+| Source repository | Private GitHub repo; **PARTIAL** | Source and branch are documented; evaluator read access is unverified. No visibility change. |
+| README setup/run | `README.md`; **COMPLETE, not freshly rehearsed** | Setup, local run, seed guard and tests documented. A28 fresh setup rehearsal still unrun. |
+| Architecture diagram | `docs/architecture.md`; **COMPLETE** | Component/request flow documentation exists; runtime Preview binding remains a separate internal gate. |
+| Data model/indexes | `docs/data-model.md`; **COMPLETE** | Schema, constraints and indexes documented against Prisma/migrations. |
+| API docs/examples | `docs/api.md`; **COMPLETE** | Routes, auth expectations, and examples documented; Preview role behavior remains untested. |
+| Sample credentials/seed | `docs/demo-accounts.md`; **COMPLETE** | Synthetic local-only accounts and guarded seed instructions; no Preview credentials are present. |
+| Test instructions/results | `docs/testing.md`, acceptance ledger; **PARTIAL** | Run 22 local API 425/425 and provisioner 21/21 on `080d883`; focused worker assertion passed after the runner edit. Combined `all` lane, exact-SHA CI, hosted A35, full audit, and complete UI/accessibility matrix remain open. |
+| Tradeoffs/limitations/next steps | `docs/limitations.md`; **COMPLETE** | Process-local throttle, pagination, signup/reset limits, and open gates are documented. |
+
+## Internal release gates (not extra assessment deliverables)
+
+- Preview A35: **BLOCKED / NOT_RUN** because inspected Web `API_ORIGIN` targets a different API deployment; deployed API database binding/role also unverified. No hosted writes or role requests were sent.
+- Offline security audit: **INCOMPLETE**, not a pass; see [continuation report](../reviews/audit-continuation-2026-11-02-080d883.md).
+- A22/A23/A37: **PARTIAL**; manual screen-reader run **NOT_RUN**.
+- Evaluator access and A28 human rehearsal: **OPEN**.
+- CI/publish: local candidate unpushed; exact-SHA Actions is not available yet. No push approval applies to this SHA.
+
+# Historical deliverables inventory

@@ -1,4 +1,13 @@
 # Testing and CI evidence
+
+## Run 22 bounded offline continuation — 2026-11-02
+
+Exact source `080d883029e6e68619c34e8dc4d055d03b4dcbb7`, tree `75094b514a6d404765b45625de542aeb4d11a476`: `api-provisioning-file` passed **21/21** and the API lane passed **425/425 across 28 files**, both exit 0 in the pinned no-network Linux image. Promoted logs, launch records, source binding, hashes, limitations, and the API assertion map are in [the continuation report](../evidence/reviews/audit-continuation-2026-11-02-080d883.md). This is local exact-source evidence, not GitHub CI and not a complete Cloudflare audit.
+
+The five throttle tests in that API lane confirm local map-capacity/expiry behavior; an independent focused verifier found no vulnerability established by this fail-closed policy. Vercel multi-instance behavior remains unknown. The follow-up worker-cap edit changes only the offline runner (`all` API to one worker; Web remains two); its focused host regression passed 1/1, but the pinned Linux `all` lane has not been rerun after that edit. Current run-22 output does not validate the uncommitted runner edit.
+
+Preview compute is currently active, but A35 was not run. The refreshed [Preview execution package](../evidence/checkpoints/PREVIEW-EXECUTION-APPROVAL-2026-11-02.md) records a Web `API_ORIGIN` destination mismatch and unverified API-to-Neon runtime binding. No fixture write or authenticated Preview request occurred.
+
 ## Current local UI follow-up — 2026-11-01
 
 In the isolated UI worktree, `npm run check` exited 0: lint, API/Web type checks, API 392/392, Web 12/12, 45 E2E tests discovered, and API/Web builds passed. `npm run test:e2e` exited 0 with 45/45 passing (54.0 seconds). See [rendered Hallmark measurements and screenshots](../evidence/reviews/hallmark-followup-2026-11-01/REPORT.md). This is uncommitted local evidence layered on the prior candidate; it is not exact-SHA CI and does not supersede any previously recorded Actions run.

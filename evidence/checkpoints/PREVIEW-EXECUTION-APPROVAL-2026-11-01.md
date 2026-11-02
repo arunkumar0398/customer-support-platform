@@ -1,5 +1,7 @@
 # Preview A35 execution package — prepared, not approved
 
+> **Superseded for current execution:** use [the refreshed 2026-11-02 package](PREVIEW-EXECUTION-APPROVAL-2026-11-02.md). This file records the earlier target snapshot and is retained for history; its deployment IDs and run plan are not current approval values.
+
 **State:** PREPARED / NOT APPROVED FOR HOSTED WRITES  
 **Prepared:** 2026-11-01  
 **Local fixture package:** provisioner reviewed in the separate local fixture evidence; this record does not authorize its hosted mode.
