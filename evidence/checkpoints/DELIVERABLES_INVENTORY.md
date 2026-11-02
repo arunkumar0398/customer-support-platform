@@ -12,8 +12,13 @@ The live default is `codex/assessment-mvp` at this SHA. See the [exact-SHA readi
 | 4. Data model and key indexes | `docs/data-model.md` | **PASS** | Entities, tenant relationships, constraints, and indexes are documented. |
 | 5. API documentation/examples | `docs/api.md` | **PASS** | Routes, authentication expectations, and request/response examples are documented. |
 | 6. Sample credentials or seed instructions | `docs/demo-accounts.md`, `api/prisma/seed.ts` | **PASS** | Synthetic local-only accounts and guarded seed instructions are documented; no hosted credentials are included. |
-| 7. Test instructions/results | `docs/testing.md`, acceptance ledger, current readiness report | **PASS** | Exact-SHA Actions, local API/Web and 47/47 Playwright results, database setup, the initial transient Docker failure plus successful same-SHA retry, and npm audit scope are recorded without treating provider success as app testing. |
+| 7. Test instructions/results | `docs/testing.md`, acceptance ledger, current readiness report, [exact-SHA CI evidence](../reviews/assessment-ci-evidence-19246132-2026-11-02.md) | **PASS** | Actions #130 ran the documented API/Web/Playwright gates on the exact SHA; commands and observed counts are summarized in the committed CI record and linked run artifact. Local Compose startup/migration/seed results are in the readiness report. The separately cited local rehearsal file was not found and its results are not claimed. |
 | 8. Tradeoffs/limitations/next steps | `docs/limitations.md` | **PASS** | Known limits and future work are documented. |
+
+### Separate internal acceptance gates
+
+- **A35 Preview: BLOCKED / NOT_RUN.** The linked [execution package](PREVIEW-EXECUTION-APPROVAL-2026-11-02.md) says **NOT APPROVED** and records no authorized hosted writes, authenticated role requests, or deployment. No separate approved run record supporting a customer/agent/admin journey claim is present in this PR. Authenticated denial results, before/after no-write evidence, and cleanup/zero-residual proof are not available here.
+- **Other internal gates:** audit completion/native-Linux proof, full UI/accessibility matrix and manual screen-reader review, evaluator access, and A28 human rehearsal remain open as described in the readiness report and ledger.
 
 ## Historical local UI evidence — 2026-11-01
 
