@@ -207,6 +207,7 @@ test('staff can edit, transition, assign, and inspect ticket history', async ({ 
 });
 
 test('staff must provide a reason when reopening a resolved ticket', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
   await signIn(page, agentIds[0]);
   await db.ticket.update({
     where: { id: ticketIds[3] },
@@ -215,10 +216,40 @@ test('staff must provide a reason when reopening a resolved ticket', async ({ pa
   await page.goto(`/tickets/${ticketIds[3]}`);
   await expect(page.getByRole('heading', { name: 'Resolved reopen fixture' })).toBeVisible();
 
-  await page.getByLabel('Ticket status').selectOption('IN_PROGRESS');
+  const before = await db.ticket.findUniqueOrThrow({ where: { id: ticketIds[3] }, select: { status: true, version: true } });
+  const eventsBefore = await db.activityEvent.count({ where: { organizationId, ticketId: ticketIds[3] } });
+  let updates = 0;
+  page.on('request', (request) => {
+    if (request.method() === 'PATCH' && new URL(request.url()).pathname === `/api/tickets/${ticketIds[3]}`) updates += 1;
+  });
+  const status = page.getByLabel('Ticket status');
+  await status.selectOption('IN_PROGRESS');
   const reopenReason = page.getByLabel('Reason for reopening');
   await expect(reopenReason).toBeVisible();
-  await reopenReason.fill('Customer confirmed the issue is still occurring.');
+  await status.focus();
+  await page.keyboard.press('Tab');
+  await expect(reopenReason).toBeFocused();
+  await expect.poll(() => reopenReason.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe('none');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(reopenReason).toBeFocused();
+  expect(updates).toBe(0);
+
+  await reopenReason.fill('   ');
+  const rejected = page.waitForResponse((response) =>
+    response.request().method() === 'PATCH' && new URL(response.url()).pathname === `/api/tickets/${ticketIds[3]}`,
+  );
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  expect((await rejected).status()).toBe(422);
+  await expect(page.getByRole('alert')).toContainText('Request body is invalid');
+  expect(await db.ticket.findUniqueOrThrow({ where: { id: ticketIds[3] }, select: { status: true, version: true } })).toEqual(before);
+  expect(await db.activityEvent.count({ where: { organizationId, ticketId: ticketIds[3] } })).toBe(eventsBefore);
+
+  await reopenReason.fill('Stale reason should not be reused');
+  await status.selectOption('RESOLVED');
+  await expect(reopenReason).toHaveCount(0);
+  await status.selectOption('IN_PROGRESS');
+  await expect(reopenReason).toHaveValue('');
+  await reopenReason.fill('  Customer confirmed the issue is still occurring.  ');
   await page.getByRole('button', { name: 'Save changes' }).click();
 
   await expect(page.getByRole('status')).toContainText('Ticket updated');
