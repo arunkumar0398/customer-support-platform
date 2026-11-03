@@ -23,7 +23,7 @@ flowchart LR
   Browser -->|development| Dev[Vite dev server] -->|/api proxy| API
 ```
 
-The browser talks to the same-origin `/api` path. In local development Vite proxies it to the API listener. In Docker, Nginx serves the built frontend and reverse-proxies `/api/*` to the API container. The hosted projects use a Vercel static frontend plus a small Vercel web proxy function for same-origin `/api/*`, which forwards to a separate Express Node Function; the API accesses Neon PostgreSQL. The API function entrypoint exports the Express app from `api/index.ts`; `api/src/local-server.ts` starts a local listener.
+The browser talks to the same-origin `/api` path. In local development Vite proxies it to the API listener. In Docker, Nginx serves the built frontend and reverse-proxies `/api/*` to the API container. The hosted projects use a Vercel static frontend plus a small Vercel web proxy function for same-origin `/api/*`, which forwards to a separate Express Node Function; the current hosted database provider is Neon PostgreSQL. The API function entrypoint exports the Express app from `api/index.ts`; `api/src/local-server.ts` starts a local listener.
 
 The request path is: request ID and JSON-size middleware → health/auth/membership/ticket/dashboard router → session and current-membership authorization → role/tenant-scoped service → Prisma/PostgreSQL. Ticket writes use expected versions and transactions that update the ticket and add an immutable activity event together. See [API contract](api.md) and [data model](data-model.md).
 
@@ -73,9 +73,11 @@ flowchart LR
   API --> DB[(Neon PostgreSQL)]
 ```
 
-The hosted architecture uses separate Vercel projects for the web and API, plus Neon PostgreSQL. In the Web project, `web/vercel.json` rewrites `/api/*` to `web/api/index.ts`; that handler reconstructs the original API path and `web/src/server/api-proxy.ts` forwards only an allowlist of request/response headers, body, and cookies to validated `API_ORIGIN`. Preview requests add a Vercel OIDC trusted-source token. The API project exports the Express app at `api/index.ts`. Runtime database access uses the pooled Neon URL; migrations use a direct/unpooled URL, with Preview and Production kept separate.
+The current hosted architecture uses separate Vercel projects for the web and API, plus Neon PostgreSQL. In the Web project, `web/vercel.json` rewrites `/api/*` to `web/api/index.ts`; that handler reconstructs the original API path and `web/src/server/api-proxy.ts` forwards only an allowlist of request/response headers, body, and cookies to validated `API_ORIGIN`. Preview requests add a Vercel OIDC trusted-source token. The API project exports the Express app at `api/index.ts`. Runtime database access uses the provider's pooled URL; Prisma migrations use the separate direct/unpooled `DATABASE_URL_UNPOOLED`. Production remains on Neon.
 
-The application source SHA with verified successful Web/API deployments is `3e613c0b7df5bec290553cfb7b5a9404bfaec1a1` (Actions #74). Documentation candidate reviewed before this update `5e27f68a7f2c8aa12c502995b26c2b5063e1309b` passed Actions #94. Both exact-SHA Vercel statuses on that docs candidate report provider build-rate-limit failures; these are not application build results and do not establish a healthy deployment at this SHA. Docs-only runs #90–#93 are historical and remain SHA-specific. Deployment is optional in the assessment. No provider upgrade is required.
+The repository contains a proposed, unexecuted Supabase Preview migration design at [the migration runbook](supabase-preview-migration.md) and [the availability decision](adr/0005-neon-supabase-availability.md). It does not establish a Supabase project, copy data, change Vercel settings, or validate provider compatibility. Any Supabase Preview must use separate targets and credentials; it cannot replace Production or existing Neon evidence.
+
+Historical deployment and Actions evidence is recorded in [the handoff](../evidence/checkpoints/CURRENT_HANDOFF.md) and [deliverables inventory](../evidence/checkpoints/DELIVERABLES_INVENTORY.md). Provider build statuses are not runtime database-binding evidence. Deployment is optional in the assessment.
 
 ## Operations and reliability
 

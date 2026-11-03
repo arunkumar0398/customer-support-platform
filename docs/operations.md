@@ -59,6 +59,8 @@ The named PostgreSQL volume persists across `docker compose down`. Removing it d
 
 This is a manual Preview setup guide. It does not authorize or perform a production release. The application uses two Vercel projects from this npm-workspaces repository and a Neon PostgreSQL Preview database. Both Vercel Function projects are pinned to Singapore (`sin1`) to stay close to the Neon Singapore region; static web files still use Vercel's CDN.
 
+The existing Neon Preview procedure remains the current documented provider path. A separate Supabase Preview migration is only proposed; it has not been executed. See [the Supabase Preview migration runbook](supabase-preview-migration.md) and [the availability decision](adr/0005-neon-supabase-availability.md). Do not treat it as evidence of a migrated or available deployment.
+
 ### Create the Neon Preview database
 
 1. In Neon, create a project named `customer-support-platform-preview`.
