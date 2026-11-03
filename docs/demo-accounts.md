@@ -1,8 +1,8 @@
 # Synthetic demo accounts
 
-These accounts and tickets are generated only for local assessment development and testing. They are not real customer data and their shared password must never be reused for an actual account or deployed environment.
+These accounts and tickets are generated only for local assessment development and testing. They are not real customer data. This guide contains the sample credentials or seed instructions required by assessment Section 8; the account set remains local-only and must never be used in Preview or Production.
 
-The local seed command targets only the loopback `support_dev` database and role. Run migrations before `npm run db:seed`. Database integration tests call the same idempotent seed function only after verifying the disposable `support_test` identity.
+The local seed command targets only the loopback `support_dev` database and role. Run migrations before `npm run db:seed`. Database integration tests call the same idempotent seed function only after verifying the disposable `support_test` identity. Do not weaken or bypass those guards to seed a deployed database. The optional, separately gated Production demo workflow is documented in [`production-demo-accounts.md`](./production-demo-accounts.md); it uses different synthetic identities and runtime-generated credentials.
 
 All accounts use the synthetic password `SupportDemo-Only-2026!`. Passwords are stored as salted scrypt hashes with `N=32768`, `r=8`, and `p=1`; the seed stores only those hashes.
 

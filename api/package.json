@@ -11,7 +11,8 @@
     "build": "tsc -p tsconfig.build.json",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts --run"
+    "db:seed": "tsx prisma/seed.ts --run",
+    "demo:production:provision": "tsx scripts/production-demo/cli.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
