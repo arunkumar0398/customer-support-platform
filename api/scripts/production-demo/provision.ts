@@ -463,16 +463,17 @@ export async function verifyExistingPersistentDemo(
     throw new Error('Persistent demo accounts or memberships do not match the run manifest.');
   }
   const memberships = await target.client.query(
-    'SELECT "userId", "organizationId", role FROM "Membership" WHERE "userId" = ANY($1::uuid[]) ORDER BY "userId", "organizationId"',
+    'SELECT "userId", "organizationId", role, "isActive" FROM "Membership" WHERE "userId" = ANY($1::uuid[]) ORDER BY "userId", "organizationId"',
     [manifest.users.map((user) => user.id)],
   );
   const expectedMemberships = [...manifest.users]
-    .map((user) => ({ userId: user.id, organizationId: user.organizationId, role: user.role }))
+    .map((user) => ({ userId: user.id, organizationId: user.organizationId, role: user.role, isActive: true }))
     .sort((a, b) => a.userId.localeCompare(b.userId) || a.organizationId.localeCompare(b.organizationId));
   const actualMemberships = memberships.rows.map((row) => ({
     userId: row.userId,
     organizationId: row.organizationId,
     role: String(row.role),
+    isActive: row.isActive === true,
   }));
   if (memberships.rowCount !== expectedMemberships.length
     || JSON.stringify(actualMemberships) !== JSON.stringify(expectedMemberships)) {

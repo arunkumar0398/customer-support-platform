@@ -86,10 +86,12 @@ function capturedTickets(base: DemoRunManifest): DemoCleanupTicket[] {
   }));
 }
 
-it('rejects a run account with any membership outside the run organization', async () => {
+it('rejects foreign and inactive memberships when verifying a persistent demo run', async () => {
   const manifest = localManifest();
   const client = new Client();
   const queries: Array<{ text: string; values?: unknown[] }> = [];
+  let includeForeignMembership = true;
+  let inactiveUserId: string | undefined;
   Object.defineProperty(client, 'connect', { configurable: true, value: async () => undefined });
   Object.defineProperty(client, 'end', { configurable: true, value: async () => undefined });
   Object.defineProperty(client, 'query', {
@@ -101,10 +103,15 @@ it('rejects a run account with any membership outside the run organization', asy
         id: manifest.organization.id, slug: manifest.organization.slug, name: manifest.organization.name,
       }] };
       if (text.includes('FROM "Membership"') && text.includes('ANY')) return {
-        rowCount: 5,
+        rowCount: includeForeignMembership ? 5 : 4,
         rows: [
-          ...manifest.users.map((user) => ({ userId: user.id, organizationId: user.organizationId, role: user.role })),
-          { userId: manifest.users[2].id, organizationId: crypto.randomUUID(), role: 'CUSTOMER' },
+          ...manifest.users.map((user) => ({
+            userId: user.id, organizationId: user.organizationId, role: user.role,
+            isActive: user.id !== inactiveUserId,
+          })),
+          ...(includeForeignMembership
+            ? [{ userId: manifest.users[2].id, organizationId: crypto.randomUUID(), role: 'CUSTOMER', isActive: true }]
+            : []),
         ].sort((a, b) => a.userId.localeCompare(b.userId) || a.organizationId.localeCompare(b.organizationId)),
       };
       if (text.includes('FROM "User"')) return {
@@ -135,6 +142,12 @@ it('rejects a run account with any membership outside the run organization', asy
     await expect(verifyExistingPersistentDemo(verified, manifest)).rejects.toThrow(/memberships do not match/);
     expect(queries.some(({ text, values }) => text.includes('FROM "Membership"')
       && text.includes('ANY') && JSON.stringify(values) === JSON.stringify([manifest.users.map((user) => user.id)]))).toBe(true);
+
+    includeForeignMembership = false;
+    inactiveUserId = manifest.users[2].id;
+    await expect(verifyExistingPersistentDemo(verified, manifest)).rejects.toThrow(/memberships do not match/);
+    expect(queries.some(({ text }) => text.includes('FROM "Membership"')
+      && text.includes('ANY') && text.includes('"isActive"'))).toBe(true);
   } finally {
     await verified.client.end();
   }
