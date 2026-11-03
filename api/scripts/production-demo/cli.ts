@@ -105,13 +105,12 @@ function terminalConfirmation(message: string): Promise<string> {
   return terminal.question(message).finally(() => terminal.close());
 }
 
-function manifestCounts(manifest: DemoRunManifest): string {
-  return `organizations=${manifest.counts.organizations} accounts=${manifest.counts.users} tickets=${manifest.counts.tickets}`;
-}
-
-function targetSummary(target: VerifiedProductionTarget): string {
-  const { projectId, branchId, endpointId, database, username } = target.identity;
-  return `target project=${projectId} branch=${branchId} endpoint=${endpointId} database=${database} role=${username}`;
+function manifestCounts(manifest: DemoRunManifest) {
+  return {
+    organizations: manifest.counts.organizations,
+    accounts: manifest.counts.users,
+    tickets: manifest.counts.tickets,
+  };
 }
 
 /** Testable orchestration; dependencies are injectable so tests never contact Neon or a database. */
@@ -160,7 +159,12 @@ export async function runProductionDemoCli(
       }
       const verifier = dependencies.verifyExisting ?? verifyExistingPersistentDemo;
       const manifest = await verifier(target, manifestValue);
-      stdout(`Verified existing Production demo run ${parsed.runId}: ${targetSummary(target)} ${manifestCounts(manifest)}.`);
+      stdout(JSON.stringify({
+        verified: true,
+        runId: manifest.runId,
+        target: target.identity,
+        ...manifestCounts(manifest),
+      }));
       completed = true;
       return 0;
     }
@@ -185,15 +189,23 @@ export async function runProductionDemoCli(
     // keep the manifest and one-time credentials so the operator can reconcile the run.
     preserveRecoveryOutput = true;
     await output.close();
-    stdout(`Provisioned persistent Production demo run ${parsed.runId}: ${targetSummary(target)} ${manifestCounts(result.manifest)}.`);
-    stdout(`Private one-time credentials: ${output.credentialsPath}`);
-    stdout(`Sanitized recovery manifest: ${output.manifestPath}`);
+    stdout(JSON.stringify({
+      provisioned: true,
+      runId: result.manifest.runId,
+      target: target.identity,
+      ...manifestCounts(result.manifest),
+      credentialsFile: output.credentialsPath,
+      sanitizedManifestFile: output.manifestPath,
+      note: 'Passwords and password hashes were not printed.',
+    }));
     completed = true;
     return 0;
   } catch {
     // Driver and parser errors may contain secret connection details. The CLI deliberately
     // reports no arbitrary error message or stack trace.
-    stderr('Production demo operation failed safely; inspect the private operator run state before retrying.');
+    stderr(JSON.stringify({
+      error: 'Production demo operation failed safely; inspect the private operator run state before retrying.',
+    }));
     return 1;
   } finally {
     if (output) {

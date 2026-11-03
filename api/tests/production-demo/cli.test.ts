@@ -159,9 +159,18 @@ describe('Production demo CLI execution', () => {
     expect(setup.calls.provision).toHaveBeenCalledOnce();
     expect(setup.target.client.end).toHaveBeenCalledOnce();
     expect([...setup.stdout, ...setup.stderr].join('\n')).not.toContain('never-print');
-    expect([...setup.stdout, ...setup.stderr].join('\n')).toContain('demo-evaluator-20261103-a1b2c3');
-    expect([...setup.stdout, ...setup.stderr].join('\n')).toContain(profile.endpointId);
-    expect([...setup.stdout, ...setup.stderr].join('\n')).toContain('credentials.json');
+    expect(setup.stdout).toHaveLength(1);
+    expect(JSON.parse(setup.stdout[0])).toEqual({
+      provisioned: true,
+      runId: 'demo-evaluator-20261103-a1b2c3',
+      target: { mode: 'production', ...profile },
+      organizations: 1,
+      accounts: 4,
+      tickets: 2,
+      credentialsFile: setup.output.credentialsPath,
+      sanitizedManifestFile: setup.output.manifestPath,
+      note: 'Passwords and password hashes were not printed.',
+    });
   });
 
   it('verification-only mode reuses the sanitized manifest without creating output or rotating passwords', async () => {
@@ -173,6 +182,14 @@ describe('Production demo CLI execution', () => {
     expect(setup.calls.output).not.toHaveBeenCalled();
     expect(setup.calls.provision).not.toHaveBeenCalled();
     expect(setup.target.client.end).toHaveBeenCalledOnce();
+    expect(JSON.parse(setup.stdout[0])).toEqual({
+      verified: true,
+      runId: 'demo-evaluator-20261103-a1b2c3',
+      target: { mode: 'production', ...profile },
+      organizations: 1,
+      accounts: 4,
+      tickets: 2,
+    });
   });
 
   it('removes only its private output after a confirmed pre-commit failure', async () => {
@@ -205,5 +222,8 @@ describe('Production demo CLI execution', () => {
     expect(text).not.toContain('private-url');
     expect(text).not.toContain('private-neon-key');
     expect(text).not.toContain('driver failed');
+    expect(setup.stderr).toEqual([JSON.stringify({
+      error: 'Production demo operation failed safely; inspect the private operator run state before retrying.',
+    })]);
   });
 });

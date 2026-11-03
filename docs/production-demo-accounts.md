@@ -42,6 +42,8 @@ After the target is verified, the operator must type the exact Production projec
 
 The CLI itself accepts only its fixed Production target, so tests never execute it against a database. Rehearse the verifier and provisioning service through the test harness against the identity-verified disposable local `support_test` database. Do not point automated tests at Preview or Production.
 
+On success, the command writes one JSON object to standard output. Provisioning returns `provisioned`, the run ID, verified target identity, record counts, and the private paths for the credentials and sanitized manifest. Verification-only returns `verified`, the run ID, target identity, and counts. Neither response contains passwords, password hashes, database URLs, or API keys. The credential file itself contains one-time passwords and must remain in the private destination; do not paste or attach it to chat, logs, GitHub, or the PR.
+
 ## Verify an existing run without changing it
 
 Use the same exact target flags, run ID, private directory, and process environment, adding `--verify-existing`:
