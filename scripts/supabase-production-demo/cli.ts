@@ -1,6 +1,10 @@
+import { createInterface } from 'node:readline/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { productionTarget } from './profile.js';
 import type { ProductionTarget } from './profile.js';
-import { connectProductionTarget } from './target.js';
+import { authorizeProductionWrite, connectProductionTarget } from './target.js';
+import { provisionProductionDemo } from './fixtures.js';
 
 type ProvisionArguments = { runId: string; outputDirectory: string };
 
@@ -69,6 +73,45 @@ export async function verifyProductionTargetCommand(argv: string[] = []): Promis
   try {
     console.log(JSON.stringify({ verified: true, target: sanitizedTarget(target), tls: 'certificate-validated' }));
   } finally {
+    await client.end().catch(() => undefined);
+  }
+}
+
+export async function provisionProductionDemoCommand(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const args = parseProvisionArguments(argv);
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error('Production provisioning requires an interactive terminal for exact-scope confirmation.');
+  }
+  const connectionString = await requireProductionUrl();
+  const { client, target } = await connectProductionTarget(connectionString);
+  const prompts = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const typedProjectRef = await prompts.question(`Type the verified Production project ref (${productionTarget.projectRef}): `);
+    const typedRunId = await prompts.question(`Type the exact Production run ID (${args.runId}): `);
+    verifyTypedProductionConfirmation(typedProjectRef, typedRunId, productionTarget.projectRef, args.runId);
+    authorizeProductionWrite(client, typedProjectRef, typedRunId);
+    const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+    const result = await provisionProductionDemo({
+      client,
+      target,
+      runId: args.runId,
+      outputDirectory: args.outputDirectory,
+      repositoryRoot,
+    });
+    console.log(JSON.stringify({
+      provisioned: true,
+      runId: args.runId,
+      target: sanitizedTarget(target),
+      organizations: result.manifest.organizations.length,
+      accounts: result.manifest.users.length,
+      tickets: result.manifest.tickets.length,
+      activityEvents: result.manifest.activityEvents.length,
+      credentialsFile: result.files.credentialsPath,
+      sanitizedManifestFile: result.files.manifestPath,
+      note: 'Persistent synthetic accounts. Passwords and password hashes were not printed.',
+    }));
+  } finally {
+    prompts.close();
     await client.end().catch(() => undefined);
   }
 }

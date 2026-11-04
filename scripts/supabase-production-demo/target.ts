@@ -27,6 +27,7 @@ type RuntimeGrantSnapshot = {
   schemaOwner?: boolean;
   tablePrivileges: TableGrant[];
   typeUsage?: Array<{ type: string; usage: boolean }>;
+  additionalPrivileges?: boolean;
 };
 
 const verifiedClients = new WeakMap<Client, { target: VerifiedTarget; writeApproved: boolean }>();
@@ -94,6 +95,9 @@ export function assertProductionGrantPolicy(grants: RuntimeGrantSnapshot): void 
   if (!grants.connect || !grants.schemaUsage || grants.schemaCreate || grants.databaseCreate || grants.schemaOwner) {
     throw new Error('Runtime role database/schema privileges do not match the approved least-privilege policy.');
   }
+  if (grants.additionalPrivileges) {
+    throw new Error('Runtime role has privileges beyond the approved application data access.');
+  }
   const byName = new Map(grants.tablePrivileges.map((row) => [row.table, row]));
   if (applicationTables.some((name) => {
     const row = byName.get(name);
@@ -135,10 +139,11 @@ function safeClient(connectionString: string, target: VerifiedTarget): Client {
   const database = decodeURIComponent(url.pathname.replace(/^\//, ''));
   const username = decodeURIComponent(url.username);
   if (!['localhost', '127.0.0.1', '::1'].includes(url.hostname.toLowerCase())
-    || database !== localTestTarget.database || username !== localTestTarget.username
-    || (url.port && !['5432', '5433'].includes(url.port))) {
+    || database !== localTestTarget.database || username !== localTestTarget.username) {
     throw new Error('Local fixture tests require the disposable loopback support_test/support_test database.');
   }
+  // Allow an OS-selected host port for a fresh disposable container. Hostname,
+  // database, username, and the connected server identity remain pinned.
   return new Client({ connectionString, connectionTimeoutMillis: 5000 });
 }
 
@@ -198,7 +203,41 @@ async function assertProductionRole(client: Client): Promise<void> {
     LEFT JOIN pg_type t ON t.typnamespace = n.oid AND t.typname = required.name
     ORDER BY required.name
   `, [applicationTypes]);
-  assertProductionGrantPolicy({ ...grantRow, tablePrivileges, typeUsage: typeResult.rows });
+  const additionalPrivilegeResult = await client.query(`
+    SELECT
+      EXISTS (
+        SELECT 1 FROM pg_namespace n
+        WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+          AND has_schema_privilege(current_user, n.oid, 'CREATE')
+      ) OR EXISTS (
+        SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+          AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
+          AND (has_table_privilege(current_user, c.oid, 'SELECT')
+            OR has_table_privilege(current_user, c.oid, 'INSERT')
+            OR has_table_privilege(current_user, c.oid, 'UPDATE')
+            OR has_table_privilege(current_user, c.oid, 'DELETE')
+            OR has_table_privilege(current_user, c.oid, 'TRUNCATE')
+            OR has_table_privilege(current_user, c.oid, 'REFERENCES')
+            OR has_table_privilege(current_user, c.oid, 'TRIGGER'))
+          AND NOT (n.nspname = 'public' AND c.relkind IN ('r', 'p') AND c.relname = ANY($1::text[])
+            AND NOT has_table_privilege(current_user, c.oid, 'TRUNCATE')
+            AND NOT has_table_privilege(current_user, c.oid, 'REFERENCES')
+            AND NOT has_table_privilege(current_user, c.oid, 'TRIGGER'))
+      ) OR EXISTS (
+        SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname NOT IN ('pg_catalog', 'information_schema') AND c.relkind = 'S'
+          AND (has_sequence_privilege(current_user, c.oid, 'USAGE')
+            OR has_sequence_privilege(current_user, c.oid, 'SELECT')
+            OR has_sequence_privilege(current_user, c.oid, 'UPDATE'))
+      ) AS additional_privileges
+  `, [applicationTables]);
+  assertProductionGrantPolicy({
+    ...grantRow,
+    tablePrivileges,
+    typeUsage: typeResult.rows,
+    additionalPrivileges: Boolean(additionalPrivilegeResult.rows[0]?.additional_privileges),
+  });
 }
 
 async function connectVerified(connectionString: string, target: VerifiedTarget, writeApproved: boolean) {

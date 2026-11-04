@@ -51,6 +51,10 @@ customer accounts. The shared password and account list in
 [Demo accounts](docs/demo-accounts.md) are local-only; never use them in
 Preview or Production.
 
+An optional, separately reviewed [Supabase Production demo-account workflow](docs/supabase-production-demo-accounts.md)
+is documented for owner-requested hosted demos. It is distinct from the
+assessment seed instructions and does not provision accounts by itself.
+
 ## Documentation
 
 - [Architecture and request flow](docs/architecture.md)

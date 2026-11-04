@@ -81,6 +81,7 @@ describe('fixed Supabase Production target', () => {
     expect(() => assertProductionGrantPolicy({ ...safe, tablePrivileges: tablePrivileges.slice(1) })).toThrow();
     expect(() => assertProductionGrantPolicy({ ...safe, tablePrivileges: tablePrivileges.map((row, index) => index === 0 ? { ...row, owns: true } : row) })).toThrow();
     expect(() => assertProductionGrantPolicy({ ...safe, tablePrivileges: tablePrivileges.map((row, index) => index === 3 ? { ...row, delete: false } : row) })).toThrow();
+    expect(() => assertProductionGrantPolicy({ ...safe, additionalPrivileges: true })).toThrow();
   });
 });
 
