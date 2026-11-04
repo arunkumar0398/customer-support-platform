@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { postgresPoolMax } from './pool-config.js';
 
 let cachedClient: PrismaClient | undefined;
 
@@ -15,7 +16,7 @@ export function getPrismaClient(): PrismaClient {
     connectionString,
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 10000,
-    max: 10,
+    max: postgresPoolMax(process.env),
   });
   cachedClient = new PrismaClient({ adapter });
   return cachedClient;
