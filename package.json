@@ -30,6 +30,8 @@
     "preview:verify-target": "tsx scripts/preview/verify-target.ts",
     "preview:provision-fixtures": "tsx scripts/preview/provision-fixtures.ts",
     "preview:cleanup-fixtures": "tsx scripts/preview/cleanup-fixtures.ts",
+    "supabase:production-demo:verify-target": "tsx scripts/supabase-production-demo/verify-target.ts",
+    "supabase:production-demo:provision": "tsx scripts/supabase-production-demo/provision.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:e2e -- --list && npm run build"
   },
   "devDependencies": {

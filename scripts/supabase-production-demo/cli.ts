@@ -1,0 +1,117 @@
+import { createInterface } from 'node:readline/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { productionTarget } from './profile.js';
+import type { ProductionTarget } from './profile.js';
+import { authorizeProductionWrite, connectProductionTarget } from './target.js';
+import { provisionProductionDemo } from './fixtures.js';
+
+type ProvisionArguments = { runId: string; outputDirectory: string };
+
+export function parseProvisionArguments(argv: string[]): ProvisionArguments {
+  const values = new Map<string, string>();
+  const switches = new Set<string>();
+  const valueFlags = new Set(['--run-id', '--output-dir']);
+  const switchFlags = new Set(['--confirm-production-write']);
+  for (let index = 0; index < argv.length; index += 1) {
+    const flag = argv[index];
+    if (!flag?.startsWith('--')) throw new Error('Arguments must use named --flags.');
+    if (switchFlags.has(flag)) {
+      if (switches.has(flag)) throw new Error(`Duplicate flag: ${flag}`);
+      switches.add(flag);
+      continue;
+    }
+    if (!valueFlags.has(flag)) throw new Error('Unknown argument supplied; target and database URL overrides are not supported.');
+    const value = argv[index + 1];
+    if (!value || value.startsWith('--') || values.has(flag)) throw new Error(`Missing or duplicate value for ${flag}.`);
+    values.set(flag, value);
+    index += 1;
+  }
+  if (!switches.has('--confirm-production-write')) throw new Error('Production write acknowledgement is required.');
+  const runId = values.get('--run-id');
+  const outputDirectory = values.get('--output-dir');
+  if (!runId || !/^prod-demo-\d{8}-[a-f0-9]{8}$/.test(runId)) {
+    throw new Error('Run ID must be unique and match prod-demo-YYYYMMDD-xxxxxxxx.');
+  }
+  if (!outputDirectory) throw new Error('Required argument missing: --output-dir.');
+  return { runId, outputDirectory };
+}
+
+export function verifyTypedProductionConfirmation(
+  typedProjectRef: string,
+  typedRunId: string,
+  expectedProjectRef: string,
+  expectedRunId: string,
+): void {
+  if (typedProjectRef !== expectedProjectRef || typedRunId !== expectedRunId) {
+    throw new Error('Typed Production project/run confirmation did not match; no data was written.');
+  }
+}
+
+async function requireProductionUrl(): Promise<string> {
+  const connectionString = process.env.SUPABASE_PRODUCTION_DIRECT_DATABASE_URL;
+  if (!connectionString) throw new Error('SUPABASE_PRODUCTION_DIRECT_DATABASE_URL is not set in this operator process.');
+  return connectionString;
+}
+
+function sanitizedTarget(target: ProductionTarget) {
+  return {
+    provider: target.provider,
+    projectRef: target.projectRef,
+    region: target.region,
+    branchLabel: target.branchLabel,
+    hostname: target.hostname,
+    port: target.port,
+    database: target.database,
+    username: target.username,
+  };
+}
+
+export async function verifyProductionTargetCommand(argv: string[] = []): Promise<void> {
+  if (argv.length) throw new Error('The read-only verifier accepts no command-line arguments.');
+  const { client, target } = await connectProductionTarget(await requireProductionUrl());
+  try {
+    console.log(JSON.stringify({ verified: true, target: sanitizedTarget(target), tls: 'certificate-validated' }));
+  } finally {
+    await client.end().catch(() => undefined);
+  }
+}
+
+export async function provisionProductionDemoCommand(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const args = parseProvisionArguments(argv);
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error('Production provisioning requires an interactive terminal for exact-scope confirmation.');
+  }
+  const connectionString = await requireProductionUrl();
+  const { client, target } = await connectProductionTarget(connectionString);
+  const prompts = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const typedProjectRef = await prompts.question(`Type the verified Production project ref (${productionTarget.projectRef}): `);
+    const typedRunId = await prompts.question(`Type the exact Production run ID (${args.runId}): `);
+    verifyTypedProductionConfirmation(typedProjectRef, typedRunId, productionTarget.projectRef, args.runId);
+    authorizeProductionWrite(client, typedProjectRef, typedRunId);
+    const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+    const result = await provisionProductionDemo({
+      client,
+      target,
+      runId: args.runId,
+      outputDirectory: args.outputDirectory,
+      repositoryRoot,
+    });
+    console.log(JSON.stringify({
+      provisioned: true,
+      runId: args.runId,
+      target: sanitizedTarget(target),
+      organizations: result.manifest.organizations.length,
+      accounts: result.manifest.users.length,
+      tickets: result.manifest.tickets.length,
+      activityEvents: result.manifest.activityEvents.length,
+      credentialsFile: result.files.credentialsPath,
+      sanitizedManifestFile: result.files.manifestPath,
+      note: 'Persistent synthetic accounts. Passwords and password hashes were not printed.',
+    }));
+  } finally {
+    prompts.close();
+    await client.end().catch(() => undefined);
+  }
+}
