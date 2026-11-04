@@ -76,7 +76,9 @@ describe('Supabase Production demo provisioning core on disposable local Postgre
   beforeAll(async () => {
     expect(databaseUrl, 'TEST_DATABASE_URL must identify disposable support_test').toBeTruthy();
     const expected = assertSafeTestDatabaseUrl(databaseUrl!);
-    const verified = await connectLocalTestTarget(databaseUrl!);
+    const ciStyleTestUrl = new URL(databaseUrl!);
+    ciStyleTestUrl.searchParams.set('schema', 'public');
+    const verified = await connectLocalTestTarget(ciStyleTestUrl.toString());
     client = verified.client;
     localTarget = verified.target;
     connected = true;

@@ -46,6 +46,7 @@ describe('fixed Supabase Production target', () => {
     ['wrong login', 'postgresql://postgres:fake@db.ityzntsmumvtktjjdacs.supabase.co:5432/postgres'],
     ['TLS disabled', 'postgresql://csp_prod_runtime:fake@db.ityzntsmumvtktjjdacs.supabase.co:5432/postgres?sslmode=disable'],
     ['host override', 'postgresql://csp_prod_runtime:fake@db.ityzntsmumvtktjjdacs.supabase.co:5432/postgres?host=localhost'],
+    ['local Prisma schema option', 'postgresql://csp_prod_runtime:fake@db.ityzntsmumvtktjjdacs.supabase.co:5432/postgres?schema=public'],
     ['SSL verification override', 'postgresql://csp_prod_runtime:fake@db.ityzntsmumvtktjjdacs.supabase.co:5432/postgres?sslmode=no-verify'],
   ])('refuses %s before connecting', (_caseName, connectionString) => {
     expect(() => parseProductionDatabaseUrl(connectionString)).toThrow();

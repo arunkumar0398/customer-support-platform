@@ -32,15 +32,19 @@ type RuntimeGrantSnapshot = {
 
 const verifiedClients = new WeakMap<Client, { target: VerifiedTarget; writeApproved: boolean }>();
 
-function parseUrl(connectionString: string): URL {
+function parseUrl(connectionString: string, allowLocalSchema = false): URL {
   let url: URL;
   try { url = new URL(connectionString); }
   catch { throw new Error('Database URL is invalid; its value is never printed.'); }
 
   if (!['postgres:', 'postgresql:'].includes(url.protocol)) throw new Error('Target must use PostgreSQL.');
   const allowedParameters = new Set(['sslmode', 'application_name']);
+  if (allowLocalSchema) allowedParameters.add('schema');
   for (const key of url.searchParams.keys()) {
     if (!allowedParameters.has(key)) throw new Error('Unsupported database URL option; target verification refused.');
+  }
+  if (url.searchParams.has('schema') && url.searchParams.get('schema') !== 'public') {
+    throw new Error('Local test database schema must be public.');
   }
   const sslMode = url.searchParams.get('sslmode');
   if (sslMode && !['require', 'verify-full'].includes(sslMode.toLowerCase())) {
@@ -135,7 +139,7 @@ export function authorizeProductionWrite(client: Client, typedProjectRef: string
 
 function safeClient(connectionString: string, target: VerifiedTarget): Client {
   if (target.provider === 'supabase') return new Client(productionConnectionConfig(connectionString).config);
-  const url = parseUrl(connectionString);
+  const url = parseUrl(connectionString, true);
   const database = decodeURIComponent(url.pathname.replace(/^\//, ''));
   const username = decodeURIComponent(url.username);
   if (!['localhost', '127.0.0.1', '::1'].includes(url.hostname.toLowerCase())
@@ -144,7 +148,10 @@ function safeClient(connectionString: string, target: VerifiedTarget): Client {
   }
   // Allow an OS-selected host port for a fresh disposable container. Hostname,
   // database, username, and the connected server identity remain pinned.
-  return new Client({ connectionString, connectionTimeoutMillis: 5000 });
+  // The repository's CI config includes Prisma's schema=public URL option. The
+  // pg driver does not need it; validate and remove it before connecting.
+  url.searchParams.delete('schema');
+  return new Client({ connectionString: url.toString(), connectionTimeoutMillis: 5000 });
 }
 
 async function assertLocalIdentity(client: Client): Promise<void> {
