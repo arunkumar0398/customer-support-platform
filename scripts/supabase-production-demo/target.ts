@@ -26,11 +26,11 @@ type RuntimeGrantSnapshot = {
   databaseCreate: boolean;
   schemaOwner?: boolean;
   tablePrivileges: TableGrant[];
-  typeUsage?: Array<{ type: string; usage: boolean }>;
+  typeUsage: Array<{ type: string; usage: boolean; owns: boolean }>;
   additionalPrivileges?: boolean;
 };
 
-const verifiedClients = new WeakMap<Client, { target: VerifiedTarget; writeApproved: boolean }>();
+const verifiedClients = new WeakMap<Client, { target: VerifiedTarget; authorizedRunId?: string }>();
 
 function parseUrl(connectionString: string, allowLocalSchema = false): URL {
   let url: URL;
@@ -109,9 +109,15 @@ export function assertProductionGrantPolicy(grants: RuntimeGrantSnapshot): void 
   }) || byName.size !== applicationTables.length) {
     throw new Error('Runtime role must have DML without ownership on exactly the application tables.');
   }
-  if (grants.typeUsage && (grants.typeUsage.length !== applicationTypes.length
-    || applicationTypes.some((name) => !grants.typeUsage?.some((row) => row.type === name && row.usage)))) {
-    throw new Error('Runtime role lacks usage on an application enum type.');
+  if (grants.typeUsage.length !== applicationTypes.length
+    || applicationTypes.some((name) => !grants.typeUsage.some((row) => row.type === name && row.usage && !row.owns))) {
+    throw new Error('Runtime role must have usage without ownership on exactly the application enum types.');
+  }
+}
+
+export function assertProductionRunAuthorization(authorizedRunId: string | undefined, requestedRunId: string): void {
+  if (!authorizedRunId || authorizedRunId !== requestedRunId) {
+    throw new Error('Production write confirmation is not bound to this exact run ID.');
   }
 }
 
@@ -120,11 +126,11 @@ export function assertProvisioningClient(client: Client, target: VerifiedTarget,
   if (!verified || JSON.stringify(verified.target) !== JSON.stringify(target)) {
     throw new Error('Database client was not created by the exact target verifier; refusing fixture writes.');
   }
-  if (target.provider === 'supabase' && !verified.writeApproved) {
-    throw new Error('Production write has not been authorized by the interactive exact-scope confirmation.');
-  }
-  if (target.provider === 'supabase' && !/^prod-demo-\d{8}-[a-f0-9]{8}$/.test(runId)) {
-    throw new Error('Production run ID must use the approved unique format.');
+  if (target.provider === 'supabase') {
+    if (!/^prod-demo-\d{8}-[a-f0-9]{8}$/.test(runId)) {
+      throw new Error('Production run ID must use the approved unique format.');
+    }
+    assertProductionRunAuthorization(verified.authorizedRunId, runId);
   }
 }
 
@@ -134,7 +140,7 @@ export function authorizeProductionWrite(client: Client, typedProjectRef: string
     || !/^prod-demo-\d{8}-[a-f0-9]{8}$/.test(typedRunId)) {
     throw new Error('Production write confirmation did not match the verified target and run ID.');
   }
-  verified.writeApproved = true;
+  verified.authorizedRunId = typedRunId;
 }
 
 function safeClient(connectionString: string, target: VerifiedTarget): Client {
@@ -204,7 +210,8 @@ async function assertProductionRole(client: Client): Promise<void> {
   const typeResult = await client.query(`
     WITH required(name) AS (SELECT unnest($1::text[]))
     SELECT required.name AS type,
-           coalesce(t.oid IS NOT NULL AND has_type_privilege(current_user, t.oid, 'USAGE'), false) AS usage
+           coalesce(t.oid IS NOT NULL AND has_type_privilege(current_user, t.oid, 'USAGE'), false) AS usage,
+           coalesce(t.oid IS NOT NULL AND t.typowner = (SELECT oid FROM pg_roles WHERE rolname = current_user), false) AS owns
     FROM required
     LEFT JOIN pg_namespace n ON n.nspname = 'public'
     LEFT JOIN pg_type t ON t.typnamespace = n.oid AND t.typname = required.name
@@ -247,7 +254,7 @@ async function assertProductionRole(client: Client): Promise<void> {
   });
 }
 
-async function connectVerified(connectionString: string, target: VerifiedTarget, writeApproved: boolean) {
+async function connectVerified(connectionString: string, target: VerifiedTarget) {
   const client = safeClient(connectionString, target);
   try {
     await client.connect();
@@ -258,7 +265,7 @@ async function connectVerified(connectionString: string, target: VerifiedTarget,
     } else {
       await assertLocalIdentity(client);
     }
-    verifiedClients.set(client, { target, writeApproved });
+    verifiedClients.set(client, { target });
     return { client, target };
   } catch {
     await client.end().catch(() => undefined);
@@ -271,12 +278,12 @@ async function connectVerified(connectionString: string, target: VerifiedTarget,
 export async function connectProductionTarget(connectionString: string) {
   const safe = parseProductionDatabaseUrl(connectionString);
   const target: ProductionTarget = { ...productionTarget, tls: 'verified' };
-  const verified = await connectVerified(connectionString, target, false);
+  const verified = await connectVerified(connectionString, target);
   return { ...verified, target, url: safe };
 }
 
 export async function connectLocalTestTarget(connectionString: string) {
   const target: LocalTestTarget = { ...localTestTarget, tls: 'local' };
-  const verified = await connectVerified(connectionString, target, true);
+  const verified = await connectVerified(connectionString, target);
   return { ...verified, target };
 }

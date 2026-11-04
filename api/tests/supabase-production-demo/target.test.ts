@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertProductionDatabaseIdentity,
   assertProductionGrantPolicy,
+  assertProductionRunAuthorization,
   assertProductionRolePolicy,
   parseProductionDatabaseUrl,
   productionTarget,
@@ -75,7 +76,9 @@ describe('fixed Supabase Production target', () => {
   it('requires app DML, schema usage, and non-ownership while refusing DDL grants', () => {
     const tablePrivileges = ['Organization', 'User', 'Membership', 'Ticket', 'Comment', 'ActivityEvent', 'Session']
       .map((table) => ({ table, select: true, insert: true, update: true, delete: true, owns: false }));
-    const safe = { connect: true, schemaUsage: true, schemaCreate: false, databaseCreate: false, tablePrivileges };
+    const typeUsage = ['MembershipRole', 'TicketStatus', 'TicketPriority', 'ActivityEventType']
+      .map((type) => ({ type, usage: true, owns: false }));
+    const safe = { connect: true, schemaUsage: true, schemaCreate: false, databaseCreate: false, tablePrivileges, typeUsage };
     expect(() => assertProductionGrantPolicy(safe)).not.toThrow();
     expect(() => assertProductionGrantPolicy({ ...safe, schemaCreate: true })).toThrow();
     expect(() => assertProductionGrantPolicy({ ...safe, databaseCreate: true })).toThrow();
@@ -83,6 +86,18 @@ describe('fixed Supabase Production target', () => {
     expect(() => assertProductionGrantPolicy({ ...safe, tablePrivileges: tablePrivileges.map((row, index) => index === 0 ? { ...row, owns: true } : row) })).toThrow();
     expect(() => assertProductionGrantPolicy({ ...safe, tablePrivileges: tablePrivileges.map((row, index) => index === 3 ? { ...row, delete: false } : row) })).toThrow();
     expect(() => assertProductionGrantPolicy({ ...safe, additionalPrivileges: true })).toThrow();
+    expect(() => assertProductionGrantPolicy({
+      ...safe,
+      typeUsage: typeUsage.map((row, index) => index === 1 ? { ...row, owns: true } : row),
+    })).toThrow(/enum|type/i);
+  });
+
+  it('binds a confirmed Production write capability to one exact run ID', () => {
+    const runA = 'prod-demo-20261104-a1b2c3d4';
+    const runB = 'prod-demo-20261104-b1b2c3d4';
+    expect(() => assertProductionRunAuthorization(runA, runA)).not.toThrow();
+    expect(() => assertProductionRunAuthorization(runA, runB)).toThrow(/run ID/i);
+    expect(() => assertProductionRunAuthorization(undefined, runA)).toThrow(/run ID/i);
   });
 });
 
